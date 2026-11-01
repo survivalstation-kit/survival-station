@@ -18,7 +18,13 @@ if not exist "setup\build-drive.ps1" (
 
 rem the builder window (checkboxes + space needed); "MAKE-USB.bat text" asks step-by-step questions instead
 if /i not "%~1"=="text" (
+  echo.
   echo   Opening the builder window... / Abrindo a janela do construtor...
+  echo.
+  echo   If you don't see it, click "Survival Station" in the taskbar.
+  echo   Se nao aparecer, clique em "Survival Station" na barra de tarefas.
+  echo   This black window closes by itself when you close the builder.
+  echo   Esta janela preta fecha sozinha quando voce fechar o construtor.
   %PS% -NoProfile -STA -ExecutionPolicy Bypass -WindowStyle Minimized -File "%~dp0setup\builder-gui.ps1"
   if not errorlevel 1 exit /b 0
   echo   The window could not open, using questions instead. / A janela nao abriu, usando perguntas.
