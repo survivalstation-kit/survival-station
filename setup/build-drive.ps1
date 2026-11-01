@@ -402,9 +402,8 @@ function Show-Progress([double]$current = 0, [switch]$Force, [string]$State = 'r
   $pct = if ($p.Total -gt 0) { [math]::Min(99, [int](100 * $done / $p.Total)) } else { 0 }
   if ($State -eq 'done') { $pct = 100 }
   $left = if ($p.Rate -gt 1KB) { [math]::Max(0.0, $p.Total - $done) / $p.Rate } else { -1 }
-  $status = '{0} of {1}  -  {2}/s  -  about {3} left' -f (Fmt-Size $done), (Fmt-Size $p.Total), (Fmt-Size $p.Rate), (Fmt-Time $left)
-  $ProgressPreference = 'Continue'
-  Write-Progress -Id 1 -Activity "Survival Station: $pct% done" -Status $status -PercentComplete $pct -CurrentOperation $p.Item
+  $script:overall = '{0}% of the build done: {1} of {2}, about {3} left' -f $pct, (Fmt-Size $done), (Fmt-Size $p.Total), (Fmt-Time $left)
+  # the console shows each file's own live progress (curl, map tool); the overall figure goes in the title
   try { $Host.UI.RawUI.WindowTitle = "$pct% - Survival Station build ($(Fmt-Time $left) left)" } catch { }
   try {
     $json = [ordered]@{ target = $Target; state = $State; percent = $pct; done = [int64]$done; total = [int64]$p.Total
@@ -415,6 +414,9 @@ function Show-Progress([double]$current = 0, [switch]$Force, [string]$State = 'r
     if ($onKit -ne $ProgressFile) { New-Item -ItemType Directory -Force (Split-Path $onKit) | Out-Null; Write-Json $json $onKit }
   } catch { }
 }
+
+# one line after each finished file: where the whole build stands
+function Write-Overall { if ($script:overall) { Write-Host "   >> $script:overall" -ForegroundColor Cyan } }
 
 # last "NN%" in a file another program is still writing (the map tool's progress)
 function Get-LastPercent($file) {
@@ -444,29 +446,24 @@ function Download($url, $dest) {
   if (Test-Path $part) { $script:prog.Mark += (Get-Item $part).Length }   # resumed bytes aren't download speed
   $code = 1
   for ($try = 1; $try -le 5; $try++) {
-    # curl runs in the background so the overall bar can follow the .part file
-    $p = Start-Process curl.exe -NoNewWindow -PassThru -ArgumentList @('-L', '--fail', '--retry', '5', '--retry-delay', '5', '-C', '-', '-s', '-S', '-o', "`"$part`"", "`"$url`"")
+    # curl shows its own live progress (percent, received, speed, time left) every second; it runs in the
+    # background so the overall figures (title, builder window, My kit page) can follow the .part file
+    $p = Start-Process curl.exe -NoNewWindow -PassThru -ArgumentList @('-L', '--fail', '--retry', '5', '--retry-delay', '5', '-C', '-', '-o', "`"$part`"", "`"$url`"")
     $null = $p.Handle   # keeps ExitCode readable after the process ends
     while (-not $p.HasExited) {
       Start-Sleep -Milliseconds 500
-      $cur = if (Test-Path $part) { (Get-Item $part).Length } else { 0 }
-      Show-Progress $cur
-      if ($size -gt 0) {
-        $ProgressPreference = 'Continue'
-        Write-Progress -Id 2 -ParentId 1 -Activity $script:prog.Item -Status "$(Fmt-Size $cur) of $human" -PercentComplete ([math]::Min(100, [int](100 * $cur / $size)))
-        $ProgressPreference = 'SilentlyContinue'
-      }
+      Show-Progress $(if (Test-Path $part) { (Get-Item $part).Length } else { 0 })
     }
     $p.WaitForExit()
     $code = $p.ExitCode
     if ($code -eq 0) { break }
     Write-Host "   retry $try (curl error $code)..." -ForegroundColor Yellow; Start-Sleep 5
   }
-  Write-Progress -Id 2 -Activity ' ' -Completed
   if ($code -ne 0) { throw "Download failed (curl error $code): $url" }
   Move-Item -Force $part $dest
   $script:prog.Done += (Get-Item $dest).Length
   Show-Progress -Force
+  Write-Overall
 }
 
 function Expand-Any($archive, $dest) {
@@ -547,22 +544,23 @@ function Invoke-Pmtiles([string[]]$argList) {
   $out
 }
 
-# a long extract, in the background so the overall bar follows the tool's own "NN%"
+# a long extract, in the background: one live line from the tool's own "NN%" (with the time so far,
+# so it visibly moves even when the percentage pauses), and the overall figures follow it
 function Invoke-PmtilesWatched([string[]]$argList, $expected) {
   $log = Join-Path $Tmp 'pmtiles-progress.log'
   $quoted = $argList | ForEach-Object { if ($_ -match '\s') { "`"$_`"" } else { $_ } }
   $p = Start-Process (Get-PmtilesTool) -ArgumentList $quoted -NoNewWindow -PassThru -RedirectStandardOutput $log -RedirectStandardError "$log.err"
   $null = $p.Handle
+  $start = Get-Date
   while (-not $p.HasExited) {
     Start-Sleep -Milliseconds 700
     $pct = Get-LastPercent $log
     Show-Progress ($expected * $pct / 100)
-    $ProgressPreference = 'Continue'
-    Write-Progress -Id 2 -ParentId 1 -Activity $script:prog.Item -Status "$pct% of ~$(Fmt-Size $expected)" -PercentComplete $pct
-    $ProgressPreference = 'SilentlyContinue'
+    $t = (Get-Date) - $start
+    Write-Host ("`r   {0}: {1,3}% of ~{2}   ({3:mm\:ss} so far)   " -f $script:prog.Item, $pct, (Fmt-Size $expected), $t) -NoNewline
   }
   $p.WaitForExit()
-  Write-Progress -Id 2 -Activity ' ' -Completed
+  Write-Host ''
   $out = @(Get-Content $log, "$log.err" -ErrorAction SilentlyContinue)
   if ($p.ExitCode -ne 0) { throw "pmtiles failed: $($out | Select-Object -Last 3)" }
   $out | Where-Object { $_ -match 'archive size' } | Select-Object -Last 1
@@ -895,6 +893,7 @@ if ($total -gt $free) { Write-Host "   Not enough space (files already downloade
 if (-not $Yes -and (Read-Host "`nContinue? [y/N]") -notmatch '^y') { exit }
 $script:prog.Total = [double]$total
 Show-Progress -Force
+Write-Overall
 if (-not $Update) { Write-Choices }
 
 Step 'Copying launchers and portal'
@@ -978,6 +977,7 @@ foreach ($m in $MapList) {
   Move-Item -Force $part $m.File
   $script:prog.Done += $m.Size
   Show-Progress -Force
+  Write-Overall
 }
 
 $sdDest = Join-Path $Target 'portal\survival-data'
@@ -1026,7 +1026,6 @@ if ($Target.Length -gt 3) {
 }
 $script:prog.Item = 'finished'
 Show-Progress -Force -State 'done'
-Write-Progress -Id 1 -Activity ' ' -Completed
 Step "Done. Test it now while you still have internet: run $($Target)START-WINDOWS.bat"
 Write-Host "   Log: $Log"
 try { Stop-Transcript | Out-Null } catch { }
