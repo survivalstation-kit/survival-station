@@ -19,7 +19,7 @@ $pt = (Get-UICulture).Name -like 'pt*'
 function T($en, $ptText) { if ($pt) { $ptText } else { $en } }
 
 function Fmt([double]$b) {
-  if ($b -ge 1GB) { '{0:N1} GB' -f ($b / 1GB) } elseif ($b -gt 0) { '{0:N0} MB' -f [math]::Max(1, $b / 1MB) } else { '0 MB' }
+  if ($b -ge 1GB) { '{0:N1} GB' -f ($b / 1GB) } elseif ($b -gt 0) { '{0:N0} MB' -f [math]::Max(1.0, $b / 1MB) } else { '0 MB' }
 }
 function Norm($p) { $p.TrimEnd('\') + '\' }
 function Test-Kit($root) { (Test-Path (Join-Path $root 'START-WINDOWS.bat')) -and (Test-Path (Join-Path $root 'engine')) }

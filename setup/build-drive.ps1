@@ -395,13 +395,13 @@ function Show-Progress([double]$current = 0, [switch]$Force, [string]$State = 'r
   $done = $p.Done + $current
   $dt = ($now - $p.MarkTime).TotalSeconds
   if ($dt -ge 2) {   # download speed, smoothed so the time left doesn't jump around
-    $speed = [math]::Max(0, ($done - $p.Mark) / $dt)
+    $speed = [math]::Max(0.0, ($done - $p.Mark) / $dt)
     $p.Rate = if ($p.Rate -gt 0) { 0.85 * $p.Rate + 0.15 * $speed } else { $speed }
     $p.Mark = $done; $p.MarkTime = $now
   }
   $pct = if ($p.Total -gt 0) { [math]::Min(99, [int](100 * $done / $p.Total)) } else { 0 }
   if ($State -eq 'done') { $pct = 100 }
-  $left = if ($p.Rate -gt 1KB) { [math]::Max(0, $p.Total - $done) / $p.Rate } else { -1 }
+  $left = if ($p.Rate -gt 1KB) { [math]::Max(0.0, $p.Total - $done) / $p.Rate } else { -1 }
   $status = '{0} of {1}  -  {2}/s  -  about {3} left' -f (Fmt-Size $done), (Fmt-Size $p.Total), (Fmt-Size $p.Rate), (Fmt-Time $left)
   $ProgressPreference = 'Continue'
   Write-Progress -Id 1 -Activity "Survival Station: $pct% done" -Status $status -PercentComplete $pct -CurrentOperation $p.Item
@@ -420,7 +420,7 @@ function Show-Progress([double]$current = 0, [switch]$Force, [string]$State = 'r
 function Get-LastPercent($file) {
   try {
     $fs = [IO.File]::Open($file, 'Open', 'Read', 'ReadWrite')
-    try { [void]$fs.Seek([math]::Max(0, $fs.Length - 4096), 'Begin'); $text = (New-Object IO.StreamReader $fs).ReadToEnd() } finally { $fs.Close() }
+    try { [void]$fs.Seek([math]::Max([int64]0, $fs.Length - 4096), 'Begin'); $text = (New-Object IO.StreamReader $fs).ReadToEnd() } finally { $fs.Close() }
     $m = [regex]::Matches($text, '(\d{1,3})%')
     if ($m.Count) { [int]$m[$m.Count - 1].Groups[1].Value } else { 0 }
   } catch { 0 }
@@ -438,7 +438,7 @@ function Download($url, $dest) {
   }
   New-Item -ItemType Directory -Force (Split-Path $dest) | Out-Null
   $part = "$dest.part"
-  $human = if ($size -ge 1GB) { '{0:N2} GB' -f ($size / 1GB) } elseif ($size -gt 0) { '{0:N0} MB' -f [math]::Max(1, $size / 1MB) } else { 'size unknown' }
+  $human = if ($size -ge 1GB) { '{0:N2} GB' -f ($size / 1GB) } elseif ($size -gt 0) { '{0:N0} MB' -f [math]::Max(1.0, $size / 1MB) } else { 'size unknown' }
   Write-Host "   downloading $(Split-Path $dest -Leaf) ($human)"
   $script:prog.Item = Split-Path $dest -Leaf
   if (Test-Path $part) { $script:prog.Mark += (Get-Item $part).Length }   # resumed bytes aren't download speed

@@ -31,7 +31,7 @@ $script:drive = $null       # selected target: a drive or a folder on this compu
 $script:updating = $false   # true while the code (not the user) ticks boxes
 
 function Fmt([double]$b) {
-  if ($b -ge 1GB) { '{0:N1} GB' -f ($b / 1GB) } elseif ($b -gt 0) { '{0:N0} MB' -f [math]::Max(1, $b / 1MB) } else { '? GB' }
+  if ($b -ge 1GB) { '{0:N1} GB' -f ($b / 1GB) } elseif ($b -gt 0) { '{0:N0} MB' -f [math]::Max(1.0, $b / 1MB) } else { '? GB' }
 }
 function Write-ErrorLog($err) {
   try {
