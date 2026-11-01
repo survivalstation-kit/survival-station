@@ -681,8 +681,11 @@ function Run-Action {
 }
 
 $form.Add_Shown({ Safe {
-  # started from a console, Windows tends to open this window behind the others: bring it to the front
-  $form.TopMost = $true; $form.Activate(); $form.TopMost = $false
+  # started from a console, Windows tends to open this window behind the others. TopMost/Activate alone
+  # isn't always allowed; a quick minimize + restore always brings it to the front.
+  $form.TopMost = $true
+  $form.WindowState = 'Minimized'; $form.WindowState = 'Normal'
+  $form.Activate(); $form.TopMost = $false
   Update-BuildStatus; $statusTimer.Start()
   Load-Drives
   if ($Kit) { Select-Kit $Kit }
