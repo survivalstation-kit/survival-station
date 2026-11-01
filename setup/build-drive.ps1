@@ -380,6 +380,9 @@ $script:prog = @{ Total = 0.0; Done = 0.0; Item = ''; Rate = 0.0; Mark = 0.0; Ma
 $ProgressFile = Join-Path $LogDir 'progress.json'
 
 function Fmt-Size([double]$b) { if ($b -ge 1GB) { '{0:N1} GB' -f ($b / 1GB) } else { '{0:N0} MB' -f ($b / 1MB) } }
+function Fmt-Speed([double]$b) {   # 740 KB/s, 0.98 MB/s, 12 MB/s
+  if ($b -le 0) { '-' } elseif ($b -lt 1MB) { '{0:N0} KB/s' -f ($b / 1KB) } elseif ($b -lt 10MB) { '{0:N2} MB/s' -f ($b / 1MB) } else { '{0:N0} MB/s' -f ($b / 1MB) }
+}
 function Fmt-Time([double]$s) {
   if ($s -lt 0) { return '?' }
   $t = [TimeSpan]::FromSeconds($s)
@@ -403,6 +406,7 @@ function Show-Progress([double]$current = 0, [switch]$Force, [string]$State = 'r
   if ($State -eq 'done') { $pct = 100 }
   $left = if ($p.Rate -gt 1KB) { [math]::Max(0.0, $p.Total - $done) / $p.Rate } else { -1 }
   $script:overall = '{0}% of the build done: {1} of {2}, about {3} left' -f $pct, (Fmt-Size $done), (Fmt-Size $p.Total), (Fmt-Time $left)
+  $script:ov = @{ Pct = $pct; Done = $done; Total = $p.Total; Rate = $p.Rate; Left = $left }   # for the progress table
   # the console shows each file's own live progress (curl, map tool); the overall figure goes in the title
   try { $Host.UI.RawUI.WindowTitle = "$pct% - Survival Station build ($(Fmt-Time $left) left)" } catch { }
   try {
@@ -417,6 +421,52 @@ function Show-Progress([double]$current = 0, [switch]$Force, [string]$State = 'r
 
 # one line after each finished file: where the whole build stands
 function Write-Overall { if ($script:overall) { Write-Host "   >> $script:overall" -ForegroundColor Cyan } }
+
+# ---------------------------------------------------------------- live progress table
+# Drawn once per file, then its two rows are rewritten in place every half second:
+#   ┌──────────────┬────────────────┬────────────────────────┬──────────────┬─────────────┐
+#   │ This file    │ ██░░░░░░░░  4% │ 117.6 MB of 2.5 GB     │ 0.98 MB/s    │ 41 min      │
+#   │ Whole build  │ █░░░░░░░░░ 12% │ 17.2 GB of 144.0 GB    │ 0.98 MB/s    │ 1d 12h      │
+# Written with [Console] (not Write-Host) so the build log isn't filled with every update. Where there is
+# no console to redraw (output redirected, narrow window), a plain line is printed every 15 seconds instead.
+$TableCols = 12, 15, 22, 12, 11
+function Table-Cell($s, $w) { $s = "$s"; if ($s.Length -gt $w) { $s = $s.Substring(0, $w) }; ' ' + $s.PadRight($w) + ' ' }
+function Table-Border($l, $m, $r) { '   ' + $l + (($TableCols | ForEach-Object { '─' * ($_ + 2) }) -join $m) + $r }
+function Table-Row($cells) { '   │' + ((0..4 | ForEach-Object { Table-Cell $cells[$_] $TableCols[$_] }) -join '│') + '│' }
+function Table-Bar([double]$pct) { $f = [int][math]::Round([math]::Min(100.0, [math]::Max(0.0, $pct)) / 10); ('█' * $f) + ('░' * (10 - $f)) + ('{0,4:0}%' -f $pct) }
+
+function Start-ProgressTable($label) {
+  $script:table = @{ Label = $label; Row = -1; Last = [datetime]::MinValue }
+  try {
+    if ([Console]::IsOutputRedirected -or [Console]::WindowWidth -lt 95) { throw 'no room' }
+    $lines = @((Table-Border '┌' '┬' '┐'), (Table-Row @('', 'Done', 'Downloaded', 'Speed', 'Time left')), (Table-Border '├' '┼' '┤'), '', '', (Table-Border '└' '┴' '┘'))
+    foreach ($l in $lines) { [Console]::WriteLine($l) }
+    $script:table.Row = [Console]::CursorTop - 3   # first data row
+  } catch { $script:table.Row = -1 }
+}
+
+# $file = @{ Pct; Done; Size; Speed; Left } for the current file or map; the whole build comes from Show-Progress
+function Update-ProgressTable($file, [switch]$Force) {
+  $t = $script:table
+  if (-not $t) { return }
+  $o = $script:ov
+  $speed = { param($v) Fmt-Speed $v }
+  $row1 = Table-Row @($t.Label, (Table-Bar $file.Pct), ('{0} of {1}' -f (Fmt-Size $file.Done), $(if ($file.Size) { Fmt-Size $file.Size } else { '?' })), (& $speed $file.Speed), (Fmt-Time $file.Left))
+  $row2 = if ($o) { Table-Row @('Whole build', (Table-Bar $o.Pct), ('{0} of {1}' -f (Fmt-Size $o.Done), (Fmt-Size $o.Total)), (& $speed $o.Rate), (Fmt-Time $o.Left)) } else { Table-Row @('Whole build', '', '', '', '') }
+  if ($t.Row -ge 0) {
+    try {
+      $back = [Console]::CursorTop
+      [Console]::SetCursorPosition(0, $t.Row); [Console]::Write($row1)
+      [Console]::SetCursorPosition(0, $t.Row + 1); [Console]::Write($row2)
+      [Console]::SetCursorPosition(0, [math]::Max($back, $t.Row + 3))
+      return
+    } catch { $t.Row = -1 }
+  }
+  if ($Force -or ((Get-Date) - $t.Last).TotalSeconds -ge 15) {   # no console to redraw: a plain line now and then
+    $t.Last = Get-Date
+    Write-Host ('   {0}: {1:0}% ({2} of {3}), whole build {4}%, about {5} left' -f $t.Label, $file.Pct, (Fmt-Size $file.Done), $(if ($file.Size) { Fmt-Size $file.Size } else { '?' }), $o.Pct, (Fmt-Time $o.Left))
+  }
+}
 
 # last "NN%" in a file another program is still writing (the map tool's progress)
 function Get-LastPercent($file) {
@@ -446,13 +496,20 @@ function Download($url, $dest) {
   if (Test-Path $part) { $script:prog.Mark += (Get-Item $part).Length }   # resumed bytes aren't download speed
   $code = 1
   for ($try = 1; $try -le 5; $try++) {
-    # curl shows its own live progress (percent, received, speed, time left) every second; it runs in the
-    # background so the overall figures (title, builder window, My kit page) can follow the .part file
-    $p = Start-Process curl.exe -NoNewWindow -PassThru -ArgumentList @('-L', '--fail', '--retry', '5', '--retry-delay', '5', '-C', '-', '-o', "`"$part`"", "`"$url`"")
+    # curl runs quietly in the background; the progress table follows the .part file every half second
+    # (this file and the whole build), as do the title, the builder window and the My kit page
+    $p = Start-Process curl.exe -NoNewWindow -PassThru -ArgumentList @('-L', '--fail', '--retry', '5', '--retry-delay', '5', '-C', '-', '-s', '-S', '-o', "`"$part`"", "`"$url`"")
     $null = $p.Handle   # keeps ExitCode readable after the process ends
+    Start-ProgressTable 'This file'
+    $last = if (Test-Path $part) { (Get-Item $part).Length } else { 0 }; $lastTime = Get-Date; $speed = 0.0
     while (-not $p.HasExited) {
       Start-Sleep -Milliseconds 500
-      Show-Progress $(if (Test-Path $part) { (Get-Item $part).Length } else { 0 })
+      $cur = if (Test-Path $part) { (Get-Item $part).Length } else { 0 }
+      $dt = ((Get-Date) - $lastTime).TotalSeconds
+      if ($dt -ge 1) { $now = ($cur - $last) / $dt; $speed = if ($speed -gt 0) { 0.7 * $speed + 0.3 * $now } else { $now }; $last = $cur; $lastTime = Get-Date }
+      Show-Progress $cur
+      $pct = if ($size -gt 0) { 100.0 * $cur / $size } else { 0 }
+      Update-ProgressTable @{ Pct = $pct; Done = $cur; Size = $size; Speed = $speed; Left = $(if ($speed -gt 1KB -and $size -gt 0) { [math]::Max(0.0, $size - $cur) / $speed } else { -1 }) }
     }
     $p.WaitForExit()
     $code = $p.ExitCode
@@ -463,6 +520,7 @@ function Download($url, $dest) {
   Move-Item -Force $part $dest
   $script:prog.Done += (Get-Item $dest).Length
   Show-Progress -Force
+  Update-ProgressTable @{ Pct = 100; Done = (Get-Item $dest).Length; Size = (Get-Item $dest).Length; Speed = $speed; Left = 0 } -Force
   Write-Overall
 }
 
@@ -552,15 +610,17 @@ function Invoke-PmtilesWatched([string[]]$argList, $expected) {
   $p = Start-Process (Get-PmtilesTool) -ArgumentList $quoted -NoNewWindow -PassThru -RedirectStandardOutput $log -RedirectStandardError "$log.err"
   $null = $p.Handle
   $start = Get-Date
+  Start-ProgressTable 'This map'
   while (-not $p.HasExited) {
     Start-Sleep -Milliseconds 700
     $pct = Get-LastPercent $log
     Show-Progress ($expected * $pct / 100)
-    $t = (Get-Date) - $start
-    Write-Host ("`r   {0}: {1,3}% of ~{2}   ({3:mm\:ss} so far)   " -f $script:prog.Item, $pct, (Fmt-Size $expected), $t) -NoNewline
+    $secs = ((Get-Date) - $start).TotalSeconds
+    Update-ProgressTable @{ Pct = $pct; Done = $expected * $pct / 100; Size = $expected
+      Speed = $(if ($secs -gt 0) { $expected * $pct / 100 / $secs } else { 0 }); Left = $(if ($pct -ge 2) { $secs * (100 - $pct) / $pct } else { -1 }) }
   }
   $p.WaitForExit()
-  Write-Host ''
+  Update-ProgressTable @{ Pct = 100; Done = $expected; Size = $expected; Speed = 0; Left = 0 } -Force
   $out = @(Get-Content $log, "$log.err" -ErrorAction SilentlyContinue)
   if ($p.ExitCode -ne 0) { throw "pmtiles failed: $($out | Select-Object -Last 3)" }
   $out | Where-Object { $_ -match 'archive size' } | Select-Object -Last 1
