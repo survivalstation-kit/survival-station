@@ -1,0 +1,5 @@
+# Line endings the start files need, whatever the checkout settings:
+# Windows batch files must be CRLF; the Mac and Linux scripts must be LF or they won't run.
+*.bat      text eol=crlf
+*.sh       text eol=lf
+*.command  text eol=lf

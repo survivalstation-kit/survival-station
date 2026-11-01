@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Help</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="help">
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html">Survival <span>Station</span></a>
+  <nav class="links">
+    <a href="index.html" data-i18n="nav.home">Home</a>
+    <a href="chat.html" data-i18n="nav.chat">Ask AI</a>
+    <a href="map.html" data-i18n="nav.map">Map</a>
+    <a href="cards.html" data-cards data-i18n="nav.cards">Emergency</a>
+    <a href="help.html" aria-current="page" data-i18n="nav.help">Help</a>
+  </nav>
+  <select class="lang-select" aria-label="Language / Idioma"></select>
+  <button class="theme-btn" type="button" data-i18n="theme">Theme</button>
+</div></header>
+
+<main class="wrap help">
+
+<!-- ======================================================= English -->
+<article data-for="en">
+  <h1>Help: how this works</h1>
+  <p class="lede">Survival Station is an offline emergency kit on a USB drive. It needs no internet and installs nothing on the computer. Everything below runs from the drive.</p>
+  <p class="notice"><b>In a life-threatening emergency, don't read this page.</b> Go straight to the <a href="cards.html">Emergency cards</a>, and call for help if any phone network works (112 / 911).</p>
+
+  <nav class="toc">
+    <a href="#what">What's inside</a><a href="#start">Starting it</a><a href="#cards-en">Emergency cards</a><a href="#ai">Ask the AI</a>
+    <a href="#library">Library</a><a href="#map-en">Map</a><a href="#phone">Phones</a><a href="#docs-en">Documents</a>
+    <a href="#trouble">Problems?</a><a href="#stop">Shutting down</a><a href="#build">Updating the drive</a>
+  </nav>
+
+  <section class="card" id="what">
+    <h2>What's inside</h2>
+    <table>
+      <tr><th>⛑️ Emergency cards</th><td>Short first-aid and disaster steps: CPR, bleeding, burns, water, flood, fire, signals, radio. They work even if nothing else does, and they print well.</td></tr>
+      <tr><th>💬 Ask the AI</th><td>A chat assistant that runs on this computer. Describe your situation and get step-by-step advice. It looks up the offline library first and shows its sources.</td></tr>
+      <tr><th>📚 Offline library</th><td>Medical encyclopedias, water and food guides, repair manuals and Wikipedia, all searchable. Which books you have depends on how the drive was built.</td></tr>
+      <tr><th>🗺️ Offline map</th><td>A world map plus detailed street maps of the regions that were downloaded. Tap a spot to get coordinates for rescuers.</td></tr>
+      <tr><th>📻 Survival Data</th><td>A collection of survival, radio and medical manuals (PDFs, in English).</td></tr>
+      <tr><th>📄 Your documents</th><td>Files the owner put on the drive: family contacts, medication lists, local maps.</td></tr>
+    </table>
+    <p>Use the language menu at the top of any page to switch between English and Português. Your choice is remembered on that device.</p>
+  </section>
+
+  <section class="card" id="start">
+    <h2>Starting it</h2>
+    <ol>
+      <li>Plug the USB drive into a computer and open it in the file explorer.</li>
+      <li>Double-click the start file for that computer:
+        <ul>
+          <li><b>Windows:</b> <code>START-WINDOWS.bat</code>. If Windows warns "Windows protected your PC", click <i>More info → Run anyway</i>.</li>
+          <li><b>Mac:</b> <code>START-MAC.command</code>. If it's blocked, right-click it and choose <i>Open</i>.</li>
+          <li><b>Linux / Raspberry Pi:</b> open a terminal on the drive and type <code>bash START-LINUX.sh</code>.</li>
+        </ul>
+      </li>
+      <li>A black window opens. If it asks you to choose an AI model, wait 10 seconds for the default, or type the number of a smaller one on an old or slow computer.</li>
+      <li>After a short wait, the browser opens this portal at <code>http://localhost:8080</code>.</li>
+      <li><b>Keep the black window open.</b> Closing it turns everything off.</li>
+    </ol>
+    <p class="muted">If the AI can't start, the emergency cards, this help page and your documents still open as plain files: just open <code>portal/index.html</code> on the drive.</p>
+  </section>
+
+  <section class="card" id="cards-en">
+    <h2>Emergency cards</h2>
+    <ul>
+      <li>Open them from <b>Emergency</b> at the top of any page. Use the buttons at the top to jump to a topic.</li>
+      <li>They are plain pages, so they work without the AI and even without the start program.</li>
+      <li>Print them now (<b>Ctrl+P</b> / <b>⌘P</b>) and keep the paper copy with the drive.</li>
+    </ul>
+  </section>
+
+  <section class="card" id="ai">
+    <h2>Ask the AI</h2>
+    <ol>
+      <li>Open <b>Ask AI</b>. Type what is happening in plain words, e.g. <i>"My neighbour cut his hand deeply on glass, it won't stop bleeding"</i>, and press <b>Enter</b>. Or tap one of the example questions.</li>
+      <li>While it works you'll see <i>Searching the offline library… → Reading articles… → Thinking…</i>, then the answer appears word by word.</li>
+      <li>Under the answer, <b>From the offline library</b> lists the articles it used. Numbers like [1] in the answer point to them. Tap one to read the full article.</li>
+      <li>Ask follow-up questions in the same chat. <b>New</b> starts a fresh conversation.</li>
+      <li><b>Stop</b> (the Send button while it's writing) cuts an answer short.</li>
+    </ol>
+    <ul>
+      <li><b>Too slow?</b> Untick <i>Look it up in the library</i>. Answers come faster but without sources. Or restart and choose a smaller model.</li>
+      <li><b>It can be wrong.</b> It's a small AI running offline. For anything medical, check the emergency cards and the source articles. It never replaces a doctor.</li>
+      <li>Conversations are saved only in this browser on this device.</li>
+    </ul>
+  </section>
+
+  <section class="card" id="library">
+    <h2>Offline library</h2>
+    <ul>
+      <li>Open <b>Offline library</b> on the Home page. It opens in a new tab, filtered to your language.</li>
+      <li>Click a book's cover to open it. Inside a book, the search box at the top searches that book.</li>
+      <li>To search every book at once, use the search on the library's front page, or the <i>🔎 Search the library</i> link under any AI answer.</li>
+      <li>English and Portuguese books are searched separately. Use the language filter on the library page to switch.</li>
+    </ul>
+  </section>
+
+  <section class="card" id="map-en">
+    <h2>Offline map</h2>
+    <ul>
+      <li><b>Move:</b> drag with the mouse or one finger. <b>Zoom:</b> mouse wheel, pinch, or the + / − buttons.</li>
+      <li><b>Coordinates:</b> tap or click any spot. A pin appears, and the bottom bar shows latitude and longitude (e.g. <code>-22.94642, -43.20000</code>) in two formats. Read them out to rescuers over phone or radio, or press <b>Copy</b>.</li>
+      <li>Street-level detail exists only for the regions that were downloaded. Elsewhere you'll see the world overview.</li>
+      <li>There is no search by place name: pan and zoom to find a place.</li>
+      <li>The ◎ <b>locate me</b> button only appears on the computer running the kit. Phones connected over Wi-Fi can't use GPS here; use Organic Maps on the phone instead.</li>
+      <li>The map needs the start program running. It won't work if you open the page as a file.</li>
+    </ul>
+  </section>
+
+  <section class="card" id="phone">
+    <h2>Using it on phones</h2>
+    <p>Phones can't run programs from a USB stick, so the computer does the work and phones connect to it like a website:</p>
+    <ol>
+      <li>Turn on the phone's <b>Hotspot / Personal Hotspot</b>. It works with no signal and no data.</li>
+      <li>Connect the computer to that hotspot's Wi-Fi. Or put the computer and phones on any shared Wi-Fi router.</li>
+      <li>Start the kit on the computer. The black window lists addresses like <code>http://192.168.43.20:8080/</code>.</li>
+      <li>On each phone, open the browser and type that address exactly, including <code>:8080</code>.</li>
+    </ol>
+    <p class="muted">Several phones can use it at once. If there are several addresses, try the one starting with 192.168. On Android, you can also install the apps in <code>apps/android/</code> (Kiwix, PocketPal AI, Organic Maps) ahead of time to use the library, AI and maps without a computer.</p>
+    <p><b>iPhone or iPad?</b> See the <a href="iphone.html">iPhone and iPad setup</a>: hotspot, apps, copying books and AI models from the stick, and saving the cards as a PDF.</p>
+  </section>
+
+  <section class="card" id="docs-en">
+    <h2>Your documents</h2>
+    <p>The Home page lists files saved in <code>portal/docs/</code> on the drive. Click one to open it. To add files, copy them into that folder, then (with the setup computer) run <code>setup\build-drive.ps1 -Drive X: -IndexOnly</code> so they appear in the list. You can always open them straight from the folder too.</p>
+  </section>
+
+  <section class="card" id="trouble">
+    <h2>Problems?</h2>
+    <table>
+      <tr><th>The black window says the AI did not start</th><td>Close it and start again, choosing a smaller model. Old computers with less than 8 GB of memory need the smallest one. Close other programs to free memory.</td></tr>
+      <tr><th>"AI: offline" on the Home page</th><td>The start program isn't running, or it was closed. Start it again and keep the black window open.</td></tr>
+      <tr><th>Answers are very slow</th><td>Normal on old computers. Untick <i>Look it up in the library</i>, ask shorter questions, or restart with a smaller model. A USB 3 port (often blue) loads faster.</td></tr>
+      <tr><th>The phone can't open the address</th><td>Check that the phone and computer are on the same Wi-Fi or hotspot. Type the address exactly, including <code>http://</code> and <code>:8080</code>. On Windows, allow access when the firewall asks (or allow "llama-server" and "kiwix-serve" in Windows Defender Firewall). Try another address from the list.</td></tr>
+      <tr><th>"Library: offline"</th><td>The drive has no library files, or the library server didn't start. Restart the kit.</td></tr>
+      <tr><th>The map is empty or shows a message</th><td>Open it through the start program (<code>http://localhost:8080/map.html</code>), not as a file. If it says there are no maps, the drive was built without them.</td></tr>
+      <tr><th>Mac: "cannot be opened"</th><td>Right-click <code>START-MAC.command</code> → Open → Open. Or in Terminal: <code>bash /Volumes/&lt;drive&gt;/START-MAC.command</code>.</td></tr>
+      <tr><th>Linux: permission denied</th><td>Run it with <code>bash START-LINUX.sh</code> (not <code>./</code>). The launcher copies the programs to /tmp if the drive won't run them.</td></tr>
+      <tr><th>Wrong language</th><td>Use the language menu at the top right of any page.</td></tr>
+    </table>
+  </section>
+
+  <section class="card" id="stop">
+    <h2>Shutting down and saving power</h2>
+    <ul>
+      <li>Click the black window and press any key (Windows), or press <b>Ctrl+C</b> (Mac / Linux). Then you can remove the drive safely.</li>
+      <li>On battery, the AI uses a lot of power while it's writing an answer. Shut the kit down when you don't need it, and lower the screen brightness.</li>
+      <li>Keep a spare copy of the drive and a printed set of emergency cards somewhere else.</li>
+    </ul>
+  </section>
+
+  <section class="card" id="share">
+    <h2>Sharing the kit (no internet needed)</h2>
+    <p>Give a copy to family, neighbours or a shelter. On a Windows computer, double-click <code>COPY-KIT.bat</code> on the drive.</p>
+    <ol>
+      <li><strong>Copy from:</strong> this kit is picked for you.</li>
+      <li><strong>Copy to:</strong> the other USB drive, or <em>This computer</em> to keep a copy on the computer (it gets a desktop shortcut).</li>
+      <li>Check the green <strong>Fits</strong> line, then click <strong>Copy</strong>. If the other drive is FAT32, click <strong>Format as exFAT</strong> first (this erases it).</li>
+    </ol>
+    <p>If the copy stops, click <strong>Copy</strong> again: files already copied are skipped. On a Mac or Linux computer, copy every file and folder from one drive to the other with the file manager.</p>
+  </section>
+
+  <section class="card" id="build">
+    <h2>Updating the drive (needs internet)</h2>
+    <p>Easiest: on the Windows computer running the kit, open <a href="kit.html">My kit</a> and click <strong>Add more</strong>, <strong>Check for updates</strong> or <strong>Verify / repair</strong>. Or double-click <code>MAKE-USB.bat</code> on the drive, choose the drive, and click <strong>Check for updates</strong>. It lists newer library editions, a newer AI engine, maps over a year old and a newer Survival-Data, with their sizes, and updates them if you say yes. In the same window you can tick more books, maps or languages and click <strong>Build the drive</strong>. Full instructions are in <code>README.md</code> (English) and <code>LEIA-ME.md</code> (Português) on the drive.</p>
+  </section>
+</article>
+
+<!-- ======================================================= Português -->
+<article data-for="pt-BR" lang="pt-BR">
+  <h1>Ajuda: como funciona</h1>
+  <p class="lede">O Survival Station é um kit de emergência offline em um pendrive. Não precisa de internet e não instala nada no computador. Tudo abaixo roda a partir do pendrive.</p>
+  <p class="notice"><b>Em uma emergência com risco de vida, não leia esta página.</b> Vá direto para os <a href="cards.pt-BR.html">Cartões de emergência</a> e peça socorro se houver qualquer sinal: SAMU 192, Bombeiros 193, Defesa Civil 199.</p>
+
+  <nav class="toc">
+    <a href="#o-que">O que tem</a><a href="#iniciar">Como iniciar</a><a href="#cartoes">Cartões</a><a href="#ia">Perguntar à IA</a>
+    <a href="#biblioteca">Biblioteca</a><a href="#mapa">Mapa</a><a href="#celular">Celulares</a><a href="#documentos">Documentos</a>
+    <a href="#problemas">Problemas?</a><a href="#desligar">Desligar</a><a href="#atualizar">Atualizar o pendrive</a>
+  </nav>
+
+  <section class="card" id="o-que">
+    <h2>O que tem no pendrive</h2>
+    <table>
+      <tr><th>⛑️ Cartões de emergência</th><td>Passos curtos de primeiros socorros e desastres: RCP, sangramento, queimaduras, picada de cobra, água, enchente, leptospirose, deslizamento, sinais, rádio. Funcionam mesmo se nada mais funcionar, e dá para imprimir.</td></tr>
+      <tr><th>💬 Perguntar à IA</th><td>Um assistente que roda neste computador. Descreva a situação e receba orientação passo a passo. Ele consulta a biblioteca offline antes e mostra as fontes.</td></tr>
+      <tr><th>📚 Biblioteca offline</th><td>Wikipédia, enciclopédias médicas, guias de água e alimentos, manuais, tudo com busca. Os livros disponíveis dependem de como o pendrive foi montado.</td></tr>
+      <tr><th>🗺️ Mapa offline</th><td>Mapa-múndi mais ruas das regiões baixadas (por exemplo, o Brasil ou o seu estado). Toque num ponto para ver as coordenadas para o resgate.</td></tr>
+      <tr><th>📻 Survival Data</th><td>Coleção de manuais de sobrevivência, rádio e medicina (PDFs, em inglês).</td></tr>
+      <tr><th>📄 Seus documentos</th><td>Arquivos que o dono colocou no pendrive: contatos da família, lista de remédios, mapas locais.</td></tr>
+    </table>
+    <p>Use o menu de idioma no topo de qualquer página para trocar entre Português e English. A escolha fica salva no aparelho.</p>
+  </section>
+
+  <section class="card" id="iniciar">
+    <h2>Como iniciar</h2>
+    <ol>
+      <li>Conecte o pendrive no computador e abra-o no explorador de arquivos.</li>
+      <li>Clique duas vezes no arquivo de início do seu sistema:
+        <ul>
+          <li><b>Windows:</b> <code>START-WINDOWS.bat</code>. Se aparecer "O Windows protegeu o computador", clique em <i>Mais informações → Executar assim mesmo</i>.</li>
+          <li><b>Mac:</b> <code>START-MAC.command</code>. Se for bloqueado, clique com o botão direito e escolha <i>Abrir</i>.</li>
+          <li><b>Linux / Raspberry Pi:</b> abra um terminal no pendrive e digite <code>bash START-LINUX.sh</code>.</li>
+        </ul>
+      </li>
+      <li>Uma janela preta abre. Se ela pedir para escolher um modelo de IA, espere 10 segundos para usar o padrão, ou digite o número de um modelo menor se o computador for antigo ou lento.</li>
+      <li>Depois de alguns instantes, o navegador abre este portal em <code>http://localhost:8080</code>.</li>
+      <li><b>Não feche a janela preta.</b> Fechar desliga tudo.</li>
+    </ol>
+    <p class="muted">Se a IA não iniciar, os cartões de emergência, esta ajuda e seus documentos ainda abrem como arquivos comuns: abra <code>portal/index.html</code> no pendrive.</p>
+  </section>
+
+  <section class="card" id="cartoes">
+    <h2>Cartões de emergência</h2>
+    <ul>
+      <li>Abra em <b>Emergência</b>, no topo de qualquer página. Use os botões no início para pular para um assunto.</li>
+      <li>São páginas simples: funcionam sem a IA e até sem o programa de início.</li>
+      <li>Imprima agora (<b>Ctrl+P</b>) e guarde a cópia em papel junto com o pendrive.</li>
+    </ul>
+  </section>
+
+  <section class="card" id="ia">
+    <h2>Perguntar à IA</h2>
+    <ol>
+      <li>Abra <b>Perguntar à IA</b>. Escreva o que está acontecendo com suas palavras, por exemplo <i>"Meu vizinho cortou a mão no vidro e não para de sangrar"</i>, e aperte <b>Enter</b>. Ou toque numa das perguntas de exemplo.</li>
+      <li>Enquanto trabalha, aparece <i>Buscando na biblioteca… → Lendo artigos… → Pensando…</i>, e depois a resposta surge palavra por palavra.</li>
+      <li>Embaixo da resposta, <b>Da biblioteca offline</b> mostra os artigos usados. Números como [1] na resposta apontam para eles. Toque num artigo para ler tudo.</li>
+      <li>Faça perguntas de continuação na mesma conversa. <b>Nova</b> começa outra conversa.</li>
+      <li><b>Parar</b> (o botão Enviar enquanto ela escreve) interrompe a resposta.</li>
+    </ol>
+    <ul>
+      <li><b>Muito lenta?</b> Desmarque <i>Consultar a biblioteca</i>. A resposta sai mais rápido, mas sem fontes. Ou reinicie e escolha um modelo menor.</li>
+      <li><b>A IA pode errar.</b> É uma IA pequena, rodando offline. Em assuntos médicos, confira os cartões de emergência e os artigos de origem. Não substitui um médico.</li>
+      <li>As conversas ficam salvas só neste navegador, neste aparelho.</li>
+    </ul>
+  </section>
+
+  <section class="card" id="biblioteca">
+    <h2>Biblioteca offline</h2>
+    <ul>
+      <li>Abra <b>Biblioteca offline</b> na página Início. Ela abre numa nova aba, já filtrada no seu idioma.</li>
+      <li>Clique na capa de um livro para abrir. Dentro do livro, a caixa de busca no topo procura naquele livro.</li>
+      <li>Para buscar em todos os livros, use a busca da página inicial da biblioteca, ou o link <i>🔎 Buscar isto na biblioteca</i> embaixo de qualquer resposta da IA.</li>
+      <li>Livros em português e em inglês são buscados separadamente. Use o filtro de idioma da biblioteca para trocar.</li>
+    </ul>
+  </section>
+
+  <section class="card" id="mapa">
+    <h2>Mapa offline</h2>
+    <ul>
+      <li><b>Mover:</b> arraste com o mouse ou um dedo. <b>Zoom:</b> rodinha do mouse, movimento de pinça, ou os botões + / −.</li>
+      <li><b>Coordenadas:</b> toque ou clique em qualquer ponto. Aparece um alfinete, e a barra de baixo mostra latitude e longitude (ex.: <code>-22.94642, -43.20000</code>) em dois formatos. Passe ao resgate por telefone ou rádio, ou aperte <b>Copiar</b>.</li>
+      <li>Ruas detalhadas só existem nas regiões que foram baixadas. Fora delas, aparece o mapa-múndi.</li>
+      <li>Não há busca por nome de lugar: arraste e dê zoom para encontrar.</li>
+      <li>O botão ◎ <b>minha localização</b> só aparece no computador que está rodando o kit. Celulares conectados pelo Wi-Fi não conseguem usar o GPS aqui; para isso, use o Organic Maps no celular.</li>
+      <li>O mapa precisa do programa de início rodando. Não funciona abrindo a página como arquivo.</li>
+    </ul>
+  </section>
+
+  <section class="card" id="celular">
+    <h2>Usar nos celulares</h2>
+    <p>Celulares não rodam programas do pendrive. Por isso, o computador faz o trabalho e os celulares acessam como se fosse um site:</p>
+    <ol>
+      <li>Ligue o <b>Roteador Wi-Fi / Hotspot</b> do celular. Funciona sem sinal e sem dados.</li>
+      <li>Conecte o computador a esse Wi-Fi. Ou ponha o computador e os celulares no mesmo roteador Wi-Fi.</li>
+      <li>Inicie o kit no computador. A janela preta mostra endereços como <code>http://192.168.43.20:8080/</code>.</li>
+      <li>Em cada celular, abra o navegador e digite esse endereço exatamente, incluindo <code>:8080</code>.</li>
+    </ol>
+    <p class="muted">Vários celulares podem usar ao mesmo tempo. Se aparecerem vários endereços, tente o que começa com 192.168. No Android, dá para instalar antes os apps de <code>apps/android/</code> (Kiwix, PocketPal AI, Organic Maps) para usar a biblioteca, a IA e os mapas sem computador.</p>
+    <p><b>iPhone ou iPad?</b> Veja a <a href="iphone.html">configuração para iPhone e iPad</a>: roteador, apps, como copiar livros e modelos de IA do pendrive e salvar os cartões em PDF.</p>
+  </section>
+
+  <section class="card" id="documentos">
+    <h2>Seus documentos</h2>
+    <p>A página Início lista os arquivos salvos em <code>portal/docs/</code> no pendrive. Clique para abrir. Para adicionar, copie os arquivos para essa pasta e depois, no computador de configuração, rode <code>setup\build-drive.ps1 -Drive X: -IndexOnly</code> para que apareçam na lista. Também dá para abrir direto pela pasta.</p>
+  </section>
+
+  <section class="card" id="problemas">
+    <h2>Problemas?</h2>
+    <table>
+      <tr><th>A janela preta diz que a IA não iniciou</th><td>Feche e inicie de novo, escolhendo um modelo menor. Computadores antigos, com menos de 8 GB de memória, precisam do menor. Feche outros programas para liberar memória.</td></tr>
+      <tr><th>"IA: desligada" na página Início</th><td>O programa de início não está rodando ou foi fechado. Inicie de novo e mantenha a janela preta aberta.</td></tr>
+      <tr><th>Respostas muito lentas</th><td>É normal em computadores antigos. Desmarque <i>Consultar a biblioteca</i>, faça perguntas mais curtas, ou reinicie com um modelo menor. Uma porta USB 3 (geralmente azul) carrega mais rápido.</td></tr>
+      <tr><th>O celular não abre o endereço</th><td>Confira se o celular e o computador estão no mesmo Wi-Fi ou roteador. Digite o endereço exatamente, com <code>http://</code> e <code>:8080</code>. No Windows, permita o acesso quando o firewall perguntar (ou libere "llama-server" e "kiwix-serve" no Firewall do Windows Defender). Tente outro endereço da lista.</td></tr>
+      <tr><th>"Biblioteca: desligada"</th><td>O pendrive não tem arquivos da biblioteca, ou o servidor da biblioteca não iniciou. Reinicie o kit.</td></tr>
+      <tr><th>O mapa está vazio ou mostra uma mensagem</th><td>Abra pelo programa de início (<code>http://localhost:8080/map.html</code>), não como arquivo. Se disser que não há mapas, o pendrive foi montado sem eles.</td></tr>
+      <tr><th>Mac: "não pode ser aberto"</th><td>Botão direito em <code>START-MAC.command</code> → Abrir → Abrir. Ou no Terminal: <code>bash /Volumes/&lt;pendrive&gt;/START-MAC.command</code>.</td></tr>
+      <tr><th>Linux: permissão negada</th><td>Rode com <code>bash START-LINUX.sh</code> (não com <code>./</code>). O programa copia os arquivos para /tmp se o pendrive não deixar rodar.</td></tr>
+      <tr><th>Idioma errado</th><td>Use o menu de idioma no canto superior direito de qualquer página.</td></tr>
+    </table>
+  </section>
+
+  <section class="card" id="desligar">
+    <h2>Desligar e economizar bateria</h2>
+    <ul>
+      <li>Clique na janela preta e aperte qualquer tecla (Windows), ou aperte <b>Ctrl+C</b> (Mac / Linux). Depois, remova o pendrive com segurança.</li>
+      <li>Na bateria, a IA gasta muita energia enquanto escreve. Desligue o kit quando não estiver usando e diminua o brilho da tela.</li>
+      <li>Guarde uma cópia reserva do pendrive e os cartões impressos em outro lugar.</li>
+    </ul>
+  </section>
+
+  <section class="card" id="compartilhar">
+    <h2>Compartilhar o kit (sem internet)</h2>
+    <p>Dê uma cópia para a família, os vizinhos ou um abrigo. Num computador Windows, clique duas vezes em <code>COPY-KIT.bat</code> no pendrive.</p>
+    <ol>
+      <li><strong>Copiar de:</strong> este kit já vem escolhido.</li>
+      <li><strong>Copiar para:</strong> o outro pendrive, ou <em>Este computador</em> para guardar uma cópia no computador (com atalho na área de trabalho).</li>
+      <li>Confira a linha verde <strong>Cabe</strong> e clique em <strong>Copiar</strong>. Se o outro pendrive for FAT32, clique antes em <strong>Formatar em exFAT</strong> (isso apaga o pendrive).</li>
+    </ol>
+    <p>Se a cópia parar, clique em <strong>Copiar</strong> de novo: os arquivos já copiados são pulados. Num Mac ou Linux, copie todos os arquivos e pastas de um pendrive para o outro pelo gerenciador de arquivos.</p>
+  </section>
+
+  <section class="card" id="atualizar">
+    <h2>Atualizar o pendrive (precisa de internet)</h2>
+    <p>Mais fácil: no computador Windows que está rodando o kit, abra <a href="kit.html">Meu kit</a> e clique em <strong>Adicionar</strong>, <strong>Procurar atualizações</strong> ou <strong>Verificar / reparar</strong>. Ou clique duas vezes em <code>MAKE-USB.bat</code> no pendrive, escolha o pendrive e clique em <strong>Procurar atualizações</strong>. Ele mostra edições novas da biblioteca, um motor de IA mais novo, mapas com mais de um ano e um Survival-Data mais novo, com os tamanhos, e atualiza se você confirmar. Na mesma janela dá para marcar mais livros, mapas ou idiomas e clicar em <strong>Montar o pendrive</strong>. As instruções completas estão em <code>LEIA-ME.md</code> (Português) e <code>README.md</code> (English), no pendrive.</p>
+  </section>
+</article>
+
+</main>
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+<script>
+  // show the help text in the reader's language (both stay visible if scripts are off)
+  document.querySelectorAll('article[data-for]').forEach(a => { a.hidden = a.dataset.for !== SURVIVAL.lang; });
+  if (!document.querySelector('article[data-for]:not([hidden])')) document.querySelector('article[data-for="en"]').hidden = false;
+  document.title = SURVIVAL.t('nav.help');
+</script>
+</body>
+</html>

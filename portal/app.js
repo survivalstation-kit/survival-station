@@ -1,0 +1,106 @@
+// Shared bits for every portal page: server addresses, status checks, language, theme toggle.
+// Needs i18n.js loaded first.
+const SURVIVAL = (() => {
+  const served = location.protocol.startsWith('http');
+  const host = served ? location.hostname : 'localhost';
+  const ai = served ? location.origin : 'http://localhost:8080';
+  const library = `http://${host}:8090`;
+
+  async function up(url, ms = 2500) {
+    try {
+      const ctl = new AbortController();
+      const t = setTimeout(() => ctl.abort(), ms);
+      // no-cors: an opaque reply is enough to prove the server is running
+      await fetch(url, { mode: 'no-cors', signal: ctl.signal, cache: 'no-store' });
+      clearTimeout(t);
+      return true;
+    } catch { return false; }
+  }
+
+  function store(key, value) {
+    try {
+      if (value === undefined) return localStorage.getItem(key);
+      localStorage.setItem(key, value);
+    } catch { return null; }
+  }
+
+  // ---- language: saved choice, else the browser's language, else English
+  function pickLang() {
+    const saved = store('lang');
+    if (saved && I18N[saved]) return saved;
+    for (const l of navigator.languages || [navigator.language || 'en']) {
+      const code = Object.keys(I18N).find(k => k.toLowerCase() === l.toLowerCase())
+        || Object.keys(I18N).find(k => k.split('-')[0] === l.split('-')[0]);
+      if (code) return code;
+    }
+    return 'en';
+  }
+  const lang = pickLang();
+  const dict = I18N[lang];
+  if (document.body.dataset.page === 'cards' && document.body.dataset.lang !== lang) location.replace(dict._cards);
+  const t = (key, vars = {}) => {
+    let s = dict[key] ?? I18N.en[key] ?? key;
+    if (typeof s === 'string') for (const [k, v] of Object.entries(vars)) s = s.replace(`{${k}}`, v);
+    return s;
+  };
+
+  function applyI18n() {
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+    document.querySelectorAll('a[data-cards]').forEach(a => { a.href = dict._cards; });
+
+    const sel = document.querySelector('.lang-select');
+    if (sel) {
+      sel.replaceChildren(...Object.entries(I18N).map(([code, d]) => new Option(d._name, code, false, code === lang)));
+      sel.addEventListener('change', () => {
+        store('lang', sel.value);
+        // the emergency cards are a separate page per language
+        if (document.body.dataset.page === 'cards') location.href = I18N[sel.value]._cards;
+        else location.reload();
+      });
+    }
+  }
+
+  function initTheme() {
+    const saved = store('theme');
+    if (saved) document.documentElement.dataset.theme = saved;
+    const btn = document.querySelector('.theme-btn');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+      const now = document.documentElement.dataset.theme || (dark ? 'dark' : 'light');
+      const next = now === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      store('theme', next);
+      document.dispatchEvent(new CustomEvent('themechange', { detail: next }));
+    });
+  }
+
+  function isDark() {
+    const set = document.documentElement.dataset.theme;
+    return set ? set === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+
+  // version tag next to the brand on every page (version.js works even when a page is opened as a file)
+  function showVersion() {
+    const s = document.createElement('script');
+    s.src = 'version.js';
+    s.onload = () => {
+      const v = window.SURVIVAL_VERSION, brand = document.querySelector('.brand');
+      if (!v || !brand) return;
+      const tag = document.createElement('span');
+      tag.className = 'version-tag';
+      tag.textContent = 'v' + v.version;
+      tag.title = `Survival Station ${v.version} (${v.date})`;
+      brand.after(tag);
+    };
+    document.head.append(s);
+  }
+
+  initTheme();
+  applyI18n();
+  showVersion();
+  return { served, host, ai, library, up, store, lang, dict, t, isDark };
+})();

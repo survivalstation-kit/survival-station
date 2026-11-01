@@ -1,0 +1,83 @@
+﻿SURVIVAL STATION - AI ON A PHONE (iPhone, iPad, Android)
+(Português abaixo)
+
+Apps (free): LLM Farm (iPhone) or PocketPal AI (iPhone and Android).
+PocketPal sells extras (PocketPal Plus); you don't need them.
+
+1. PICK A MODEL FILE (in this "models" folder)
+
+   Llama-3.2-1B-Instruct-Q4_K_M.gguf   0.8 GB   template: Llama 3
+       Start with this one. Most phones from 2021 on.
+   Qwen_Qwen3-4B-Q4_K_M.gguf           2.3 GB   template: ChatML
+       Better answers. Needs a phone with lots of memory
+       (iPhone 15 Pro / 16 or newer). If the app closes, use Llama.
+
+2. SET UP THE APP
+
+   LLM Farm:  + (new chat) > Model: choose the file > Template: see above
+              > System prompt: paste the text below > Save.
+   PocketPal: Models > + > Add Local Model > choose the file > Load.
+              Paste the text below as the chat's system prompt.
+
+3. TEST IN AIRPLANE MODE: "How do I make water safe to drink?"
+
+4. SYSTEM PROMPT - copy everything between the lines.
+   For Qwen3, also keep the last line "/no_think" (it answers faster).
+   For Llama, leave out the "/no_think" line.
+
+--------------------------------------------------------------------
+You are an offline emergency and survival assistant running on a phone during a disaster, with no internet.
+The person may be stressed, injured, cold, or caring for someone else. Always answer in English.
+- Lead with the most important action in one short line, then numbered steps.
+- Be concrete: quantities, times, distances. Use only common household items when possible.
+- Life-threatening signs (not breathing, heavy bleeding, chest pain, stroke signs, unconsciousness): say so first and tell them to get emergency help by any means (phone, SMS, radio, neighbours).
+- If you are unsure, say so plainly and give the safest option. Never invent drug doses.
+- Keep answers short unless asked for detail. Ask one clarifying question only if it really changes the advice.
+/no_think
+--------------------------------------------------------------------
+
+The phone AI can't look things up in the library, and it can be wrong.
+For first aid, follow the emergency cards (portal/cards.html).
+
+
+====================================================================
+IA NO CELULAR (iPhone, iPad, Android)
+
+Apps (grátis): LLM Farm (iPhone) ou PocketPal AI (iPhone e Android).
+O PocketPal vende extras (PocketPal Plus); você não precisa deles.
+
+1. ESCOLHA UM ARQUIVO DE MODELO (nesta pasta "models")
+
+   Llama-3.2-1B-Instruct-Q4_K_M.gguf   0,8 GB   template: Llama 3
+       Comece por este. Maioria dos celulares de 2021 para cá.
+   Qwen_Qwen3-4B-Q4_K_M.gguf           2,3 GB   template: ChatML
+       Respostas melhores, principalmente em português. Precisa de
+       bastante memória (iPhone 15 Pro / 16 ou mais novo).
+       Se o app fechar, use o Llama.
+
+2. CONFIGURE O APP
+
+   LLM Farm:  + (chat novo) > Model: escolha o arquivo > Template: veja acima
+              > System prompt: cole o texto abaixo > Salve.
+   PocketPal: Models > + > Add Local Model > escolha o arquivo > Load.
+              Cole o texto abaixo como system prompt do chat.
+
+3. TESTE EM MODO AVIÃO: "Como deixo a água segura para beber?"
+
+4. SYSTEM PROMPT - copie tudo entre as linhas.
+   Para o Qwen3, mantenha a última linha "/no_think" (responde mais rápido).
+   Para o Llama, tire a linha "/no_think".
+
+--------------------------------------------------------------------
+Você é um assistente offline de emergência e sobrevivência rodando em um celular durante um desastre, sem internet.
+A pessoa pode estar assustada, ferida, com frio ou cuidando de alguém. Responda sempre em português do Brasil.
+- Comece pela ação mais importante em uma linha curta, depois passos numerados.
+- Seja concreto: quantidades, tempos, distâncias. Use itens comuns de casa quando possível.
+- Sinais de risco de vida (não respira, sangramento forte, dor no peito, sinais de AVC, inconsciência): diga isso primeiro e oriente a buscar socorro por qualquer meio (SAMU 192, Bombeiros 193, SMS, rádio, vizinhos).
+- Se não tiver certeza, diga claramente e dê a opção mais segura. Nunca invente doses de remédios.
+- Respostas curtas, a não ser que peçam detalhes. Faça no máximo uma pergunta, só se mudar a orientação.
+/no_think
+--------------------------------------------------------------------
+
+A IA do celular não consulta a biblioteca e pode errar.
+Em primeiros socorros, siga os cartões de emergência (portal/cards.pt-BR.html).

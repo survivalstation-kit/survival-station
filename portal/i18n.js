@@ -1,0 +1,123 @@
+// Interface text for every language. To add a language: copy the 'en' block, translate it,
+// add a cards.<code>.html page, and list the language's Kiwix code in `kiwix` (ISO 639-3).
+const I18N = {
+  en: {
+    _name: 'English', _kiwix: 'eng', _map: 'en', _cards: 'cards.html',
+    'nav.home': 'Home', 'nav.chat': 'Ask AI', 'nav.map': 'Map', 'nav.cards': 'Emergency', 'nav.help': 'Help', 'theme': 'Theme',
+    'tile.help.t': 'Help', 'tile.help.p': 'How everything works, using it on phones, and what to do when something goes wrong.',
+    'tile.kit.t': 'My kit', 'tile.kit.p': 'What is on this kit. Add more books and maps, check for updates, verify and repair.',
+    'home.title': 'Offline help, no internet needed',
+    'home.lede': 'Everything here runs from this drive: an AI assistant, an offline library, maps and quick emergency guides.',
+    'st.ai.checking': 'AI: checking…', 'st.ai.on': 'AI: running', 'st.ai.off': 'AI: offline',
+    'st.lib.checking': 'Library: checking…', 'st.lib.on': 'Library: running', 'st.lib.off': 'Library: offline',
+    'home.start': 'Start here',
+    'tile.cards.t': 'Emergency now', 'tile.cards.p': 'CPR, bleeding, burns, water, signals. Short steps, works even if nothing else does.',
+    'tile.chat.t': 'Ask the AI', 'tile.chat.p': 'Describe your situation and get step-by-step guidance, checked against the offline library.',
+    'tile.lib.t': 'Offline library', 'tile.lib.p': 'Medical encyclopedias, water & food guides, repair manuals, Wikipedia — searchable.',
+    'tile.map.t': 'Offline map', 'tile.map.p': 'Streets and places with no internet. Tap anywhere to get coordinates for rescuers.',
+    'tile.sd.t': 'Survival Data', 'tile.sd.p': 'Emergency preparedness, radio communications and medical reference PDFs (English).',
+    'home.docs': 'Your documents',
+    'home.docs.hint': 'Put PDFs (manuals, maps, family info, medical records) in <code>portal/docs/</code>, then run <code>setup\\build-drive.ps1 -Drive X: -IndexOnly</code>.',
+    'home.phone': 'Use it on a phone',
+    'home.phone.1': "Turn on the phone's <b>Hotspot</b> (works with no signal or data) and join it from this computer — or put both on any shared Wi-Fi router.",
+    'home.phone.2': 'On the phone, open the browser and go to the address shown in the start window (<code>http://192.168.x.x:8080</code>).',
+    'home.phone.3': 'Android without a computer: install the apps in <code>apps/android/</code> (Kiwix, PocketPal AI, Organic Maps) <i>before</i> disaster strikes.',
+    'home.phone.4': 'iPhone or iPad: see the <a href="iphone.html">iPhone and iPad setup</a> (free App Store apps that use the files on this drive).',
+    'footer': 'Not a replacement for professional medical care or training. If any phone network works, call emergency services first (112 / 911 work on most phones even without a SIM).',
+
+    'chat.title': "What's happening?",
+    'chat.intro': 'Describe your situation in plain words. The AI runs entirely on this computer, so it can be slow and it can be wrong — for anything life-threatening, check the <a href="cards.html">emergency cards</a> too.',
+    'chat.checking': 'Checking the AI…', 'chat.on': '✅ AI is running on this device.',
+    'chat.off': '⚠️ The AI is not running. Start it with START-WINDOWS.bat / START-MAC.command / START-LINUX.sh on the drive.',
+    'chat.placeholder': 'e.g. Tap water is brown after the flood. Is it safe?',
+    'chat.new': 'New', 'chat.send': 'Send', 'chat.stop': 'Stop', 'chat.you': 'You', 'chat.assistant': 'Assistant',
+    'chat.uselib': 'Look it up in the library', 'chat.searching': 'Searching the offline library…',
+    'chat.reading': 'Reading {n} article(s)…', 'chat.thinking': 'Thinking…',
+    'chat.sources': 'From the offline library:', 'chat.searchlib': '🔎 Search the library for this',
+    'chat.err': '⚠️ Could not reach the AI ({e}). Is the start window still open? Meanwhile, use the emergency cards or the library.',
+    'chat.stopped': '(stopped)',
+    'chat.quick': [
+      'Someone is bleeding heavily from the leg',
+      'How do I make water safe to drink?',
+      'Power is out — how long is food in the fridge safe?',
+      'Signs of hypothermia and what to do',
+      'Build a shelter with a tarp and rope',
+      'Stay safe after an earthquake',
+    ],
+    'chat.system': `You are an offline emergency and survival assistant running on a USB drive during a disaster, with no internet.
+The person may be stressed, injured, cold, or caring for someone else. Always answer in English.
+- Lead with the most important action in one short line, then numbered steps.
+- Be concrete: quantities, times, distances. Use only common household items when possible.
+- Life-threatening signs (not breathing, heavy bleeding, chest pain, stroke signs, unconsciousness): say so first and tell them to get emergency help by any means (phone, SMS, radio, neighbours).
+- If you are unsure, say so plainly and give the safest option. Never invent drug doses.
+- Keep answers short unless asked for detail. Ask one clarifying question only if it really changes the advice.`,
+    'chat.withsources': `Excerpts from the offline library are below. Use them when they are relevant and cite them like [1] or [2]. If they don't cover the question, say so briefly and answer carefully from general knowledge.`,
+    'chat.stop.words': 'a an and are as at be by can do does for from get have how i if in into is it me my of on or should so that the their there this to was what when where which who why will with you your',
+
+    'map.title': 'Offline map', 'map.tap': 'Tap the map to get coordinates.',
+    'map.copy': 'Copy', 'map.copied': 'Copied',
+    'map.none': 'No maps on this drive yet. Run setup\\build-drive.ps1 (it adds a world map; add -Map brazil for streets).',
+    'map.needserver': 'The map needs the start program running (START-WINDOWS.bat / START-MAC.command / START-LINUX.sh). Opening it as a file does not work.',
+    'map.share': 'Tell rescuers these coordinates (latitude, longitude):',
+  },
+
+  'pt-BR': {
+    _name: 'Português (Brasil)', _kiwix: 'por', _map: 'pt', _cards: 'cards.pt-BR.html',
+    'nav.home': 'Início', 'nav.chat': 'Perguntar à IA', 'nav.map': 'Mapa', 'nav.cards': 'Emergência', 'nav.help': 'Ajuda', 'theme': 'Tema',
+    'tile.help.t': 'Ajuda', 'tile.help.p': 'Como tudo funciona, como usar nos celulares e o que fazer quando algo dá errado.',
+    'tile.kit.t': 'Meu kit', 'tile.kit.p': 'O que tem neste kit. Adicione livros e mapas, procure atualizações, verifique e repare.',
+    'home.title': 'Ajuda offline, sem precisar de internet',
+    'home.lede': 'Tudo aqui roda a partir deste pendrive: um assistente de IA, uma biblioteca offline, mapas e guias rápidos de emergência.',
+    'st.ai.checking': 'IA: verificando…', 'st.ai.on': 'IA: funcionando', 'st.ai.off': 'IA: desligada',
+    'st.lib.checking': 'Biblioteca: verificando…', 'st.lib.on': 'Biblioteca: funcionando', 'st.lib.off': 'Biblioteca: desligada',
+    'home.start': 'Comece aqui',
+    'tile.cards.t': 'Emergência agora', 'tile.cards.p': 'RCP, sangramento, queimaduras, água, sinais. Passos curtos, funciona mesmo se nada mais funcionar.',
+    'tile.chat.t': 'Perguntar à IA', 'tile.chat.p': 'Descreva a situação e receba orientação passo a passo, conferida com a biblioteca offline.',
+    'tile.lib.t': 'Biblioteca offline', 'tile.lib.p': 'Enciclopédias médicas, guias de água e alimentos, manuais, Wikipédia — com busca.',
+    'tile.map.t': 'Mapa offline', 'tile.map.p': 'Ruas e lugares sem internet. Toque em qualquer ponto para obter as coordenadas para o resgate.',
+    'tile.sd.t': 'Survival Data', 'tile.sd.p': 'PDFs de preparação para emergências, rádio e referência médica (em inglês).',
+    'home.docs': 'Seus documentos',
+    'home.docs.hint': 'Coloque PDFs (manuais, mapas, dados da família, documentos médicos) em <code>portal/docs/</code> e rode <code>setup\\build-drive.ps1 -Drive X: -IndexOnly</code>.',
+    'home.phone': 'Usar no celular',
+    'home.phone.1': 'Ligue o <b>Roteador Wi-Fi / Hotspot</b> do celular (funciona sem sinal e sem dados) e conecte este computador a ele — ou ponha os dois no mesmo roteador Wi-Fi.',
+    'home.phone.2': 'No celular, abra o navegador e acesse o endereço mostrado na janela de início (<code>http://192.168.x.x:8080</code>).',
+    'home.phone.3': 'Android sem computador: instale os apps de <code>apps/android/</code> (Kiwix, PocketPal AI, Organic Maps) <i>antes</i> de uma emergência.',
+    'home.phone.4': 'iPhone ou iPad: veja a <a href="iphone.html">configuração para iPhone e iPad</a> (apps grátis da App Store que usam os arquivos deste pendrive).',
+    'footer': 'Não substitui atendimento médico nem treinamento. Se houver qualquer sinal de celular, ligue primeiro para a emergência: SAMU 192, Bombeiros 193, Polícia 190, Defesa Civil 199 (112 também funciona na maioria dos celulares, mesmo sem chip).',
+
+    'chat.title': 'O que está acontecendo?',
+    'chat.intro': 'Descreva a situação com suas palavras. A IA roda inteiramente neste computador, então pode ser lenta e pode errar — em casos de risco de vida, confira também os <a href="cards.pt-BR.html">cartões de emergência</a>.',
+    'chat.checking': 'Verificando a IA…', 'chat.on': '✅ A IA está funcionando neste aparelho.',
+    'chat.off': '⚠️ A IA não está rodando. Inicie com START-WINDOWS.bat / START-MAC.command / START-LINUX.sh no pendrive.',
+    'chat.placeholder': 'ex.: A água da torneira está marrom depois da enchente. Posso beber?',
+    'chat.new': 'Nova', 'chat.send': 'Enviar', 'chat.stop': 'Parar', 'chat.you': 'Você', 'chat.assistant': 'Assistente',
+    'chat.uselib': 'Consultar a biblioteca', 'chat.searching': 'Buscando na biblioteca offline…',
+    'chat.reading': 'Lendo {n} artigo(s)…', 'chat.thinking': 'Pensando…',
+    'chat.sources': 'Da biblioteca offline:', 'chat.searchlib': '🔎 Buscar isto na biblioteca',
+    'chat.err': '⚠️ Não foi possível falar com a IA ({e}). A janela de início ainda está aberta? Enquanto isso, use os cartões de emergência ou a biblioteca.',
+    'chat.stopped': '(interrompido)',
+    'chat.quick': [
+      'Uma pessoa está sangrando muito na perna',
+      'Como deixar a água própria para beber?',
+      'Acabou a luz — por quanto tempo a comida da geladeira fica boa?',
+      'Sinais de hipotermia e o que fazer',
+      'Como montar um abrigo com lona e corda',
+      'O que fazer depois de uma enchente',
+    ],
+    'chat.system': `Você é um assistente offline de emergência e sobrevivência rodando em um pendrive durante um desastre, sem internet.
+A pessoa pode estar assustada, ferida, com frio ou cuidando de alguém. Responda sempre em português do Brasil.
+- Comece pela ação mais importante em uma linha curta, depois passos numerados.
+- Seja concreto: quantidades, tempos, distâncias. Use itens comuns de casa quando possível.
+- Sinais de risco de vida (não respira, sangramento forte, dor no peito, sinais de AVC, inconsciência): diga isso primeiro e oriente a buscar socorro por qualquer meio (SAMU 192, Bombeiros 193, SMS, rádio, vizinhos).
+- Se não tiver certeza, diga claramente e dê a opção mais segura. Nunca invente doses de remédios.
+- Respostas curtas, a não ser que peçam detalhes. Faça no máximo uma pergunta, só se mudar a orientação.`,
+    'chat.withsources': `Abaixo há trechos da biblioteca offline. Use-os quando forem relevantes e cite como [1] ou [2]. Se não cobrirem a pergunta, diga isso brevemente e responda com cuidado a partir do conhecimento geral.`,
+    'chat.stop.words': 'a o as os um uma uns umas e é de do da dos das em no na nos nas por para pra com sem que se como quando onde qual quais quem porque por que eu meu minha me mim você voce seu sua isso isto esse essa este esta ao aos à às ou mais muito pode posso devo deve fazer faço tem ter está estou foi ser são não sim já',
+
+    'map.title': 'Mapa offline', 'map.tap': 'Toque no mapa para ver as coordenadas.',
+    'map.copy': 'Copiar', 'map.copied': 'Copiado',
+    'map.none': 'Ainda não há mapas neste pendrive. Rode setup\\build-drive.ps1 (ele inclui um mapa-múndi; adicione -Map brazil para ver as ruas).',
+    'map.needserver': 'O mapa precisa do programa de início rodando (START-WINDOWS.bat / START-MAC.command / START-LINUX.sh). Abrir como arquivo não funciona.',
+    'map.share': 'Informe estas coordenadas ao resgate (latitude, longitude):',
+  },
+};

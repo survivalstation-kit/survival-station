@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Survival Station</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="home">
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html">Survival <span>Station</span></a>
+  <nav class="links">
+    <a href="index.html" aria-current="page" data-i18n="nav.home">Home</a>
+    <a href="chat.html" data-i18n="nav.chat">Ask AI</a>
+    <a href="map.html" data-i18n="nav.map">Map</a>
+    <a href="cards.html" data-cards data-i18n="nav.cards">Emergency</a>
+    <a href="help.html" data-i18n="nav.help">Help</a>
+  </nav>
+  <select class="lang-select" aria-label="Language / Idioma"></select>
+  <button class="theme-btn" type="button" data-i18n="theme">Theme</button>
+</div></header>
+
+<main class="wrap">
+  <h1 data-i18n="home.title">Offline help, no internet needed</h1>
+  <p class="lede" data-i18n="home.lede"></p>
+  <div class="status">
+    <span class="pill" id="st-ai" data-i18n="st.ai.checking"></span>
+    <span class="pill" id="st-lib" data-i18n="st.lib.checking"></span>
+  </div>
+
+  <h2 data-i18n="home.start">Start here</h2>
+  <div class="grid">
+    <a class="tile primary" href="cards.html" data-cards>
+      <div class="ico">⛑️</div><h3 data-i18n="tile.cards.t"></h3><p data-i18n="tile.cards.p"></p>
+    </a>
+    <a class="tile" id="tile-ai" href="chat.html">
+      <div class="ico">💬</div><h3 data-i18n="tile.chat.t"></h3><p data-i18n="tile.chat.p"></p>
+    </a>
+    <a class="tile" id="tile-lib" href="#" target="_blank" rel="noopener">
+      <div class="ico">📚</div><h3 data-i18n="tile.lib.t"></h3><p data-i18n="tile.lib.p"></p>
+    </a>
+    <a class="tile" id="tile-map" href="map.html">
+      <div class="ico">🗺️</div><h3 data-i18n="tile.map.t"></h3><p data-i18n="tile.map.p"></p>
+    </a>
+    <a class="tile" href="survival-data/index.html" target="_blank" rel="noopener">
+      <div class="ico">📻</div><h3 data-i18n="tile.sd.t"></h3><p data-i18n="tile.sd.p"></p>
+    </a>
+    <a class="tile" href="kit.html">
+      <div class="ico">🧰</div><h3 data-i18n="tile.kit.t"></h3><p data-i18n="tile.kit.p"></p>
+    </a>
+    <a class="tile" href="help.html">
+      <div class="ico">❓</div><h3 data-i18n="tile.help.t"></h3><p data-i18n="tile.help.p"></p>
+    </a>
+  </div>
+
+  <h2 data-i18n="home.docs">Your documents</h2>
+  <div class="box" id="docs"><p class="muted" data-i18n-html="home.docs.hint"></p></div>
+
+  <h2 data-i18n="home.phone">Use it on a phone</h2>
+  <div class="box">
+    <ol>
+      <li data-i18n-html="home.phone.1"></li>
+      <li data-i18n-html="home.phone.2"></li>
+      <li data-i18n-html="home.phone.3"></li>
+      <li data-i18n-html="home.phone.4"></li>
+    </ol>
+  </div>
+
+  <footer data-i18n="footer"></footer>
+</main>
+
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+<script>
+(async () => {
+  const $ = id => document.getElementById(id);
+  const { t } = SURVIVAL;
+  // the library's home page, filtered to the reader's language
+  $('tile-lib').href = `${SURVIVAL.library}/#lang=${SURVIVAL.dict._kiwix}`;
+
+  const [ai, lib] = await Promise.all([SURVIVAL.up(SURVIVAL.ai + '/health'), SURVIVAL.up(SURVIVAL.library + '/')]);
+  $('st-ai').textContent = t(ai ? 'st.ai.on' : 'st.ai.off');
+  $('st-ai').classList.add(ai ? 'ok' : 'bad');
+  $('st-lib').textContent = t(lib ? 'st.lib.on' : 'st.lib.off');
+  $('st-lib').classList.add(lib ? 'ok' : 'bad');
+  if (!ai) { $('tile-ai').classList.add('off'); $('tile-map').classList.add('off'); }
+  if (!lib) $('tile-lib').classList.add('off');
+
+  try {
+    const files = await (await fetch('docs/index.json', { cache: 'no-store' })).json();
+    if (files.length) {
+      const fmt = b => b > 1e6 ? (b / 1e6).toFixed(1) + ' MB' : Math.ceil(b / 1e3) + ' KB';
+      const ul = document.createElement('ul'); ul.className = 'files';
+      for (const f of files) {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = 'docs/' + f.path.split('/').map(encodeURIComponent).join('/');
+        a.textContent = f.path; a.target = '_blank';
+        const s = document.createElement('span'); s.textContent = fmt(f.size);
+        li.append(a, s); ul.append(li);
+      }
+      $('docs').replaceChildren(ul);
+    }
+  } catch { /* opened as a file, or no index yet: keep the hint */ }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My kit</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="kit">
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html">Survival <span>Station</span></a>
+  <nav class="links">
+    <a href="index.html" data-i18n="nav.home">Home</a>
+    <a href="chat.html" data-i18n="nav.chat">Ask AI</a>
+    <a href="map.html" data-i18n="nav.map">Map</a>
+    <a href="cards.html" data-cards data-i18n="nav.cards">Emergency</a>
+    <a href="help.html" data-i18n="nav.help">Help</a>
+  </nav>
+  <select class="lang-select" aria-label="Language / Idioma"></select>
+  <button class="theme-btn" type="button" data-i18n="theme">Theme</button>
+</div></header>
+
+<main class="wrap help">
+  <h1 id="title">My kit</h1>
+  <p class="lede" id="lede"></p>
+
+  <section class="card" id="progress-card" hidden>
+    <h2 id="progress-title"></h2>
+    <progress id="progress-bar" max="100" value="0"></progress>
+    <p class="muted" id="progress-text"></p>
+  </section>
+
+  <section class="card" id="manage">
+    <h2 id="manage-title"></h2>
+    <div id="manage-body"></div>
+  </section>
+
+  <section class="card">
+    <h2 id="inv-title"></h2>
+    <div id="inventory"><p class="muted" id="inv-loading"></p></div>
+  </section>
+</main>
+
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+<script>
+(() => {
+  const pt = SURVIVAL.lang === 'pt-BR';
+  const L = (en, p) => pt ? p : en;
+  const $ = id => document.getElementById(id);
+  const HELPER = 'http://localhost:8091';   // setup\kit-control.ps1, started by START-WINDOWS.bat; this computer only
+  const onThisComputer = ['localhost', '127.0.0.1'].includes(location.hostname);
+  const size = b => b >= 1e9 ? (b / 1073741824).toFixed(1) + ' GB' : Math.max(1, Math.round(b / 1048576)) + ' MB';
+  const time = s => s < 0 ? '?' : s >= 3600 ? `${Math.floor(s / 3600)}h ${String(Math.floor(s % 3600 / 60)).padStart(2, '0')}m` : s >= 60 ? `${Math.floor(s / 60)} min` : '< 1 min';
+  const el = (tag, text, cls) => { const e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; };
+
+  document.title = L('My kit', 'Meu kit');
+  $('title').textContent = L('My kit', 'Meu kit');
+  $('lede').textContent = L('What is on this kit, and how to add more or update it.', 'O que tem neste kit e como adicionar mais ou atualizar.');
+  $('manage-title').textContent = L('Add more, updates, repair', 'Adicionar, atualizar, reparar');
+  $('inv-title').textContent = L('What is on this kit', 'O que tem neste kit');
+  $('inv-loading').textContent = L('Checking...', 'Conferindo...');
+
+  // ---- buttons: open the builder window on the computer running the kit
+  function showButtons(st) {
+    const box = $('manage-body');
+    box.replaceChildren();
+    const p = el('p', L('These open the builder window on this computer. Adding and updating need internet; repair can also fix files offline.',
+                        'Estes botões abrem a janela do construtor neste computador. Adicionar e atualizar precisam de internet; reparar também corrige arquivos sem internet.'));
+    const row = el('p', null, 'copy-row');
+    const note = el('span', '', 'muted');
+    const actions = [
+      ['add', L('➕ Add more: books, maps, AI', '➕ Adicionar: livros, mapas, IA')],
+      ['updates', L('🔄 Check for updates', '🔄 Procurar atualizações')],
+      ['verify', L('🩺 Verify / repair', '🩺 Verificar / reparar')],
+    ];
+    for (const [action, label] of actions) {
+      const b = el('button', label, 'btn'); b.type = 'button';
+      b.onclick = async () => {
+        note.textContent = L('Opening...', 'Abrindo...');
+        try {
+          const r = await fetch(`${HELPER}/open?action=${action}`, { method: 'POST' });
+          note.textContent = r.ok ? L('The builder window opened on this computer (it may be behind the browser).', 'A janela do construtor abriu neste computador (pode estar atrás do navegador).')
+                                  : L('Could not open it.', 'Não deu para abrir.');
+        } catch { note.textContent = L('Could not reach the kit helper. Close the kit and start it again.', 'Não deu para falar com o ajudante do kit. Feche o kit e inicie de novo.'); }
+      };
+      row.append(b);
+    }
+    row.append(note);
+    box.append(p, row);
+    if (st.choices) box.append(el('p', L('This kit remembers what it was built with (BUILD-CHOICES.txt), so "Add more" starts with those items ticked.',
+                                         'Este kit lembra com o que foi montado (BUILD-CHOICES.txt), então "Adicionar" já começa com esses itens marcados.'), 'muted'));
+  }
+
+  function explainNoHelper() {
+    const box = $('manage-body');
+    box.replaceChildren(el('p', onThisComputer
+      ? L('Adding and updating needs a Windows computer with internet: double-click MAKE-USB.bat on the drive. (On a Mac or Linux computer the kit runs, but the builder is Windows only.)',
+          'Adicionar e atualizar precisa de um computador Windows com internet: clique duas vezes em MAKE-USB.bat no pendrive. (No Mac ou Linux o kit funciona, mas o construtor é só para Windows.)')
+      : L('To add more or update, use the computer running the kit: open this page there (http://localhost:8080/kit.html), or double-click MAKE-USB.bat on the drive. It needs internet.',
+          'Para adicionar ou atualizar, use o computador que está rodando o kit: abra esta página nele (http://localhost:8080/kit.html) ou clique duas vezes em MAKE-USB.bat no pendrive. Precisa de internet.')));
+  }
+
+  // ---- inventory
+  function list(title, items, empty) {
+    const wrap = el('div');
+    wrap.append(el('h3', title));
+    if (!items.length) { wrap.append(el('p', empty, 'muted')); return wrap; }
+    const ul = el('ul', null, 'files');
+    for (const it of items) { const li = el('li'); li.append(el('span', it.name), el('span', it.size != null ? size(it.size) : '', 'muted')); ul.append(li); }
+    wrap.append(ul);
+    return wrap;
+  }
+
+  function showInventory(st) {
+    const inv = $('inventory');
+    inv.replaceChildren();
+    if (st.root) inv.append(el('p', L(`Kit at ${st.root} - ${size(st.free)} free of ${size(st.size)}`, `Kit em ${st.root} - ${size(st.free)} livres de ${size(st.size)}`), 'muted'));
+    inv.append(list(L('AI models', 'Modelos de IA'), st.models, L('None', 'Nenhum')));
+    inv.append(list(L('Library books', 'Livros da biblioteca'), st.books, L('None', 'Nenhum')));
+    inv.append(list(L('Maps', 'Mapas'), st.maps, L('None yet', 'Nenhum ainda')));
+    const extras = [];
+    if (st.survivalData != null) extras.push({ name: 'Survival-Data: ' + (st.survivalData ? '✓' : L('not on this kit', 'não está no kit')) });
+    if (st.apps != null) extras.push({ name: L('Android apps: ', 'Apps Android: ') + (st.apps ? '✓' : L('not on this kit', 'não estão no kit')) });
+    if (extras.length) inv.append(list('Extras', extras, ''));
+    if (st.partial && st.partial.length) inv.append(list(L('Unfinished downloads (finish with Verify / repair)', 'Downloads pela metade (termine com Verificar / reparar)'), st.partial, ''));
+  }
+
+  function showProgress(p) {
+    const card = $('progress-card');
+    if (!p) { card.hidden = true; return; }
+    card.hidden = false;
+    $('progress-bar').value = p.percent;
+    if (p.state === 'done') { $('progress-title').textContent = L('✓ Last build finished', '✓ A última montagem terminou'); $('progress-text').textContent = ''; return; }
+    if (p.state === 'error') { $('progress-title').textContent = L(`✗ The build stopped at ${p.percent}%`, `✗ A montagem parou em ${p.percent}%`); $('progress-text').textContent = p.item; return; }
+    const stale = (Date.now() - new Date(p.updated).getTime()) / 1000 > 90;
+    $('progress-title').textContent = stale ? L(`Build paused at ${p.percent}%`, `Montagem parada em ${p.percent}%`)
+                                            : L(`Building: ${p.percent}%`, `Montando: ${p.percent}%`);
+    $('progress-text').textContent = stale ? L('Its window was closed? Use "Add more" or Verify / repair to continue.', 'A janela foi fechada? Use "Adicionar" ou Verificar / reparar para continuar.')
+      : L(`${size(p.done)} of ${size(p.total)} - about ${time(p.secondsLeft)} left - now: ${p.item}`, `${size(p.done)} de ${size(p.total)} - faltam cerca de ${time(p.secondsLeft)} - agora: ${p.item}`);
+  }
+
+  // without the helper (phones, Mac/Linux): what the kit's own servers can tell
+  async function fallbackInventory() {
+    const st = { models: [], books: [], maps: [] };
+    try { st.maps = (await (await fetch('maps/index.json', { cache: 'no-store' })).json()).map(m => ({ name: m.file, size: m.size })); } catch {}
+    try { const m = await (await fetch(SURVIVAL.ai + '/v1/models')).json(); st.models = (m.data || []).map(x => ({ name: x.id.split(/[\\/]/).pop() + L(' (running now)', ' (rodando agora)') })); } catch {}
+    try {
+      const xml = new DOMParser().parseFromString(await (await fetch(SURVIVAL.library + '/catalog/v2/entries?count=-1')).text(), 'application/xml');
+      st.books = [...xml.querySelectorAll('entry')].map(e => ({ name: e.querySelector('title')?.textContent }));
+    } catch {}
+    return st;
+  }
+
+  let buttonsShown = false;
+  async function refresh() {
+    let st = null;
+    if (onThisComputer) { try { const r = await fetch(HELPER + '/status', { cache: 'no-store' }); if (r.ok) st = await r.json(); } catch {} }
+    if (st) {
+      if (!buttonsShown) { st.canBuild ? showButtons(st) : explainNoHelper(); buttonsShown = true; }
+      showInventory(st); showProgress(st.progress);
+    } else if (!buttonsShown) {
+      explainNoHelper();
+      showInventory(await fallbackInventory());
+    }
+    return !!st;
+  }
+  // with the helper, keep the inventory and build progress live
+  refresh().then(live => { if (live) setInterval(() => { if (!document.hidden) refresh(); }, 5000); });
+})();
+</script>
+</body>
+</html>

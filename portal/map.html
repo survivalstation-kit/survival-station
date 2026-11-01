@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Offline Map</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="vendor/maplibre-gl.css">
+</head>
+<body class="map-page" data-page="map">
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html">Survival <span>Station</span></a>
+  <nav class="links">
+    <a href="index.html" data-i18n="nav.home">Home</a>
+    <a href="chat.html" data-i18n="nav.chat">Ask AI</a>
+    <a href="map.html" aria-current="page" data-i18n="nav.map">Map</a>
+    <a href="cards.html" data-cards data-i18n="nav.cards">Emergency</a>
+    <a href="help.html" data-i18n="nav.help">Help</a>
+  </nav>
+  <select class="lang-select" aria-label="Language / Idioma"></select>
+  <button class="theme-btn" type="button" data-i18n="theme">Theme</button>
+</div></header>
+
+<div id="map"></div>
+<div class="map-panel" id="panel"><span data-i18n="map.tap"></span></div>
+
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+<script src="vendor/maplibre-gl.js"></script>
+<script src="vendor/pmtiles.js"></script>
+<script src="vendor/basemaps.js"></script>
+<script>
+(async () => {
+  const { t } = SURVIVAL;
+  const panel = document.getElementById('panel');
+  const say = msg => { panel.replaceChildren(); panel.textContent = msg; panel.classList.add('warn'); };
+
+  // PMTiles needs HTTP range requests, so the page has to come from the start program's server
+  if (!SURVIVAL.served || typeof maplibregl === 'undefined') return say(t('map.needserver'));
+
+  let maps = [];
+  try { maps = await (await fetch('maps/index.json', { cache: 'no-store' })).json(); } catch {}
+  if (!maps.length) return say(t('map.none'));
+
+  const base = location.href.replace(/[^/]*([?#].*)?$/, '');
+  const protocol = new pmtiles.Protocol();
+  maplibregl.addProtocol('pmtiles', protocol.tile);
+
+  // world overview first, detailed regions drawn on top of it
+  maps.sort((a, b) => (b.name === 'world') - (a.name === 'world'));
+  const archives = maps.map(m => {
+    const p = new pmtiles.PMTiles(base + 'maps/' + encodeURIComponent(m.file));
+    protocol.add(p);
+    return p;
+  });
+  const headers = await Promise.all(archives.map(a => a.getHeader().catch(() => null)));
+
+  function style(dark) {
+    const flavor = basemaps.namedFlavor(dark ? 'dark' : 'light');
+    const sources = {}, layers = [];
+    maps.forEach((m, i) => {
+      const id = 'm' + i;
+      sources[id] = { type: 'vector', url: 'pmtiles://' + archives[i].source.getKey(), attribution: '© OpenStreetMap' };
+      for (const l of basemaps.layers(id, flavor, { lang: SURVIVAL.dict._map })) {
+        if (i > 0 && l.type === 'background') continue;   // keep the world map visible around a region
+        layers.push({ ...l, id: `${id}-${l.id}` });
+      }
+    });
+    return {
+      version: 8, sources, layers,
+      glyphs: base + 'vendor/basemaps-assets/fonts/{fontstack}/{range}.pbf',
+      sprite: base + 'vendor/basemaps-assets/sprites/v4/' + (dark ? 'dark' : 'light'),
+    };
+  }
+
+  // start on the most detailed region if there is one
+  const region = headers.findIndex((h, i) => h && maps[i].name !== 'world');
+  const h = headers[region >= 0 ? region : 0];
+  const saved = (() => { try { return JSON.parse(SURVIVAL.store('map-view')); } catch { return null; } })();
+
+  const view = saved ? { center: saved.center, zoom: saved.zoom }
+    : region >= 0 ? { bounds: [[h.minLon, h.minLat], [h.maxLon, h.maxLat]] }
+    : { center: [0, 20], zoom: 1.5 };
+  const map = new maplibregl.Map({
+    container: 'map',
+    style: style(SURVIVAL.isDark()),
+    ...view,
+    maxZoom: 19,
+    attributionControl: { compact: true },
+  });
+  map.addControl(new maplibregl.NavigationControl(), 'top-right');
+  map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left');
+  // GPS only works on the computer itself (browsers block it on plain-http network addresses)
+  if (window.isSecureContext) map.addControl(new maplibregl.GeolocateControl({ trackUserLocation: true }), 'top-right');
+
+  map.on('moveend', () => SURVIVAL.store('map-view', JSON.stringify({ center: map.getCenter().toArray(), zoom: map.getZoom() })));
+  document.addEventListener('themechange', e => map.setStyle(style(e.detail === 'dark')));
+
+  const dms = (v, pos, neg) => {
+    const ts = Math.round(Math.abs(v) * 36000) / 10;   // round to 0.1" first so 59.96" carries into the minute
+    const d = Math.floor(ts / 3600), m = Math.floor((ts - d * 3600) / 60), s = (ts - d * 3600 - m * 60).toFixed(1);
+    return `${d}°${m}'${s}"${v >= 0 ? pos : neg}`;
+  };
+  let marker = null;
+  map.on('click', e => {
+    const { lat, lng } = e.lngLat;
+    const dec = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    marker = marker || new maplibregl.Marker({ color: '#b4441c' });
+    marker.setLngLat(e.lngLat).addTo(map);
+    panel.classList.remove('warn');
+    const label = document.createElement('div'); label.className = 'muted'; label.textContent = t('map.share');
+    const big = document.createElement('div'); big.className = 'coords'; big.textContent = dec;
+    const small = document.createElement('div'); small.className = 'muted'; small.textContent = `${dms(lat, 'N', 'S')}  ${dms(lng, 'E', 'W')}`;
+    const btn = document.createElement('button'); btn.className = 'btn ghost'; btn.type = 'button'; btn.textContent = t('map.copy');
+    btn.onclick = async () => {
+      try { await navigator.clipboard.writeText(dec); btn.textContent = t('map.copied'); }
+      catch { getSelection().selectAllChildren(big); }   // clipboard API needs a secure context; select the text instead
+    };
+    panel.replaceChildren(label, big, small, btn);
+  });
+})();
+</script>
+</body>
+</html>

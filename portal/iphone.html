@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iPhone and iPad</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="iphone">
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html">Survival <span>Station</span></a>
+  <nav class="links">
+    <a href="index.html" data-i18n="nav.home">Home</a>
+    <a href="chat.html" data-i18n="nav.chat">Ask AI</a>
+    <a href="map.html" data-i18n="nav.map">Map</a>
+    <a href="cards.html" data-cards data-i18n="nav.cards">Emergency</a>
+    <a href="help.html" aria-current="page" data-i18n="nav.help">Help</a>
+  </nav>
+  <select class="lang-select" aria-label="Language / Idioma"></select>
+  <button class="theme-btn" type="button" data-i18n="theme">Theme</button>
+</div></header>
+
+<main class="wrap help">
+
+<!-- ======================================================= English -->
+<article data-for="en">
+  <h1>iPhone and iPad</h1>
+  <p class="lede">An iPhone can't run programs from a USB stick: Apple only allows apps from the App Store. But it can still use almost everything in the kit, in three ways. <b>Set it up now, while you have internet.</b></p>
+
+  <nav class="toc">
+    <a href="#ways">Three ways</a><a href="#apps">Install the apps</a><a href="#stick">Connect the stick</a>
+    <a href="#library">Library</a><a href="#ai">AI</a><a href="#maps">Maps</a><a href="#cards">Cards offline</a>
+    <a href="#hotspot">Use a computer's kit</a><a href="#trouble">Problems?</a>
+  </nav>
+
+  <section class="card" id="ways">
+    <h2>Three ways to use it</h2>
+    <table>
+      <tr><th>1. Connect to a computer running the kit</th><td>Everything works in Safari: AI with sources, library, maps, cards. Needs a computer with power. <a href="#hotspot">How</a></td></tr>
+      <tr><th>2. Apps on the iPhone, files from the stick</th><td>Library, AI and maps work on the phone alone, even with the computer off. Set it up beforehand. <a href="#apps">How</a></td></tr>
+      <tr><th>3. Open files straight from the stick</th><td>PDFs (Survival-Data, your documents) open in the Files app. No AI, library search or maps this way.</td></tr>
+    </table>
+  </section>
+
+  <section class="card" id="apps">
+    <h2>Install the apps (free, needs internet)</h2>
+    <table>
+      <tr><th>Kiwix</th><td>Offline library: reads the <code>.zim</code> books from the stick's <code>library</code> folder.</td></tr>
+      <tr><th>PocketPal AI</th><td>The AI on the phone: loads the <code>.gguf</code> models from the stick's <code>models</code> folder. Free to download, and loading a model and chatting offline is free. It also sells extras (PocketPal Plus, add-on packs): <b>you don't need any of them</b> for the kit. <b>Alternative:</b> LLM Farm (free, open-source, loads the same files).</td></tr>
+      <tr><th>Organic Maps</th><td>Offline maps <b>with GPS</b> and directions. It uses its own maps, not the kit's: download your country or state inside the app.</td></tr>
+    </table>
+    <p class="muted">Search for each name in the App Store. Open each app once while online, in case it asks to download something. If an app shows a subscription screen, close it: everything on this page works without paying. PocketPal is rated 18+ in the App Store because of optional chat characters, so for a child's phone LLM Farm is the better choice.</p>
+  </section>
+
+  <section class="card" id="stick">
+    <h2>Connect the stick</h2>
+    <ul>
+      <li><b>iPhone 15 or newer, and iPads with USB-C:</b> plug in a USB-C stick, or a USB-A stick with a small adapter.</li>
+      <li><b>Older iPhones (Lightning):</b> use Apple's <i>Lightning to USB 3 Camera Adapter</i>. If the stick doesn't show up, plug a charger into the adapter's power port: many sticks need more power than the phone gives.</li>
+      <li>Open the <b>Files</b> app → <b>Browse</b> → the stick appears under <i>Locations</i> (often named SURVIVAL).</li>
+    </ul>
+    <p class="muted">The stick must be exFAT (the builder formats it that way). iPhones can't read NTFS sticks.</p>
+  </section>
+
+  <section class="card" id="library">
+    <h2>Library on the iPhone (Kiwix)</h2>
+    <ol>
+      <li>Check free space: <b>Settings → General → iPhone Storage</b>. The books are big, so pick the ones that fit.</li>
+      <li>In <b>Files</b>, open the stick → <code>library</code>. Each <code>.zim</code> file is one book.</li>
+      <li>Touch and hold a book → <b>Copy</b>, go to <b>On My iPhone → Kiwix</b>, then touch and hold → <b>Paste</b>. Or open <b>Kiwix</b> and use its button to open or import a file, then pick the book on the stick.</li>
+      <li>The book appears in Kiwix's library. Search and read offline.</li>
+    </ol>
+    <p><b>Good small books to start with:</b> <code>zimgit-medicine</code>, <code>zimgit-water</code>, <code>zimgit-post-disaster</code>, <code>zimgit-food-preparation</code>, <code>zimgit-knots</code> (all English, under 1 GB together), <code>wikipedia_pt_medicine</code> (Portuguese, about 270 MB). Wikipedia medicine in English is about 1.7 GB.</p>
+  </section>
+
+  <section class="card" id="ai">
+    <h2>AI on the iPhone: easy setup</h2>
+    <p><b>1. Pick the model file</b> (in the stick's <code>models</code> folder) and note its <b>template</b>:</p>
+    <table>
+      <tr><th>Llama-3.2-1B-Instruct-Q4_K_M.gguf<br><span class="muted">0.8 GB · start with this one</span></th><td>Template: <b>Llama 3</b>. Works on most iPhones from 2021 on (iPhone 13 and newer).</td></tr>
+      <tr><th>Qwen_Qwen3-4B-Q4_K_M.gguf<br><span class="muted">2.3 GB · better answers</span></th><td>Template: <b>ChatML</b>. Needs lots of memory: iPhone 15 Pro, 16 or newer, or a recent iPad. If the app closes or writes nonsense, use Llama instead.</td></tr>
+    </table>
+
+    <p><b>2. Copy the survival instructions</b> (the same ones the kit's computer AI uses):</p>
+    <pre class="prompt" id="prompt-en"></pre>
+    <p class="copy-row">
+      <button class="btn" type="button" data-copy="prompt-en">Copy for Llama</button>
+      <button class="btn" type="button" data-copy="prompt-en" data-suffix="&#10;/no_think">Copy for Qwen3</button>
+      <span class="muted copy-note"></span>
+    </p>
+    <p class="muted">"Copy for Qwen3" adds <code>/no_think</code> at the end, so Qwen3 answers right away instead of thinking out loud first (much faster on a phone).</p>
+
+    <p><b>3. Set up the app</b> (once, while preparing):</p>
+    <table>
+      <tr><th>LLM Farm<br><span class="muted">free, open-source</span></th><td><ol>
+        <li>Tap <b>+</b> to create a new chat.</li>
+        <li><b>Model:</b> choose the file from the stick (Files → the stick → <code>models</code>). The app copies it in, so the stick can be unplugged afterwards.</li>
+        <li><b>Template / prompt format:</b> Llama 3 or ChatML, from the table above.</li>
+        <li><b>System prompt:</b> paste the instructions. Save.</li>
+      </ol></td></tr>
+      <tr><th>PocketPal AI<br><span class="muted">free; paid extras not needed</span></th><td><ol>
+        <li><b>Models → + → Add Local Model</b>, choose the file from the stick, tap <b>Load</b>. The template is set automatically.</li>
+        <li>Paste the instructions as the chat's <b>system prompt</b> (in the chat or "Pal" settings).</li>
+      </ol></td></tr>
+    </table>
+    <p><b>4. Test it in airplane mode:</b> ask "How do I make water safe to drink?" It should answer with short numbered steps.</p>
+
+    <p class="notice">The phone AI <b>does not look things up in the library</b>, so its answers come without sources and can be wrong. For first aid, follow the <a href="cards.html">emergency cards</a>.</p>
+    <p class="muted">No computer nearby? The same settings and instructions are in <code>models/PHONE-AI-SETUP.txt</code> on the stick; open it in the Files app and copy from there. Menu names can differ a little between app versions.</p>
+  </section>
+
+  <section class="card" id="maps">
+    <h2>Maps with GPS (Organic Maps)</h2>
+    <ol>
+      <li>While online, open <b>Organic Maps</b> and download your country or state (it asks when you zoom in, or use <b>Download maps</b> in the menu).</li>
+      <li>Allow location access. GPS works with no signal and no internet.</li>
+      <li>To pass your position to rescuers, tap the blue dot and share or read out the coordinates.</li>
+    </ol>
+    <p class="muted">The kit's own map (<code>.pmtiles</code> files) only works through a computer running the kit, in Safari.</p>
+  </section>
+
+  <section class="card" id="cards">
+    <h2>Keep the emergency cards on the phone</h2>
+    <ol>
+      <li>Connect to a computer running the kit (<a href="#hotspot">below</a>) and open <b>Emergency</b> in Safari.</li>
+      <li>Tap <b>Share</b> → <b>Options</b> → choose <b>PDF</b> → <b>Save to Files</b> → <b>On My iPhone</b>.</li>
+      <li>The cards are now a PDF on the phone that opens anytime, even offline. You can also print it.</li>
+    </ol>
+  </section>
+
+  <section class="card" id="hotspot">
+    <h2>Use a computer's kit from the iPhone</h2>
+    <ol>
+      <li>On the iPhone: <b>Settings → Personal Hotspot → Allow Others to Join</b>. It works with no signal and no data. Turn on <b>Maximize Compatibility</b> if the computer can't see it.</li>
+      <li>Connect the computer to the iPhone's Wi-Fi, then start the kit on the computer.</li>
+      <li>In <b>Safari</b> on the iPhone, type the address shown in the computer's black window, for example <code>http://172.20.10.2:8080</code>, including <code>:8080</code>.</li>
+    </ol>
+    <p class="muted">Other phones can join the same hotspot and use the kit too. The ◎ locate-me button doesn't work in Safari here; use Organic Maps for GPS.</p>
+  </section>
+
+  <section class="card" id="trouble">
+    <h2>Problems?</h2>
+    <table>
+      <tr><th>The stick doesn't appear in Files</th><td>Unplug and replug. With a Lightning adapter, connect a charger to it. The stick must be exFAT.</td></tr>
+      <tr><th>"Not enough storage"</th><td>Copy fewer or smaller books, or delete photos and apps you don't need. You can also read a book straight from the stick in Kiwix without copying it.</td></tr>
+      <tr><th>The AI app closes when loading the model</th><td>The phone doesn't have enough memory: use Llama-3.2-1B and close other apps.</td></tr>
+      <tr><th>Safari can't open the kit's address</th><td>Check the computer is on the iPhone's hotspot, type <code>http://</code> and <code>:8080</code>, and on Windows click <b>Allow</b> if the firewall asked.</td></tr>
+    </table>
+  </section>
+</article>
+
+<!-- ======================================================= Português -->
+<article data-for="pt-BR" lang="pt-BR">
+  <h1>iPhone e iPad</h1>
+  <p class="lede">O iPhone não roda programas de um pendrive: a Apple só permite apps da App Store. Mas ele ainda usa quase tudo do kit, de três jeitos. <b>Prepare agora, enquanto tem internet.</b></p>
+
+  <nav class="toc">
+    <a href="#jeitos">Três jeitos</a><a href="#apps-pt">Instalar os apps</a><a href="#pendrive">Conectar o pendrive</a>
+    <a href="#biblioteca">Biblioteca</a><a href="#ia">IA</a><a href="#mapas">Mapas</a><a href="#cartoes">Cartões offline</a>
+    <a href="#roteador">Usar o kit de um computador</a><a href="#problemas">Problemas?</a>
+  </nav>
+
+  <section class="card" id="jeitos">
+    <h2>Três jeitos de usar</h2>
+    <table>
+      <tr><th>1. Conectar a um computador com o kit</th><td>Tudo funciona no Safari: IA com fontes, biblioteca, mapas, cartões. Precisa de um computador ligado. <a href="#roteador">Como</a></td></tr>
+      <tr><th>2. Apps no iPhone, arquivos do pendrive</th><td>Biblioteca, IA e mapas funcionam só no celular, mesmo com o computador desligado. Prepare antes. <a href="#apps-pt">Como</a></td></tr>
+      <tr><th>3. Abrir arquivos direto do pendrive</th><td>PDFs (Survival-Data, seus documentos) abrem no app Arquivos. Assim não tem IA, busca na biblioteca nem mapas.</td></tr>
+    </table>
+  </section>
+
+  <section class="card" id="apps-pt">
+    <h2>Instalar os apps (grátis, precisa de internet)</h2>
+    <table>
+      <tr><th>Kiwix</th><td>Biblioteca offline: lê os livros <code>.zim</code> da pasta <code>library</code> do pendrive.</td></tr>
+      <tr><th>PocketPal AI</th><td>A IA no celular: carrega os modelos <code>.gguf</code> da pasta <code>models</code> do pendrive. O download é grátis, e carregar um modelo e conversar offline é grátis. O app também vende extras (PocketPal Plus, pacotes): <b>você não precisa de nenhum</b> para o kit. <b>Alternativa:</b> LLM Farm (grátis, de código aberto, carrega os mesmos arquivos).</td></tr>
+      <tr><th>Organic Maps</th><td>Mapas offline <b>com GPS</b> e rotas. Usa mapas próprios, não os do kit: baixe seu país ou estado dentro do app.</td></tr>
+    </table>
+    <p class="muted">Procure cada nome na App Store. Abra cada app uma vez com internet, caso ele peça para baixar algo. Se aparecer uma tela de assinatura, feche: tudo nesta página funciona sem pagar. O PocketPal tem classificação 18+ na App Store por causa de personagens de conversa opcionais, então no celular de uma criança o LLM Farm é melhor.</p>
+  </section>
+
+  <section class="card" id="pendrive">
+    <h2>Conectar o pendrive</h2>
+    <ul>
+      <li><b>iPhone 15 ou mais novo, e iPads com USB-C:</b> conecte um pendrive USB-C, ou um USB-A com um adaptador pequeno.</li>
+      <li><b>iPhones mais antigos (Lightning):</b> use o <i>Adaptador de Lightning para USB 3 (câmera)</i> da Apple. Se o pendrive não aparecer, ligue um carregador na entrada de energia do adaptador: muitos pendrives precisam de mais energia do que o celular fornece.</li>
+      <li>Abra o app <b>Arquivos</b> → <b>Explorar</b> → o pendrive aparece em <i>Locais</i> (geralmente com o nome SURVIVAL).</li>
+    </ul>
+    <p class="muted">O pendrive precisa ser exFAT (o construtor formata assim). O iPhone não lê pendrives NTFS.</p>
+  </section>
+
+  <section class="card" id="biblioteca">
+    <h2>Biblioteca no iPhone (Kiwix)</h2>
+    <ol>
+      <li>Veja o espaço livre: <b>Ajustes → Geral → Armazenamento do iPhone</b>. Os livros são grandes, escolha os que cabem.</li>
+      <li>No <b>Arquivos</b>, abra o pendrive → <code>library</code>. Cada arquivo <code>.zim</code> é um livro.</li>
+      <li>Toque e segure um livro → <b>Copiar</b>, vá em <b>No Meu iPhone → Kiwix</b>, toque e segure → <b>Colar</b>. Ou abra o <b>Kiwix</b>, use o botão de abrir ou importar arquivo e escolha o livro no pendrive.</li>
+      <li>O livro aparece na biblioteca do Kiwix. Pesquise e leia offline.</li>
+    </ol>
+    <p><b>Livros pequenos para começar:</b> <code>wikipedia_pt_medicine</code> (Wikipédia de medicina em português, uns 270 MB), <code>wikivoyage_pt</code> (guia de viagem), e os guias em inglês <code>zimgit-medicine</code>, <code>zimgit-water</code>, <code>zimgit-post-disaster</code> (menos de 1 GB juntos).</p>
+  </section>
+
+  <section class="card" id="ia">
+    <h2>IA no iPhone: configuração fácil</h2>
+    <p><b>1. Escolha o arquivo do modelo</b> (na pasta <code>models</code> do pendrive) e anote o <b>template</b>:</p>
+    <table>
+      <tr><th>Llama-3.2-1B-Instruct-Q4_K_M.gguf<br><span class="muted">0,8 GB · comece por este</span></th><td>Template: <b>Llama 3</b>. Funciona na maioria dos iPhones de 2021 para cá (iPhone 13 e mais novos).</td></tr>
+      <tr><th>Qwen_Qwen3-4B-Q4_K_M.gguf<br><span class="muted">2,3 GB · respostas melhores</span></th><td>Template: <b>ChatML</b>. Precisa de bastante memória: iPhone 15 Pro, 16 ou mais novo, ou um iPad recente. Se o app fechar ou escrever coisas sem sentido, use o Llama.</td></tr>
+    </table>
+
+    <p><b>2. Copie as instruções de sobrevivência</b> (as mesmas que a IA do computador usa):</p>
+    <pre class="prompt" id="prompt-pt"></pre>
+    <p class="copy-row">
+      <button class="btn" type="button" data-copy="prompt-pt">Copiar para Llama</button>
+      <button class="btn" type="button" data-copy="prompt-pt" data-suffix="&#10;/no_think">Copiar para Qwen3</button>
+      <span class="muted copy-note"></span>
+    </p>
+    <p class="muted">"Copiar para Qwen3" coloca <code>/no_think</code> no final, para o Qwen3 responder direto em vez de pensar em voz alta antes (bem mais rápido no celular).</p>
+
+    <p><b>3. Configure o app</b> (uma vez, na preparação):</p>
+    <table>
+      <tr><th>LLM Farm<br><span class="muted">grátis, código aberto</span></th><td><ol>
+        <li>Toque em <b>+</b> para criar um chat novo.</li>
+        <li><b>Model:</b> escolha o arquivo no pendrive (Arquivos → o pendrive → <code>models</code>). O app copia o arquivo, então depois dá para tirar o pendrive.</li>
+        <li><b>Template / prompt format:</b> Llama 3 ou ChatML, conforme a tabela acima.</li>
+        <li><b>System prompt:</b> cole as instruções. Salve.</li>
+      </ol></td></tr>
+      <tr><th>PocketPal AI<br><span class="muted">grátis; extras pagos não são necessários</span></th><td><ol>
+        <li><b>Models → + → Add Local Model</b>, escolha o arquivo no pendrive e toque em <b>Load</b>. O template é ajustado sozinho.</li>
+        <li>Cole as instruções como <b>system prompt</b> do chat (nas configurações do chat ou do "Pal").</li>
+      </ol></td></tr>
+    </table>
+    <p><b>4. Teste em modo avião:</b> pergunte "Como deixo a água segura para beber?". Ele deve responder com passos curtos e numerados.</p>
+
+    <p class="notice">A IA do celular <b>não consulta a biblioteca</b>, então responde sem fontes e pode errar. Em primeiros socorros, siga os <a href="cards.html">cartões de emergência</a>.</p>
+    <p class="muted">Sem computador por perto? As mesmas configurações e instruções estão em <code>models/PHONE-AI-SETUP.txt</code> no pendrive; abra no app Arquivos e copie de lá. Os nomes dos menus podem mudar um pouco entre versões dos apps.</p>
+  </section>
+
+  <section class="card" id="mapas">
+    <h2>Mapas com GPS (Organic Maps)</h2>
+    <ol>
+      <li>Com internet, abra o <b>Organic Maps</b> e baixe seu país ou estado (ele pergunta quando você aproxima, ou use <b>Baixar mapas</b> no menu).</li>
+      <li>Permita o acesso à localização. O GPS funciona sem sinal e sem internet.</li>
+      <li>Para passar sua posição ao resgate, toque no ponto azul e compartilhe ou leia as coordenadas.</li>
+    </ol>
+    <p class="muted">O mapa do próprio kit (arquivos <code>.pmtiles</code>) só funciona por um computador com o kit, no Safari.</p>
+  </section>
+
+  <section class="card" id="cartoes">
+    <h2>Guardar os cartões de emergência no celular</h2>
+    <ol>
+      <li>Conecte a um computador com o kit (<a href="#roteador">abaixo</a>) e abra <b>Emergência</b> no Safari.</li>
+      <li>Toque em <b>Compartilhar</b> → <b>Opções</b> → escolha <b>PDF</b> → <b>Salvar em Arquivos</b> → <b>No Meu iPhone</b>.</li>
+      <li>Os cartões viram um PDF no celular, que abre a qualquer hora, mesmo offline. Dá para imprimir também.</li>
+    </ol>
+  </section>
+
+  <section class="card" id="roteador">
+    <h2>Usar o kit de um computador pelo iPhone</h2>
+    <ol>
+      <li>No iPhone: <b>Ajustes → Acesso Pessoal → Permitir Outros Acessos</b>. Funciona sem sinal e sem dados. Ative <b>Maximizar Compatibilidade</b> se o computador não encontrar a rede.</li>
+      <li>Conecte o computador no Wi-Fi do iPhone e inicie o kit no computador.</li>
+      <li>No <b>Safari</b> do iPhone, digite o endereço que aparece na janela preta do computador, por exemplo <code>http://172.20.10.2:8080</code>, com o <code>:8080</code>.</li>
+    </ol>
+    <p class="muted">Outros celulares podem entrar no mesmo roteador e usar o kit também. O botão ◎ de localização não funciona no Safari aqui; use o Organic Maps para GPS.</p>
+  </section>
+
+  <section class="card" id="problemas">
+    <h2>Problemas?</h2>
+    <table>
+      <tr><th>O pendrive não aparece no Arquivos</th><td>Tire e coloque de novo. Com adaptador Lightning, ligue um carregador nele. O pendrive precisa ser exFAT.</td></tr>
+      <tr><th>"Armazenamento insuficiente"</th><td>Copie menos livros ou livros menores, ou apague fotos e apps que não precisa. Também dá para ler um livro direto do pendrive no Kiwix, sem copiar.</td></tr>
+      <tr><th>O app da IA fecha ao carregar o modelo</th><td>Falta memória no celular: use o Llama-3.2-1B e feche outros apps.</td></tr>
+      <tr><th>O Safari não abre o endereço do kit</th><td>Confira se o computador está no Acesso Pessoal do iPhone, digite <code>http://</code> e <code>:8080</code>, e no Windows clique em <b>Permitir</b> se o firewall perguntou.</td></tr>
+    </table>
+  </section>
+</article>
+
+</main>
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+<script>
+  // show the page in the reader's language (both stay visible if scripts are off)
+  document.querySelectorAll('article[data-for]').forEach(a => { a.hidden = a.dataset.for !== SURVIVAL.lang; });
+  if (!document.querySelector('article[data-for]:not([hidden])')) document.querySelector('article[data-for="en"]').hidden = false;
+  document.title = SURVIVAL.lang === 'pt-BR' ? 'iPhone e iPad' : 'iPhone and iPad';
+
+  // phone AI instructions: the kit's own system prompt, worded for a phone
+  const phone = { en: ['running on a USB drive', 'running on a phone'], 'pt-BR': ['rodando em um pendrive', 'rodando em um celular'] };
+  for (const [lang, [from, to]] of Object.entries(phone)) {
+    const box = document.getElementById(lang === 'en' ? 'prompt-en' : 'prompt-pt');
+    if (box && I18N[lang]) box.textContent = I18N[lang]['chat.system'].replace(from, to);
+  }
+
+  // Copy buttons. The kit is served over plain http, where Safari has no clipboard API, so fall back to a selected textarea.
+  document.querySelectorAll('[data-copy]').forEach(btn => btn.addEventListener('click', async () => {
+    const text = document.getElementById(btn.dataset.copy).textContent + (btn.dataset.suffix || '');
+    let ok = false;
+    try { await navigator.clipboard.writeText(text); ok = true; } catch {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.append(ta); ta.select(); ta.setSelectionRange(0, text.length);
+      try { ok = document.execCommand('copy'); } catch {}
+      ta.remove();
+    }
+    const note = btn.parentElement.querySelector('.copy-note');
+    const pt = SURVIVAL.lang === 'pt-BR';
+    note.textContent = ok ? (pt ? 'Copiado. Agora cole no app.' : 'Copied. Now paste it into the app.')
+                          : (pt ? 'Não deu para copiar: toque e segure no texto acima.' : 'Could not copy: touch and hold the text above.');
+  }));
+</script>
+</body>
+</html>

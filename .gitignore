@@ -1,0 +1,9 @@
+# build logs and progress (written by setup\build-drive.ps1 and the builder window)
+logs/
+# downloads in progress, if the project folder is ever used as a build target
+.download/
+*.part
+# local editor and tool settings
+.claude/
+__pycache__/
+*.pyc
