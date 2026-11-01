@@ -72,7 +72,8 @@ done
 PICK=$DEF
 if [ ${#MODELS[@]} -gt 1 ]; then
   echo
-  read -r -t 10 -p "  Choose AI model [1-${#MODELS[@]}] (default $DEF; use a smaller one on old computers): " PICK
+  echo " Old or slow computer? Pick Llama-3.2-1B.  /  Computador antigo ou lento? Escolha Llama-3.2-1B."
+  read -r -t 10 -p "  Choose AI model / Modelo de IA [1-${#MODELS[@]}] (default $DEF): " PICK
   [[ "$PICK" =~ ^[0-9]+$ ]] && [ "$PICK" -ge 1 ] && [ "$PICK" -le ${#MODELS[@]} ] || PICK=$DEF
   echo
 fi

@@ -51,7 +51,7 @@ O programa mostra o tamanho de tudo e pergunta antes de baixar. Se a internet ca
 | Android sem computador | **Antes** de uma emergência, instale os apps da pasta `apps/android/`: Kiwix (biblioteca), PocketPal AI (IA no celular) e Organic Maps. |
 | iPhone sem computador | O iPhone não roda programas do pendrive. Instale antes o **Kiwix** e o **PocketPal AI** pela App Store e copie os arquivos para o celular. |
 
-**Computador antigo ou com pouca memória (menos de 8 GB)?** Quando o programa perguntar, escolha o menor modelo de IA (Llama 1B).
+**Computador antigo ou com pouca memória (menos de 8 GB)?** Quando o programa perguntar, escolha o **Llama-3.2-1B**: é o mais rápido, mas responde de forma mais simples, então confira o que for importante nos cartões de emergência.
 
 **Respostas lentas?** Desmarque "Consultar a biblioteca" embaixo do chat. A resposta sai mais rápido, mas sem as fontes.
 

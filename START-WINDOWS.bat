@@ -44,7 +44,7 @@ set keys=123456789
 set keys=!keys:~0,%n%!
 if %n% GTR 1 (
   echo.
-  echo  Old/slow computer? Pick the smallest model.  /  Computador antigo? Escolha o menor modelo.
+  echo  Old or slow computer? Pick Llama-3.2-1B.  /  Computador antigo ou lento? Escolha Llama-3.2-1B.
   "%SYS%\choice.exe" /c !keys! /t 10 /d !def! /n /m "  AI model / Modelo de IA [1-%n%] (default/padrao !def!): "
   set pick=!errorlevel!
 ) else set pick=1

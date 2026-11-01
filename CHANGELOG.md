@@ -12,6 +12,13 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.0.1 (2026-11-01)
+
+- **Removed the "Survivors guide" library book.** It turned out to be the Vampire Survivors video-game wiki, added by mistake because of its file name. The AI's library lookup could quote game items as survival advice. **Verify / repair** and **Check for updates** remove it from drives that already have it, with no internet needed.
+- The start windows now name the model for old computers (Llama-3.2-1B).
+- Tested and **not added:** Qwen3-1.7B. It's twice as fast as Qwen3-4B, but it gave unsafe water-safety advice even with a library passage.
+- Known limit: the "zimgit" books (water, medicine, food, after a disaster, knots) are collections of PDF manuals. They can be opened and read, but they have no search index, so the AI can't quote them.
+
 ## 1.0.0 (2026-11-01)
 
 The first version.

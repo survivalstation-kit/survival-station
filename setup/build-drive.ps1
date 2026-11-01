@@ -124,7 +124,6 @@ $Zims = @(
   @{ Lang = 'en'; Tier = 'Lite'; Dir = 'other'; Prefix = 'zimgit-food-preparation_en'; Name = 'Food preparation and storage' }
   @{ Lang = 'en'; Tier = 'Lite'; Dir = 'other'; Prefix = 'zimgit-post-disaster_en'; Name = 'After a disaster: shelter, sanitation, recovery' }
   @{ Lang = 'en'; Tier = 'Lite'; Dir = 'other'; Prefix = 'zimgit-knots_en'; Name = 'Knots' }
-  @{ Lang = 'en'; Tier = 'Lite'; Dir = 'other'; Prefix = 'survivors_en_all_maxi'; Name = 'Survivors guide' }
   @{ Lang = 'en'; Tier = 'Lite'; Dir = 'other'; Prefix = 'appropedia_en_all_maxi'; Name = 'Appropedia: low-tech and DIY solutions' }
   @{ Lang = 'en'; Tier = 'Lite'; Dir = 'wikipedia'; Prefix = 'wikipedia_en_medicine_maxi'; Name = 'Wikipedia: medicine' }
   @{ Lang = 'en'; Tier = 'Lite'; Dir = 'wikivoyage'; Prefix = 'wikivoyage_en_all_nopic'; Name = 'Wikivoyage: travel guide, no pictures' }
@@ -145,6 +144,15 @@ $Zims = @(
   @{ Lang = 'pt'; Tier = 'Standard'; Dir = 'gutenberg'; Prefix = 'gutenberg_pt_all'; Name = 'Projeto Gutenberg: livros em português' }
   @{ Lang = 'pt'; Tier = 'Full'; Dir = 'wikipedia'; Prefix = 'wikipedia_pt_all_maxi'; Name = 'Wikipédia: completa, com fotos' }
 )
+# Taken out of the kit. Verify / repair and updates remove these from drives that already have them.
+$Retired = [ordered]@{
+  'survivors_en_all_maxi' = 'the Vampire Survivors video-game wiki, added by mistake (not survival content)'
+}
+function Get-RetiredFiles {
+  foreach ($p in $Retired.Keys) {
+    Get-ChildItem (Join-Path $Target 'library') -Filter "$($p)_*.zim" -ErrorAction SilentlyContinue | ForEach-Object { @{ File = $_; Why = $Retired[$p] } }
+  }
+}
 $LangList = @($Languages.Split(',', [StringSplitOptions]::RemoveEmptyEntries) | ForEach-Object { $_.Trim().ToLower() -replace '^pt-br$', 'pt' })
 foreach ($l in $LangList) { if ($l -notin 'en', 'pt') { throw "Unknown language '$l' (use en, pt)" } }
 
@@ -659,7 +667,7 @@ if ($Catalog) {
   $sdPushed = try { "$((Invoke-RestMethod 'https://api.github.com/repos/PR0M3TH3AN/Survival-Data').pushed_at)" } catch { '' }
   # which items include others (the window greys those out instead of letting both be ticked)
   foreach ($i in $list) { $i.contains = @($Contains[$i.id] | Where-Object { $_ }) }
-  Write-Json ([ordered]@{ version = 2; created = (Get-Date).ToString('s'); planet = $planet; pmtiles = $pm; engine = $engine; sdPushed = $sdPushed; base = $BaseSize - 190MB + $world; items = $list }) $Catalog
+  Write-Json ([ordered]@{ version = 3; retired = $Retired; created = (Get-Date).ToString('s'); planet = $planet; pmtiles = $pm; engine = $engine; sdPushed = $sdPushed; base = $BaseSize - 190MB + $world; items = $list }) $Catalog
   Write-Host "   $($list.Count) items -> $Catalog"
   exit
 }
@@ -721,7 +729,10 @@ if ($Verify) {
   # library: a complete ZIM ends exactly 16 bytes (its MD5) after the checksum position in its header
   $zimFiles = @(Get-ChildItem (Join-Path $Target 'library') -Filter *.zim -ErrorAction SilentlyContinue)
   if (-not $zimFiles) { Report bad 'No library books in library\' }
+  $retiredFiles = @(Get-RetiredFiles)
+  foreach ($r in $retiredFiles) { Report bad ("Library {0}: {1} - repair removes it" -f $r.File.Name, $r.Why) @{ Kind = 'remove'; Path = $r.File.FullName } }
   foreach ($f in $zimFiles) {
+    if ($retiredFiles | Where-Object { $_.File.FullName -eq $f.FullName }) { continue }
     $h = Read-Head $f.FullName 80
     $z = $Zims | Where-Object { $f.Name -match ('^' + [regex]::Escape($_.Prefix) + '_\d{4}-\d{2}\.zim$') } | Select-Object -First 1
     $fix = if ($z) { @{ Kind = 'item'; Id = $z.Prefix } }
@@ -794,14 +805,20 @@ if ($Verify) {
   $fixes = @($script:found | Where-Object { $_.Fix } | ForEach-Object { $_.Fix })
   Write-Host ("`n   {0} OK, {1} to fix, {2} downloading or unfinished" -f @($script:found | Where-Object State -eq 'ok').Count, $bad.Count, @($script:found | Where-Object State -eq 'wait').Count)
   if (-not $fixes) { Write-Host '   Nothing to repair.' -ForegroundColor Green; Write-Indexes; exit }
-  $fetch = @($fixes | Where-Object { $_.Kind -ne 'app' })
+  $fetch = @($fixes | Where-Object { $_.Kind -notin 'app', 'remove' })
+  $remove = @($fixes | Where-Object { $_.Kind -eq 'remove' })
   Write-Host "`n   Repair will:"
   if ($fixes | Where-Object Kind -eq 'app') { Write-Host '    - copy the newest app pages, start files and tools (no internet needed)' }
+  if ($remove) { Write-Host "    - remove $($remove.Count) file(s) that don't belong in the kit (no internet needed)" }
   if ($fetch) { Write-Host '    - download again what is missing or incomplete, and finish unfinished downloads (needs internet)' }
   if ($fetch -and $busy) { Write-Host '      A download is running on this drive right now, so this part is skipped: run Verify again when it finishes.' -ForegroundColor Yellow }
   if (-not $Yes -and (Read-Host "`n   Repair now? [Y/n]") -match '^n') { exit }
 
   if ($fixes | Where-Object Kind -eq 'app') { Step 'Copying the newest app files'; Copy-AppFiles; Write-Host '   done' }
+  foreach ($r in $remove) {
+    try { Remove-Item -Force $r.Path -ErrorAction Stop; Write-Host "   removed $(Split-Path $r.Path -Leaf)" }
+    catch { Write-Host "   could not remove $(Split-Path $r.Path -Leaf): close the kit (its library server has it open) and repair again" -ForegroundColor Yellow }
+  }
   Write-Indexes
   if ($fetch -and -not $busy) {
     foreach ($f in $fetch) { if ($f.Delete -and (Test-Path $f.Delete)) { Remove-Item -Recurse -Force $f.Delete } elseif ($f.Path -and (Test-Path $f.Path)) { Remove-Item -Recurse -Force $f.Path } }
@@ -925,6 +942,12 @@ foreach ($z in $zimList) {
   Download $z.Url (Join-Path $libDir $z.File)
   # remove older editions of the same archive
   Get-ChildItem $libDir -Filter "$($z.Prefix)_*.zim" | Where-Object { $_.Name -ne $z.File } | Remove-Item -Force
+}
+if ($Update) {
+  foreach ($r in Get-RetiredFiles) {
+    try { Remove-Item -Force $r.File.FullName -ErrorAction Stop; Write-Host "   removed $($r.File.Name): $($r.Why)" }
+    catch { Write-Host "   could not remove $($r.File.Name): close the kit and update again" -ForegroundColor Yellow }
+  }
 }
 
 Step 'Map viewer'

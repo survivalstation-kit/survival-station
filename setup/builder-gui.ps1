@@ -536,6 +536,14 @@ function Get-Updates {
       $ups += [pscustomobject]@{ Text = '{0}: {1} -> {2}' -f $i.name, (& $date $old.Name), (& $date (Split-Path $i.file -Leaf)); Size = [double]$i.size }
     }
   }
+  # books taken out of the kit (the update removes them)
+  if ($c.retired) {
+    foreach ($p in $c.retired.PSObject.Properties) {
+      foreach ($f in (Get-ChildItem (Join-Path $r 'library') -Filter "$($p.Name)_*.zim" -ErrorAction SilentlyContinue)) {
+        $ups += [pscustomobject]@{ Text = (T 'Remove {0}: {1}' 'Remover {0}: {1}') -f $f.Name, $p.Value; Size = 0 }
+      }
+    }
+  }
   $ver = Join-Path $r 'engine\VERSION'
   if ($c.engine -and (Test-Path $ver) -and (Get-Content $ver) -ne $c.engine) {
     $ups += [pscustomobject]@{ Text = (T 'AI engine (llama.cpp): {0} -> {1}' 'Motor da IA (llama.cpp): {0} -> {1}') -f (Get-Content $ver), $c.engine; Size = 400MB }
@@ -578,7 +586,7 @@ function Check-Updates {
     return
   }
   $total = ($ups | ForEach-Object { $_.Size } | Measure-Object -Sum).Sum
-  $msg = ((T "Updates for {0}:`n`n" "Atualizações para {0}:`n`n") -f $script:drive.Name) + (($ups | ForEach-Object { "  •  $($_.Text)   ($(Fmt $_.Size))" }) -join "`n") +
+  $msg = ((T "Updates for {0}:`n`n" "Atualizações para {0}:`n`n") -f $script:drive.Name) + (($ups | ForEach-Object { "  •  $($_.Text)" + $(if ($_.Size) { "   ($(Fmt $_.Size))" }) }) -join "`n") +
          ((T "`n`nAbout {0} to download. Update now?`n(New editions replace the old ones; nothing else changes.)" "`n`nCerca de {0} para baixar. Atualizar agora?`n(As edições novas substituem as antigas; nada mais muda.)") -f (Fmt $total))
   if ([Windows.Forms.MessageBox]::Show($msg, 'Survival Station', 'YesNo', 'Question') -ne 'Yes') { return }
   Start-Process $PS -ArgumentList ('-NoProfile -ExecutionPolicy Bypass -NoExit -File "{0}" -Drive "{1}" -Update -Yes' -f $Builder, $script:drive.Name)
@@ -677,8 +685,8 @@ $form.Add_Shown({ Safe {
   Load-Drives
   if ($Kit) { Select-Kit $Kit }
   if (Test-Path $CacheFile) { Load-Catalog }
-  # version 2 lists which items include others (and has the country maps cut along borders)
-  if (-not $script:catalog -or $script:catalog.version -lt 2 -or ((Get-Date) - [datetime]$script:catalog.created).TotalDays -gt 7) { Refresh-Catalog }
+  # version 2 lists which items include others (and has the country maps cut along borders); 3 lists retired items
+  if (-not $script:catalog -or $script:catalog.version -lt 3 -or ((Get-Date) - [datetime]$script:catalog.created).TotalDays -gt 7) { Refresh-Catalog }
   if ($Action) { Run-Action }
 } })
 

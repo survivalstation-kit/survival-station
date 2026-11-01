@@ -30,7 +30,7 @@ powershell -ExecutionPolicy Bypass -File setup\build-drive.ps1 -Drive E: -Tier L
 
 | Tier | Drive | Contents (English) | Approx. download |
 |---|---|---|---|
-| `Lite` | 16 GB | Qwen3-4B + Llama-3.2-1B AI, medicine, water, food, post-disaster, knots, survivors guide, Appropedia, Wikivoyage, Wikipedia medical | ~9 GB |
+| `Lite` | 16 GB | Qwen3-4B + Llama-3.2-1B AI, medicine, water, food, post-disaster, knots, Appropedia, Wikivoyage, Wikipedia medical | ~9 GB |
 | `Standard` | 64 GB | Lite, plus Qwen3-8B, Wikipedia "mini" (intro of every article), iFixit, MDWiki, Energypedia | ~33 GB |
 | `Full` | 256 GB | Standard, but full Wikipedia with images (~119 GB) instead of mini | ~139 GB |
 
@@ -75,7 +75,13 @@ It then offers to copy the newest app pages and tools (seconds, no internet) and
 
 The browser opens `http://localhost:8080` and the library runs on port `8090`. If the AI won't start, the emergency cards still open from `portal/index.html`. The map, though, needs the start program running.
 
-**Choosing a model:** on older computers or ones with less than 8 GB of RAM, choose **Llama-3.2-1B**. Qwen3-4B is the default and a good balance, and it handles Portuguese well. Qwen3-8B gives better answers but needs 8 GB or more of RAM.
+**Choosing a model** (the start window asks, and picks Qwen3-4B after 10 seconds):
+
+| Model | Size | Use it on |
+|---|---|---|
+| **Qwen3-4B** (default) | 2.3 GB | Most computers. A good balance, and good Portuguese. |
+| **Llama-3.2-1B** | 0.8 GB | Old or slow computers, or less than 8 GB of RAM. Fastest, but gives simpler answers, so check anything important against the emergency cards. |
+| **Qwen3-8B** (Standard and up) | 4.7 GB | Fast computers with 8 GB or more of RAM. Gives the best answers. |
 
 **Library lookup:** the "Look it up in the library" box under the chat is on by default. It searches the library in your language first, then in your other languages, reads the top 3 articles and gives their key paragraphs to the AI. Answers get slower: on a laptop CPU, the AI needs extra time to read the excerpts before it starts writing. Untick the box when you need a fast answer.
 
@@ -111,6 +117,7 @@ launch/        start-unix.sh (shared Mac/Linux launcher)
 ## Limits to know about
 
 - The AI can be wrong. Check anything medical against the cards and the library.
+- The "zimgit" books (water, medicine, food, after a disaster, knots) are collections of PDF manuals. You can open and read them in the library, but they have no search index, so the AI's library lookup can't quote them.
 - On a typical laptop CPU, the 4B model writes a few words per second. A USB 3 drive loads it in seconds; on USB 2.0, loading can take about a minute.
 - Linux builds expect a fairly recent distro (Ubuntu 22.04+). If a program won't run from the drive, the launcher copies it to `/tmp` and runs it from there.
 - Map search by place name isn't available offline; you have to pan and zoom. The GPS "locate me" button only works on the computer running the kit, because browsers block GPS on plain-http network addresses. On phones, Organic Maps does GPS offline, but download its region map in the app ahead of time.
