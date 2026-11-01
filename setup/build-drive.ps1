@@ -383,7 +383,7 @@ function Fmt-Size([double]$b) { if ($b -ge 1GB) { '{0:N1} GB' -f ($b / 1GB) } el
 function Fmt-Time([double]$s) {
   if ($s -lt 0) { return '?' }
   $t = [TimeSpan]::FromSeconds($s)
-  if ($t.TotalHours -ge 1) { '{0}h {1:D2}m' -f [int][math]::Floor($t.TotalHours), $t.Minutes } elseif ($t.TotalMinutes -ge 1) { "$($t.Minutes) min" } else { '< 1 min' }
+  if ($t.TotalDays -ge 1) { '{0}d {1}h' -f [int][math]::Floor($t.TotalDays), $t.Hours } elseif ($t.TotalHours -ge 1) { '{0}h {1:D2}m' -f [int][math]::Floor($t.TotalHours), $t.Minutes } elseif ($t.TotalMinutes -ge 1) { "$($t.Minutes) min" } else { '< 1 min' }
 }
 
 function Show-Progress([double]$current = 0, [switch]$Force, [string]$State = 'running') {

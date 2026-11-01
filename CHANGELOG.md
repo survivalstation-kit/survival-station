@@ -12,6 +12,10 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.0.3 (2026-11-01)
+
+- The time left shows days for long builds ("1d 3h"), and hours and minutes below a day ("12h 42m"). This applies in the build window, the taskbar title, the builder window and the My kit page.
+
 ## 1.0.2 (2026-11-01)
 
 - **Fixed: builds of more than about 2 GB stopped right away** with "Cannot convert value … to type System.Int32". The time-left calculation in the progress bar used a 32-bit number. The same trap was fixed in the download speed, the map progress, and the size labels in the builder window and copy tool.

@@ -51,7 +51,7 @@
   const HELPER = 'http://localhost:8091';   // setup\kit-control.ps1, started by START-WINDOWS.bat; this computer only
   const onThisComputer = ['localhost', '127.0.0.1'].includes(location.hostname);
   const size = b => b >= 1e9 ? (b / 1073741824).toFixed(1) + ' GB' : Math.max(1, Math.round(b / 1048576)) + ' MB';
-  const time = s => s < 0 ? '?' : s >= 3600 ? `${Math.floor(s / 3600)}h ${String(Math.floor(s % 3600 / 60)).padStart(2, '0')}m` : s >= 60 ? `${Math.floor(s / 60)} min` : '< 1 min';
+  const time = s => s < 0 ? '?' : s >= 86400 ? `${Math.floor(s / 86400)}d ${Math.floor(s % 86400 / 3600)}h` : s >= 3600 ? `${Math.floor(s / 3600)}h ${String(Math.floor(s % 3600 / 60)).padStart(2, '0')}m` : s >= 60 ? `${Math.floor(s / 60)} min` : '< 1 min';
   const el = (tag, text, cls) => { const e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; };
 
   document.title = L('My kit', 'Meu kit');
