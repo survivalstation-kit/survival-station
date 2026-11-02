@@ -45,7 +45,10 @@ param(
   [switch]$Update,       # update what is already on the kit: newer library editions, AI engine, old maps, Survival-Data
   [int]$MapMaxAgeDays = 365,  # with -Update: re-cut maps older than this from the newest map data
   [switch]$Verify,       # check every part of the kit, then offer to refresh app files and re-fetch broken items
-  [switch]$Resume        # build again exactly what BUILD-CHOICES.txt on the drive lists (finish a stopped build)
+  [switch]$Resume,       # build again exactly what BUILD-CHOICES.txt on the drive lists (finish a stopped build)
+  # auto = test the drive's write speed and prepare on this computer only what a slow drive would hold up;
+  # local = prepare everything on this computer's disk, then copy it to the drive; direct = straight to the drive
+  [ValidateSet('auto', 'local', 'direct')][string]$Staging = 'auto'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -519,19 +522,23 @@ function Download($url, $dest) {
   $human = if ($size -ge 1GB) { '{0:N2} GB' -f ($size / 1GB) } elseif ($size -gt 0) { '{0:N0} MB' -f [math]::Max(1.0, $size / 1MB) } else { 'size unknown' }
   Write-Host "   downloading $(Split-Path $dest -Leaf) ($human)"
   $script:prog.Item = Split-Path $dest -Leaf
-  if (Test-Path $part) { $script:prog.Mark += (Get-Item $part).Length }   # resumed bytes aren't download speed
+  # on a slow drive, download to this computer's disk and copy the finished file over (see Set-Staging);
+  # a half-finished download already on the drive just continues there
+  $stage = if ($script:stageFiles -and $size -gt 0 -and -not (Test-Path $part)) { Get-StageDir $size (Split-Path $dest -Leaf) }
+  $fetch = if ($stage) { Join-Path $stage ((Split-Path $dest -Leaf) + '.part') } else { $part }
+  if (Test-Path $fetch) { $script:prog.Mark += (Get-Item $fetch).Length }   # resumed bytes aren't download speed
   $code = 1
   for ($try = 1; $try -le 5; $try++) {
     # curl runs quietly in the background; the progress table follows the .part file every half second
     # (this file and the whole build), as do the title, the builder window and the My kit page
-    $p = Start-Process curl.exe -NoNewWindow -PassThru -ArgumentList @('-L', '--fail', '--retry', '5', '--retry-delay', '5', '-C', '-', '-s', '-S', '-o', "`"$part`"", "`"$url`"")
+    $p = Start-Process curl.exe -NoNewWindow -PassThru -ArgumentList @('-L', '--fail', '--retry', '5', '--retry-delay', '5', '-C', '-', '-s', '-S', '-o', "`"$fetch`"", "`"$url`"")
     $null = $p.Handle   # keeps ExitCode readable after the process ends
     Add-ChildProcess $p
     Start-ProgressTable 'This file'
-    $last = if (Test-Path $part) { (Get-Item $part).Length } else { 0 }; $lastTime = Get-Date; $speed = 0.0
+    $last = if (Test-Path $fetch) { (Get-Item $fetch).Length } else { 0 }; $lastTime = Get-Date; $speed = 0.0
     while (-not $p.HasExited) {
       Start-Sleep -Milliseconds 500
-      $cur = if (Test-Path $part) { (Get-Item $part).Length } else { 0 }
+      $cur = if (Test-Path $fetch) { (Get-Item $fetch).Length } else { 0 }
       $dt = ((Get-Date) - $lastTime).TotalSeconds
       if ($dt -ge 1) { $now = ($cur - $last) / $dt; $speed = if ($speed -gt 0) { 0.7 * $speed + 0.3 * $now } else { $now }; $last = $cur; $lastTime = Get-Date }
       Show-Progress $cur
@@ -544,6 +551,11 @@ function Download($url, $dest) {
     Write-Host "   retry $try (curl error $code)..." -ForegroundColor Yellow; Start-Sleep 5
   }
   if ($code -ne 0) { throw "Download failed (curl error $code): $url" }
+  if ($stage) {
+    Write-Host "   copying $(Split-Path $dest -Leaf) to the drive..."
+    Copy-WithProgress $fetch $part
+    Remove-Item -Force $fetch
+  }
   Move-Item -Force $part $dest
   $script:prog.Done += (Get-Item $dest).Length
   Show-Progress -Force
@@ -669,18 +681,55 @@ function Invoke-PmtilesWatched([string[]]$argList, $expected) {
   $true
 }
 
-# A map is cut on this computer's own disk when the kit is on another drive: the map tool writes the file
-# in random order, and on a USB stick Windows first fills the whole file with zeros (minutes to hours for a
-# big map). Then it is copied to the drive in one go. $null = cut straight onto the drive.
-function Get-MapWorkDir([double]$size) {
+# ---------------------------------------------------------------- staging on this computer's disk
+# Maps: the map tool writes the file in random order, and on a slow USB stick Windows first fills the whole
+# file with zeros (minutes to hours for a big map). Downloads: a very slow stick can be slower than the
+# internet. Either can be prepared on this computer's disk and then copied to the drive in one go.
+# Decided once per build by Set-Staging (from -Staging and, for auto, a short write-speed test).
+$script:stageMaps = $false; $script:stageFiles = $false
+$FastDrive = 150   # MB/s: maps go straight to a drive at least this fast (a fast USB SSD, 10 Gbps port)
+$SlowDrive = 25    # MB/s: downloads are prepared on this computer for a drive slower than this
+
+# write speed of the target drive: write-through (no cache) for about 3 seconds
+function Test-DriveSpeed {
+  $f = Join-Path $Tmp 'speed-test.tmp'
+  $buf = New-Object byte[] (8MB); (New-Object Random).NextBytes($buf)
+  $fs = New-Object IO.FileStream($f, [IO.FileMode]::Create, [IO.FileAccess]::Write, [IO.FileShare]::None, 4096, [IO.FileOptions]::WriteThrough)
+  $sw = [Diagnostics.Stopwatch]::StartNew(); $n = 0.0
+  try { while ($sw.Elapsed.TotalSeconds -lt 3 -and $n -lt 1GB) { $fs.Write($buf, 0, $buf.Length); $n += $buf.Length }; $fs.Flush($true) }
+  finally { $fs.Close(); $sw.Stop(); Remove-Item $f -Force -ErrorAction SilentlyContinue }
+  $n / 1MB / [math]::Max(0.001, $sw.Elapsed.TotalSeconds)
+}
+
+function Set-Staging {
   $temp = [IO.Path]::GetFullPath($env:TEMP)
-  if ($temp.Substring(0, 1) -eq $Target.Substring(0, 1)) { return }   # the kit is on this disk anyway
-  $free = (Get-PSDrive $temp.Substring(0, 1)).Free
-  if ($free -lt $size * 1.15 + 2GB) { Write-Host "   (not enough room on this computer's disk to prepare the map; cutting it straight onto the drive, which is slower)" -ForegroundColor Yellow; return }
-  $dir = Join-Path $temp 'survival-station-maps'
+  if ($temp.Substring(0, 1) -eq $Target.Substring(0, 1)) { Write-Host '   Download method: straight to the folder (it is on this computer''s disk)'; return }
+  switch ($Staging) {
+    'local'  { $script:stageMaps = $true; $script:stageFiles = $true; Write-Host '   Download method: prepare on this computer, then copy to the drive' }
+    'direct' { Write-Host '   Download method: straight to the drive' }
+    default {
+      $mbps = Test-DriveSpeed
+      $script:stageMaps = $mbps -lt $FastDrive; $script:stageFiles = $mbps -lt $SlowDrive
+      $how = if (-not $script:stageMaps) { 'fast drive: everything goes straight to it' }
+             elseif (-not $script:stageFiles) { 'maps are prepared on this computer and copied over; downloads go straight to the drive' }
+             else { 'slow drive: maps and downloads are prepared on this computer and copied over' }
+      Write-Host ("   Drive write speed: {0:N0} MB/s - {1}" -f $mbps, $how)
+    }
+  }
+}
+
+# folder on this computer's disk for staging $size bytes, or $null (= straight to the drive)
+function Get-StageDir([double]$size, $what) {
+  $temp = [IO.Path]::GetFullPath($env:TEMP)
+  if ($temp.Substring(0, 1) -eq $Target.Substring(0, 1)) { return }
+  if ((Get-PSDrive $temp.Substring(0, 1)).Free -lt $size * 1.1 + 2GB) {
+    Write-Host "   (not enough room on this computer's disk for $what; it goes straight to the drive)" -ForegroundColor Yellow; return
+  }
+  $dir = Join-Path $temp 'survival-station-staging'
   New-Item -ItemType Directory -Force $dir | Out-Null
   $dir
 }
+function Get-MapWorkDir([double]$size) { if ($script:stageMaps) { Get-StageDir $size 'this map' } }
 
 # copy a big file with the progress table (a plain Move-Item to a USB stick shows nothing for minutes)
 function Copy-WithProgress($src, $dst) {
@@ -1029,6 +1078,7 @@ $script:prog.Total = [double]$total
 Show-Progress -Force
 Write-Overall
 if (-not $Update) { Write-Choices }
+Set-Staging
 
 Step 'Copying launchers and portal'
 Copy-AppFiles
@@ -1163,6 +1213,7 @@ Step 'Indexes'
 Write-Indexes
 
 Remove-Item -Recurse -Force $Tmp -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force (Join-Path $env:TEMP 'survival-station-staging') -ErrorAction SilentlyContinue   # everything is on the drive now
 
 if ($Target.Length -gt 3) {
   # installed in a folder on this computer: add a desktop shortcut

@@ -12,6 +12,18 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.1.0 (2026-11-01)
+
+- **New "Download method" choice** in the builder window (and `-Staging` on the command line):
+  - **Automatic** (the default) tests the drive's write speed for about 3 seconds at the start of the build:
+    - 150 MB/s or faster (a fast USB SSD or 10 Gbps port): everything goes straight to the drive.
+    - 25–150 MB/s: maps are prepared on this computer's disk and copied over; downloads go straight to the drive.
+    - Under 25 MB/s: maps and downloads are both prepared on this computer and copied over.
+  - **Prepare on this computer, then copy to the drive**: always stage.
+  - **Straight to the drive**: never stage.
+- **"Test drive speed" button** shows the drive's write speed and what Automatic will do with it.
+- Any file without room on the computer's disk goes straight to the drive. Staged files are copied with the progress table, and the staging folder is emptied when the build finishes. A half-finished download already on the drive continues where it is.
+
 ## 1.0.9 (2026-11-01)
 
 - **Maps retry after a dropped connection.** A brief network drop ("connection was aborted") stopped the whole build. Now the map starts again after 15 seconds, up to 3 tries, and the reason is shown in plain words. The map tool can't resume, but cutting a map on the computer's disk is fast (about 50 MB/s in testing), so a retry costs minutes.

@@ -50,6 +50,8 @@ The script shows sizes and asks before it downloads. You can run it again at any
 
 **Updates:** in the builder window, choose the drive and click **Check for updates**. It compares the kit with what's online and lists newer library editions, a newer AI engine, maps over a year old, a newer Survival-Data and newer app pages, each with its size, then updates them if you agree. New editions replace old ones and nothing else changes. Text mode has the same option (`MAKE-USB.bat text`, option 4), as does the command line (`build-drive.ps1 -Drive E: -Update`).
 
+**Slow sticks:** many USB sticks write far slower than they read. Some cheap ones manage 1–2 MB/s, and USB 2 ports slow any stick down. The builder window's **Download method** is set to **Automatic** by default: it tests the drive's speed and prepares maps (and, on very slow sticks, downloads) on the computer's disk first, then copies them over. **Test drive speed** shows the result. If a stick is very slow, try a USB 3 port (blue or marked "SS"), or a faster stick or USB SSD.
+
 **Verify / repair:** the **Verify / repair** button (text mode option 6, or `build-drive.ps1 -Drive E: -Verify`) checks every part of a kit:
 - programs for each system
 - AI models (file header, plus size when online)

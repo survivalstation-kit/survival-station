@@ -109,6 +109,19 @@ $btnArea = New-Ctl Button @{ Text = (T 'Add area' 'Adicionar'); AutoSize = $true
 $row3.Controls.AddRange(@((New-Label (T 'Map detail:' 'Detalhe do mapa:')), $cbZoom,
   (New-Label (T '  Other area (bboxfinder.com):' '  Outra área (bboxfinder.com):')), $txtBox, $txtName, $btnArea))
 
+# how files reach the drive (build-drive.ps1 -Staging auto | local | direct)
+$row4 = New-Row
+$Stagings = @('auto', 'local', 'direct')
+$cbStaging = New-Ctl ComboBox @{ DropDownStyle = 'DropDownList'; Width = 420 }
+[void]$cbStaging.Items.AddRange(@((T 'Automatic (tests the drive''s speed)' 'Automático (testa a velocidade do pendrive)'),
+  (T 'Prepare on this computer, then copy to the drive' 'Preparar neste computador e depois copiar para o pendrive'),
+  (T 'Straight to the drive' 'Direto para o pendrive')))
+$cbStaging.SelectedIndex = 0
+$btnSpeed = New-Ctl Button @{ Text = (T 'Test drive speed' 'Testar velocidade'); AutoSize = $true }
+$lblSpeed = New-Ctl Label @{ AutoSize = $true; ForeColor = [Drawing.Color]::DimGray; Margin = (New-Object Windows.Forms.Padding 6, 7, 3, 0) }
+$row4.Controls.AddRange(@((New-Label (T 'Download method:' 'Como baixar:')), $cbStaging, $btnSpeed, $lblSpeed))
+function Staging { $Stagings[[math]::Max(0, $cbStaging.SelectedIndex)] }
+
 $tree = New-Ctl TreeView @{ Dock = 'Fill'; CheckBoxes = $true; ShowLines = $false; FullRowSelect = $true; ItemHeight = 24 }
 
 $bottom = New-Ctl TableLayoutPanel @{ Dock = 'Bottom'; AutoSize = $true; ColumnCount = 1; Padding = (New-Object Windows.Forms.Padding 6) }
@@ -136,7 +149,7 @@ foreach ($c in $lblBuild, $buildBar, $lblBuildItem) { [void]$buildPanel.Controls
 foreach ($c in $buildPanel, $lblNeed, $lblFit, $bar, $lblStatus, $buttons) { [void]$bottom.Controls.Add($c) }
 
 # docked controls are laid out last-added first
-$form.Controls.AddRange(@($tree, $bottom, $row3, $row2, $row1))
+$form.Controls.AddRange(@($tree, $bottom, $row4, $row3, $row2, $row1))
 $form.AcceptButton = $btnBuild
 
 # ---------------------------------------------------------------- drives
@@ -240,6 +253,7 @@ function Restore-Choices {
 function Update-Drive {
   $script:drive = if ($script:targets -and $cbDrive.SelectedIndex -ge 0) { $script:targets[$cbDrive.SelectedIndex] } else { $null }
   $btnFormat.Enabled = $script:drive -and -not $script:drive.Folder
+  $lblSpeed.Text = ''
   $lblWhere.Text = if ($script:drive.Folder) { T 'A copy on this computer works without the USB drive. A desktop shortcut is added.' 'Uma cópia neste computador funciona sem o pendrive. Um atalho é criado na área de trabalho.' } else { '' }
   $lblWhere.Visible = [bool]$lblWhere.Text
   foreach ($n in (Get-Leaves)) { Set-Label $n }
@@ -535,7 +549,7 @@ function Start-Build {
 
   $ids = @($chosen | Where-Object { $_.id -ne 'custom' } | ForEach-Object { $_.id })
   if (-not $ids) { $ids = @('none') }
-  $cmd = '-NoProfile -ExecutionPolicy Bypass -NoExit -File "{0}" -Drive "{1}" -Items {2} -MapMaxZoom {3} -Yes' -f $Builder, $v.Name, ($ids -join ','), (Zoom)
+  $cmd = '-NoProfile -ExecutionPolicy Bypass -NoExit -File "{0}" -Drive "{1}" -Items {2} -MapMaxZoom {3} -Staging {4} -Yes' -f $Builder, $v.Name, ($ids -join ','), (Zoom), (Staging)
   $custom = $chosen | Where-Object { $_.id -eq 'custom' } | Select-Object -First 1
   if ($custom) { $cmd += ' -MapBbox "{0}" -MapName {1}' -f $custom.bbox, $custom.mapName }
   Start-Process $PS -ArgumentList $cmd
@@ -607,8 +621,29 @@ function Check-Updates {
   $msg = ((T "Updates for {0}:`n`n" "Atualizações para {0}:`n`n") -f $script:drive.Name) + (($ups | ForEach-Object { "  •  $($_.Text)" + $(if ($_.Size) { "   ($(Fmt $_.Size))" }) }) -join "`n") +
          ((T "`n`nAbout {0} to download. Update now?`n(New editions replace the old ones; nothing else changes.)" "`n`nCerca de {0} para baixar. Atualizar agora?`n(As edições novas substituem as antigas; nada mais muda.)") -f (Fmt $total))
   if ([Windows.Forms.MessageBox]::Show($msg, 'Survival Station', 'YesNo', 'Question') -ne 'Yes') { return }
-  Start-Process $PS -ArgumentList ('-NoProfile -ExecutionPolicy Bypass -NoExit -File "{0}" -Drive "{1}" -Update -Yes' -f $Builder, $script:drive.Name)
+  Start-Process $PS -ArgumentList ('-NoProfile -ExecutionPolicy Bypass -NoExit -File "{0}" -Drive "{1}" -Update -Staging {2} -Yes' -f $Builder, $script:drive.Name, (Staging))
   $lblStatus.Text = T 'Updating in the other window. When it says Done, click "Test the drive".' 'Atualizando na outra janela. Quando aparecer Done, clique em "Testar o pendrive".'
+}
+
+# write speed of the chosen drive, the same test the builder runs for "Automatic" (about 3 seconds)
+function Test-SelectedDriveSpeed {
+  $v = $script:drive
+  if (-not $v) { return }
+  if ($v.Folder -and $v.Letter -eq ([IO.Path]::GetFullPath($env:TEMP)).Substring(0, 1)) {
+    $lblSpeed.Text = T 'A folder on this computer: files go straight there.' 'Uma pasta neste computador: os arquivos vão direto para ela.'; return
+  }
+  $form.UseWaitCursor = $true; $lblSpeed.Text = T 'Testing (about 3 seconds)...' 'Testando (cerca de 3 segundos)...'; [Windows.Forms.Application]::DoEvents()
+  $f = Join-Path $v.Root 'survival-speed-test.tmp'
+  try {
+    $buf = New-Object byte[] (8MB); (New-Object Random).NextBytes($buf)
+    $fs = New-Object IO.FileStream($f, [IO.FileMode]::Create, [IO.FileAccess]::Write, [IO.FileShare]::None, 4096, [IO.FileOptions]::WriteThrough)
+    $sw = [Diagnostics.Stopwatch]::StartNew(); $n = 0.0
+    try { while ($sw.Elapsed.TotalSeconds -lt 3 -and $n -lt 1GB) { $fs.Write($buf, 0, $buf.Length); $n += $buf.Length }; $fs.Flush($true) } finally { $fs.Close(); $sw.Stop() }
+    $mbps = $n / 1MB / [math]::Max(0.001, $sw.Elapsed.TotalSeconds)
+    $lblSpeed.Text = if ($mbps -ge 150) { (T '{0:N0} MB/s: fast drive, everything goes straight to it.' '{0:N0} MB/s: pendrive rápido, tudo vai direto para ele.') -f $mbps }
+                     elseif ($mbps -ge 25) { (T '{0:N0} MB/s: maps are prepared on this computer first.' '{0:N0} MB/s: os mapas são preparados neste computador antes.') -f $mbps }
+                     else { (T '{0:N0} MB/s: slow drive, maps and downloads are prepared on this computer first.' '{0:N0} MB/s: pendrive lento, mapas e downloads são preparados neste computador antes.') -f $mbps }
+  } finally { Remove-Item $f -Force -ErrorAction SilentlyContinue; $form.UseWaitCursor = $false }
 }
 
 function Test-Drive {
@@ -668,6 +703,7 @@ $btnArea.Add_Click({ Safe { Add-Area } })
 $btnSizes.Add_Click({ Safe { Refresh-Catalog } })
 $btnBuild.Add_Click({ Safe { Start-Build } })
 $btnTest.Add_Click({ Safe { Test-Drive } })
+$btnSpeed.Add_Click({ Safe { Test-SelectedDriveSpeed } })
 $btnUpdates.Add_Click({ Safe { Check-Updates } })
 # safe while a build runs: it reports files still downloading and only refreshes app files then
 $btnVerify.Add_Click({ Safe {
