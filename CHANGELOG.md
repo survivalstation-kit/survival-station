@@ -12,6 +12,10 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.0.9 (2026-11-01)
+
+- **Maps retry after a dropped connection.** A brief network drop ("connection was aborted") stopped the whole build. Now the map starts again after 15 seconds, up to 3 tries, and the reason is shown in plain words. The map tool can't resume, but cutting a map on the computer's disk is fast (about 50 MB/s in testing), so a retry costs minutes.
+
 ## 1.0.8 (2026-11-01)
 
 - **Big maps no longer crawl on USB sticks.** The map tool writes in random order, and on a USB stick Windows first fills the whole file with zeros, so a 9 GB map could receive almost nothing for many minutes. Maps are now cut on the computer's own disk and then copied to the drive in one go, with progress. If the computer's disk is too full, they're cut straight onto the drive as before.

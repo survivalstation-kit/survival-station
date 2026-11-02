@@ -631,7 +631,8 @@ function Invoke-Pmtiles([string[]]$argList) {
 
 # Cut a map in the background. Progress = bytes the map tool has written so far (its own "NN%" only
 # changes when big chunks finish, so on a large map it can sit at 0% for many minutes).
-# Returns $false if no map data arrived for $StallMinutes (stuck), after stopping the tool.
+# Returns $true when done, or the reason it failed (stuck: no map data for $StallMinutes; or the map
+# tool's own error, e.g. a dropped connection), so the caller can try again.
 $StallMinutes = 10
 function Invoke-PmtilesWatched([string[]]$argList, $expected) {
   $log = Join-Path $Tmp 'pmtiles-progress.log'
@@ -653,14 +654,18 @@ function Invoke-PmtilesWatched([string[]]$argList, $expected) {
       Speed = $speed; Left = $(if ($speed -gt 1KB) { [math]::Max(0.0, $expected - $done) / $speed } else { -1 }) }
     if (((Get-Date) - $lastGrowth).TotalMinutes -ge $StallMinutes) {
       Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
-      Write-Host "   no map data for $StallMinutes minutes (the map server may be slow or busy)" -ForegroundColor Yellow
-      return $false
+      return "no map data for $StallMinutes minutes (the map server may be slow or busy)"
     }
   }
   $p.WaitForExit()
+  if ($p.ExitCode -ne 0) {
+    # the tool's own error, without its progress-bar noise
+    $why = @(Get-Content $log, "$log.err" -ErrorAction SilentlyContinue | ForEach-Object { ($_ -split "`r")[-1] } |
+      Where-Object { $_ -match 'Failed|error|refused|aborted|timeout|reset' }) | Select-Object -Last 1
+    if (-not $why) { $why = "map tool error $($p.ExitCode)" }
+    return ($why -replace '^.*main\.go:\d+:\s*', '')
+  }
   Update-ProgressTable @{ Pct = 100; Done = $expected; Size = $expected; Speed = $speed; Left = 0 } -Force
-  $out = @(Get-Content $log, "$log.err" -ErrorAction SilentlyContinue)
-  if ($p.ExitCode -ne 0) { throw "pmtiles failed: $($out | Select-Object -Last 3)" }
   $true
 }
 
@@ -1104,11 +1109,15 @@ foreach ($m in $MapList) {
   if ($work) { Get-ChildItem $work -File -ErrorAction SilentlyContinue | Remove-Item -Force }   # leftovers of a stopped build
   $cut = if ($work) { Join-Path $work "$($m.Name).pmtiles.part" } else { $part }
   $script:prog.Item = "map $($m.Name)"
+  # a dropped connection or a stuck server: start the map again (the map tool can't resume), up to 3 tries
   for ($try = 1; ; $try++) {
     Remove-Item -Force $cut -ErrorAction SilentlyContinue
-    if (Invoke-PmtilesWatched (Get-MapArgs $m $planet $cut) $m.Size) { break }
-    if ($try -ge 2) { throw "Map $($m.Name) got no data twice. The map server may be busy: run the builder again later, or choose less map detail (zoom 14)." }
-    Write-Host '   trying the map again...'
+    $result = Invoke-PmtilesWatched (Get-MapArgs $m $planet $cut) $m.Size
+    if ($result -eq $true) { break }
+    Write-Host "   map $($m.Name) stopped: $result" -ForegroundColor Yellow
+    if ($try -ge 3) { throw "Map $($m.Name) failed 3 times (last: $result). Check the internet connection and run the builder again; finished files are kept." }
+    Write-Host "   trying the map again in 15 seconds (attempt $($try + 1) of 3)..."
+    Start-Sleep 15
   }
   if ($work) {
     Write-Host "   copying $($m.Name) to the drive..."
