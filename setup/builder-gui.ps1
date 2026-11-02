@@ -10,6 +10,24 @@ $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Windows.Forms, System.Drawing, Microsoft.VisualBasic
 [Windows.Forms.Application]::EnableVisualStyles()
 
+# One builder window at a time: opening MAKE-USB again brings the open window to the front instead
+# (two windows reading the same busy drive made both freeze)
+$script:single = New-Object Threading.Mutex($false, 'Local\SurvivalStationBuilderWindow')
+$first = try { $script:single.WaitOne(0) } catch [Threading.AbandonedMutexException] { $true }   # abandoned = the old window was killed
+if (-not $first) {
+  Add-Type @'
+using System; using System.Runtime.InteropServices;
+public static class OtherWindow {
+  [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h, int cmd);
+  [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h);
+}
+'@
+  $other = Get-Process powershell -ErrorAction SilentlyContinue |
+    Where-Object { $_.Id -ne $PID -and $_.MainWindowHandle -ne 0 -and $_.MainWindowTitle -match '^Survival Station .* - (build the USB drive|montar o pendrive)$' } | Select-Object -First 1
+  if ($other) { [void][OtherWindow]::ShowWindow($other.MainWindowHandle, 6); [void][OtherWindow]::ShowWindow($other.MainWindowHandle, 9); [void][OtherWindow]::SetForegroundWindow($other.MainWindowHandle) }
+  exit 0
+}
+
 $Builder = Join-Path $PSScriptRoot 'build-drive.ps1'
 $PS = Join-Path $PSHOME 'powershell.exe'
 $CacheFile = Join-Path $env:LOCALAPPDATA 'SurvivalStation\catalog.json'

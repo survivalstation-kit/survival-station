@@ -12,6 +12,14 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.0.8 (2026-11-01)
+
+- **Big maps no longer crawl on USB sticks.** The map tool writes in random order, and on a USB stick Windows first fills the whole file with zeros, so a 9 GB map could receive almost nothing for many minutes. Maps are now cut on the computer's own disk and then copied to the drive in one go, with progress. If the computer's disk is too full, they're cut straight onto the drive as before.
+- **Map progress is real.** It follows the bytes the map tool writes. The tool's own percentage only changes when big chunks finish, so the table could sit at 0%.
+- **A stuck map is restarted.** With no map data for 10 minutes, the map tool restarts once, then the build stops with a clear message.
+- **Downloads and map cutting stop together with the build.** Closing the build window used to leave them running in the background, still writing to the drive.
+- **Only one builder window at a time.** Opening MAKE-USB again brings the open window to the front. Two windows reading the same busy drive made both freeze.
+
 ## 1.0.7 (2026-11-01)
 
 - **The builder window reliably opens in front.** The 1.0.5 fix (topmost + activate) doesn't always get past Windows' rule against windows jumping in front, and the window could still open behind others. It now also minimizes and restores itself once on opening, which Windows always brings to the front.

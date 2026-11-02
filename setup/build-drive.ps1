@@ -50,6 +50,32 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'   # Invoke-WebRequest is 10x slower with the progress bar
+
+# Downloads (curl) and map cutting (pmtiles) run as child programs. They go in a Windows job object that
+# kills them when this builder stops for any reason (window closed, Ctrl+C, error), so none keep running
+# on their own, writing to the drive.
+Add-Type @'
+using System; using System.Runtime.InteropServices;
+public static class ChildProcesses {
+  [StructLayout(LayoutKind.Sequential)] struct Basic { public long A, B; public uint LimitFlags; public UIntPtr C, D; public uint E; public UIntPtr F; public uint G, H; }
+  [StructLayout(LayoutKind.Sequential)] struct Io { public ulong A, B, C, D, E, F; }
+  [StructLayout(LayoutKind.Sequential)] struct Extended { public Basic Basic; public Io Io; public UIntPtr P, J, PU, JU; }
+  [DllImport("kernel32.dll", CharSet = CharSet.Unicode)] static extern IntPtr CreateJobObject(IntPtr attributes, string name);
+  [DllImport("kernel32.dll")] static extern bool SetInformationJobObject(IntPtr job, int infoClass, IntPtr info, uint length);
+  [DllImport("kernel32.dll")] static extern bool AssignProcessToJobObject(IntPtr job, IntPtr process);
+  static IntPtr job = IntPtr.Zero;   // never closed on purpose: Windows closes it when this process ends
+  public static bool Add(IntPtr process) {
+    if (job == IntPtr.Zero) {
+      job = CreateJobObject(IntPtr.Zero, null);
+      var info = new Extended(); info.Basic.LimitFlags = 0x2000;   // JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+      int length = Marshal.SizeOf(typeof(Extended)); IntPtr p = Marshal.AllocHGlobal(length);
+      Marshal.StructureToPtr(info, p, false); SetInformationJobObject(job, 9, p, (uint)length); Marshal.FreeHGlobal(p);
+    }
+    return AssignProcessToJobObject(job, process);
+  }
+}
+'@
+function Add-ChildProcess($p) { try { [void][ChildProcesses]::Add($p.Handle) } catch { } }
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 $Root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
@@ -500,6 +526,7 @@ function Download($url, $dest) {
     # (this file and the whole build), as do the title, the builder window and the My kit page
     $p = Start-Process curl.exe -NoNewWindow -PassThru -ArgumentList @('-L', '--fail', '--retry', '5', '--retry-delay', '5', '-C', '-', '-s', '-S', '-o', "`"$part`"", "`"$url`"")
     $null = $p.Handle   # keeps ExitCode readable after the process ends
+    Add-ChildProcess $p
     Start-ProgressTable 'This file'
     $last = if (Test-Path $part) { (Get-Item $part).Length } else { 0 }; $lastTime = Get-Date; $speed = 0.0
     while (-not $p.HasExited) {
@@ -602,28 +629,70 @@ function Invoke-Pmtiles([string[]]$argList) {
   $out
 }
 
-# a long extract, in the background: one live line from the tool's own "NN%" (with the time so far,
-# so it visibly moves even when the percentage pauses), and the overall figures follow it
+# Cut a map in the background. Progress = bytes the map tool has written so far (its own "NN%" only
+# changes when big chunks finish, so on a large map it can sit at 0% for many minutes).
+# Returns $false if no map data arrived for $StallMinutes (stuck), after stopping the tool.
+$StallMinutes = 10
 function Invoke-PmtilesWatched([string[]]$argList, $expected) {
   $log = Join-Path $Tmp 'pmtiles-progress.log'
   $quoted = $argList | ForEach-Object { if ($_ -match '\s') { "`"$_`"" } else { $_ } }
   $p = Start-Process (Get-PmtilesTool) -ArgumentList $quoted -NoNewWindow -PassThru -RedirectStandardOutput $log -RedirectStandardError "$log.err"
   $null = $p.Handle
-  $start = Get-Date
+  Add-ChildProcess $p
+  $written = 0.0; $lastGrowth = Get-Date; $speed = 0.0; $prevW = 0.0; $prevT = Get-Date
   Start-ProgressTable 'This map'
   while (-not $p.HasExited) {
     Start-Sleep -Milliseconds 700
-    $pct = Get-LastPercent $log
-    Show-Progress ($expected * $pct / 100)
-    $secs = ((Get-Date) - $start).TotalSeconds
-    Update-ProgressTable @{ Pct = $pct; Done = $expected * $pct / 100; Size = $expected
-      Speed = $(if ($secs -gt 0) { $expected * $pct / 100 / $secs } else { 0 }); Left = $(if ($pct -ge 2) { $secs * (100 - $pct) / $pct } else { -1 }) }
+    $w = [double](Get-CimInstance Win32_Process -Filter "ProcessId=$($p.Id)" -ErrorAction SilentlyContinue).WriteTransferCount
+    if ($w -gt $written) { $written = $w; $lastGrowth = Get-Date }
+    $dt = ((Get-Date) - $prevT).TotalSeconds
+    if ($dt -ge 2) { $now = ($written - $prevW) / $dt; $speed = if ($speed -gt 0) { 0.7 * $speed + 0.3 * $now } else { $now }; $prevW = $written; $prevT = Get-Date }
+    $done = [math]::Min($written, $expected * 0.999)
+    Show-Progress $done
+    Update-ProgressTable @{ Pct = $(if ($expected -gt 0) { 100.0 * $done / $expected } else { Get-LastPercent $log }); Done = $done; Size = $expected
+      Speed = $speed; Left = $(if ($speed -gt 1KB) { [math]::Max(0.0, $expected - $done) / $speed } else { -1 }) }
+    if (((Get-Date) - $lastGrowth).TotalMinutes -ge $StallMinutes) {
+      Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+      Write-Host "   no map data for $StallMinutes minutes (the map server may be slow or busy)" -ForegroundColor Yellow
+      return $false
+    }
   }
   $p.WaitForExit()
-  Update-ProgressTable @{ Pct = 100; Done = $expected; Size = $expected; Speed = 0; Left = 0 } -Force
+  Update-ProgressTable @{ Pct = 100; Done = $expected; Size = $expected; Speed = $speed; Left = 0 } -Force
   $out = @(Get-Content $log, "$log.err" -ErrorAction SilentlyContinue)
   if ($p.ExitCode -ne 0) { throw "pmtiles failed: $($out | Select-Object -Last 3)" }
-  $out | Where-Object { $_ -match 'archive size' } | Select-Object -Last 1
+  $true
+}
+
+# A map is cut on this computer's own disk when the kit is on another drive: the map tool writes the file
+# in random order, and on a USB stick Windows first fills the whole file with zeros (minutes to hours for a
+# big map). Then it is copied to the drive in one go. $null = cut straight onto the drive.
+function Get-MapWorkDir([double]$size) {
+  $temp = [IO.Path]::GetFullPath($env:TEMP)
+  if ($temp.Substring(0, 1) -eq $Target.Substring(0, 1)) { return }   # the kit is on this disk anyway
+  $free = (Get-PSDrive $temp.Substring(0, 1)).Free
+  if ($free -lt $size * 1.15 + 2GB) { Write-Host "   (not enough room on this computer's disk to prepare the map; cutting it straight onto the drive, which is slower)" -ForegroundColor Yellow; return }
+  $dir = Join-Path $temp 'survival-station-maps'
+  New-Item -ItemType Directory -Force $dir | Out-Null
+  $dir
+}
+
+# copy a big file with the progress table (a plain Move-Item to a USB stick shows nothing for minutes)
+function Copy-WithProgress($src, $dst) {
+  $size = (Get-Item $src).Length
+  Start-ProgressTable 'Copying'
+  $in = [IO.File]::OpenRead($src); $out = [IO.File]::Create($dst)
+  try {
+    $buf = New-Object byte[] (4MB); $done = 0.0; $t0 = Get-Date; $shown = [datetime]::MinValue
+    while (($n = $in.Read($buf, 0, $buf.Length)) -gt 0) {
+      $out.Write($buf, 0, $n); $done += $n
+      if (((Get-Date) - $shown).TotalMilliseconds -ge 500) {
+        $shown = Get-Date; $secs = ((Get-Date) - $t0).TotalSeconds; $speed = if ($secs -gt 0) { $done / $secs } else { 0 }
+        Update-ProgressTable @{ Pct = 100.0 * $done / $size; Done = $done; Size = $size; Speed = $speed; Left = $(if ($speed -gt 0) { ($size - $done) / $speed } else { -1 }) }
+      }
+    }
+  } finally { $in.Close(); $out.Close() }
+  Update-ProgressTable @{ Pct = 100; Done = $size; Size = $size; Speed = 0; Left = 0 } -Force
 }
 
 function Get-MapArgs($m, $planet, $out) {
@@ -1031,9 +1100,22 @@ foreach ($m in $MapList) {
   New-Item -ItemType Directory -Force (Split-Path $m.File) | Out-Null
   Write-Host "   extracting $($m.Name) (~$([math]::Round($m.Size / 1GB, 2)) GB)..."
   $part = "$($m.File).part"
-  Remove-Item -Force $part -ErrorAction SilentlyContinue
+  $work = Get-MapWorkDir $m.Size
+  if ($work) { Get-ChildItem $work -File -ErrorAction SilentlyContinue | Remove-Item -Force }   # leftovers of a stopped build
+  $cut = if ($work) { Join-Path $work "$($m.Name).pmtiles.part" } else { $part }
   $script:prog.Item = "map $($m.Name)"
-  Invoke-PmtilesWatched (Get-MapArgs $m $planet $part) $m.Size
+  for ($try = 1; ; $try++) {
+    Remove-Item -Force $cut -ErrorAction SilentlyContinue
+    if (Invoke-PmtilesWatched (Get-MapArgs $m $planet $cut) $m.Size) { break }
+    if ($try -ge 2) { throw "Map $($m.Name) got no data twice. The map server may be busy: run the builder again later, or choose less map detail (zoom 14)." }
+    Write-Host '   trying the map again...'
+  }
+  if ($work) {
+    Write-Host "   copying $($m.Name) to the drive..."
+    Remove-Item -Force $part -ErrorAction SilentlyContinue
+    Copy-WithProgress $cut $part
+    Remove-Item -Force $cut
+  }
   Move-Item -Force $part $m.File
   $script:prog.Done += $m.Size
   Show-Progress -Force
