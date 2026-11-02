@@ -12,6 +12,10 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.1.1 (2026-11-02)
+
+- **Test drive speed** shows one decimal on slow drives (1.5 MB/s instead of 2 MB/s).
+
 ## 1.1.0 (2026-11-01)
 
 - **New "Download method" choice** in the builder window (and `-Staging` on the command line):

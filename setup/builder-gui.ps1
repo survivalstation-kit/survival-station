@@ -640,9 +640,11 @@ function Test-SelectedDriveSpeed {
     $sw = [Diagnostics.Stopwatch]::StartNew(); $n = 0.0
     try { while ($sw.Elapsed.TotalSeconds -lt 3 -and $n -lt 1GB) { $fs.Write($buf, 0, $buf.Length); $n += $buf.Length }; $fs.Flush($true) } finally { $fs.Close(); $sw.Stop() }
     $mbps = $n / 1MB / [math]::Max(0.001, $sw.Elapsed.TotalSeconds)
-    $lblSpeed.Text = if ($mbps -ge 150) { (T '{0:N0} MB/s: fast drive, everything goes straight to it.' '{0:N0} MB/s: pendrive rápido, tudo vai direto para ele.') -f $mbps }
-                     elseif ($mbps -ge 25) { (T '{0:N0} MB/s: maps are prepared on this computer first.' '{0:N0} MB/s: os mapas são preparados neste computador antes.') -f $mbps }
-                     else { (T '{0:N0} MB/s: slow drive, maps and downloads are prepared on this computer first.' '{0:N0} MB/s: pendrive lento, mapas e downloads são preparados neste computador antes.') -f $mbps }
+    # one decimal on slow drives, so 1.5 MB/s doesn't read as 2
+    $s = if ($mbps -lt 10) { $mbps.ToString('N1') } else { $mbps.ToString('N0') }
+    $lblSpeed.Text = if ($mbps -ge 150) { (T '{0} MB/s: fast drive, everything goes straight to it.' '{0} MB/s: pendrive rápido, tudo vai direto para ele.') -f $s }
+                     elseif ($mbps -ge 25) { (T '{0} MB/s: maps are prepared on this computer first.' '{0} MB/s: os mapas são preparados neste computador antes.') -f $s }
+                     else { (T '{0} MB/s: slow drive, maps and downloads are prepared on this computer first.' '{0} MB/s: pendrive lento, mapas e downloads são preparados neste computador antes.') -f $s }
   } finally { Remove-Item $f -Force -ErrorAction SilentlyContinue; $form.UseWaitCursor = $false }
 }
 
