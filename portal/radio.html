@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radio</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="radio">
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html">Survival <span>Station</span></a>
+  <nav class="links">
+    <a href="index.html" data-i18n="nav.home">Home</a>
+    <a href="chat.html" data-i18n="nav.chat">Ask AI</a>
+    <a href="map.html" data-i18n="nav.map">Map</a>
+    <a href="cards.html" data-cards data-i18n="nav.cards">Emergency</a>
+    <a href="help.html" data-i18n="nav.help">Help</a>
+  </nav>
+  <select class="lang-select" aria-label="Language / Idioma"></select>
+  <button class="theme-btn" type="button" data-i18n="theme">Theme</button>
+</div></header>
+
+<main class="wrap help">
+
+<!-- ======================================================= English -->
+<article data-for="en">
+  <h1>Two-way radio in an emergency</h1>
+  <p class="lede">What to listen to and how to call for help, the frequencies to program, and how to set up a <b>Baofeng UV-5R</b> and a <b>TIDRADIO TD-H3 PLUS</b>. Print this page and keep it with the radios.</p>
+  <p class="notice"><b>Program the radios now, while you have internet and time.</b> Typing frequencies on a keypad in the dark, under stress, is hard. The <a href="radio/survival-channels.csv" download>channel file</a> loads every frequency below in one go (see <a href="#chirp">Programming with CHIRP</a>).</p>
+
+  <nav class="toc">
+    <a href="#now">Emergency now</a><a href="#freqs">Frequencies</a><a href="#rules">Who may transmit</a>
+    <a href="#uv5r">Baofeng UV-5R</a><a href="#h3">TIDRADIO TD-H3 PLUS</a><a href="#chirp">Programming with CHIRP</a>
+    <a href="#range">Range and battery</a><a href="#before">Before a disaster</a>
+  </nav>
+
+  <section class="card" id="now">
+    <h2>In an emergency, right now</h2>
+    <ol>
+      <li><b>Listen first.</b> Turn the volume up and listen for a minute before you talk. Someone may already be coordinating.</li>
+      <li><b>Call in this order</b> until someone answers:
+        <ul>
+          <li>a <b>local ham repeater</b>, if you programmed one: it reaches tens of kilometres;</li>
+          <li><b>146.520 MHz</b>, the 2 m ham calling frequency;</li>
+          <li><b>FRS/GMRS channel 3</b> (462.6125) and <b>channel 20</b> (462.675), where families and neighbours with walkie-talkies listen;</li>
+          <li><b>marine channel 16</b> (156.800) near the sea, big lakes or rivers.</li>
+        </ul></li>
+      <li><b>Press and hold PTT, wait one second, then speak</b> slowly, 5 cm from the radio. Let go to listen.</li>
+      <li><b>Say:</b> <i>"MAYDAY, MAYDAY, MAYDAY. This is [your name]. I am at [place, or the coordinates from the <a href="map.html">Map</a>]. [What happened]. [How many people, injuries]. [What we need]. Over."</i> Use "PAN-PAN" when it is urgent but no life is in immediate danger.</li>
+      <li><b>Listen for 30 seconds</b>, then repeat. If nobody answers, try again every few minutes, then at the times in the listening plan below, to save battery.</li>
+      <li><b>Listen for news</b> on the weather channels (North America) and on ordinary FM radio. Both radios receive FM broadcast stations.</li>
+    </ol>
+    <p><b>Listening plan (3-3-3):</b> many preparedness groups turn their radios on at <b>3, 6, 9 and 12 o'clock</b> (day and night) for <b>3 minutes</b> on <b>FRS/GMRS channel 3</b>. Agree on the same plan, plus 146.520 MHz, with your family and neighbours.</p>
+  </section>
+
+  <section class="card" id="freqs">
+    <h2>Frequencies to have</h2>
+    <p>"Listen" means receive only on these two radios (see <a href="#rules">Who may transmit</a>). Channel numbers match the <a href="radio/survival-channels.csv" download>channel file</a>.</p>
+    <table>
+      <tr><th>Frequency (MHz)</th><th>What it is</th><th>Ch.</th></tr>
+      <tr><td><b>146.520</b> FM</td><td>Ham 2 m national simplex calling: the main emergency calling frequency across the Americas. License needed, except in distress.</td><td>1</td></tr>
+      <tr><td>146.550 FM</td><td>Ham 2 m simplex, often the "next" frequency after 146.520 (US/Canada).</td><td>2</td></tr>
+      <tr><td><b>446.000</b> FM</td><td>Ham 70 cm simplex calling (US/Canada). Not a ham frequency in Brazil.</td><td>3</td></tr>
+      <tr><td>your repeaters</td><td>Local ham repeaters reach much farther. Look them up before a disaster (<a href="#before">see below</a>) and save them in channels 4–9.</td><td>4–9</td></tr>
+      <tr><td><b>462.6125</b> NFM</td><td>FRS/GMRS channel 3: preparedness calling, no privacy code. Listen.</td><td>12</td></tr>
+      <tr><td><b>462.675</b></td><td>FRS/GMRS channel 20: in the US, GMRS users use it with tone 141.3 for travelers and emergencies. Listen.</td><td>29</td></tr>
+      <tr><td>462.5625 … 462.725</td><td>All 22 FRS/GMRS channels (list below), used by walkie-talkies from shops. Listen.</td><td>10–31</td></tr>
+      <tr><td><b>156.800</b> FM</td><td>Marine channel 16: distress and calling, monitored by coast guards and ships worldwide. Listen.</td><td>40</td></tr>
+      <tr><td>156.450 / 157.100</td><td>Marine channel 9 (boaters calling, US) / 22A (US Coast Guard working channel). Listen.</td><td>41–42</td></tr>
+      <tr><td><b>162.400 – 162.550</b></td><td>Weather radio: NOAA (US) and Environment Canada, 24 h forecasts and warnings, 7 channels. A few Canadian areas also use 161.650 and 161.775. There is none in Brazil. Listen.</td><td>50–56</td></tr>
+      <tr><td>151.820 – 154.600</td><td>MURS, 5 channels: license-free in the US only, with certified radios. Listen.</td><td>60–64</td></tr>
+      <tr><td>121.500 AM</td><td>Aviation emergency. The TD-H3 PLUS can listen (airband); the UV-5R can't.</td><td>–</td></tr>
+      <tr><td>88 – 108 FM</td><td>Ordinary FM stations: official news and civil-defence announcements. Both radios have an FM radio button.</td><td>–</td></tr>
+      <tr><td>CB 27 MHz</td><td>CB channel 9 = emergency, 19 = truckers. Needs a CB radio: these two radios can't reach it.</td><td>–</td></tr>
+    </table>
+    <p><b>FRS/GMRS channels</b> (MHz):</p>
+    <table>
+      <tr><td>1 462.5625</td><td>2 462.5875</td><td>3 462.6125</td><td>4 462.6375</td></tr>
+      <tr><td>5 462.6625</td><td>6 462.6875</td><td>7 462.7125</td><td>8 467.5625</td></tr>
+      <tr><td>9 467.5875</td><td>10 467.6125</td><td>11 467.6375</td><td>12 467.6625</td></tr>
+      <tr><td>13 467.6875</td><td>14 467.7125</td><td>15 462.5500</td><td>16 462.5750</td></tr>
+      <tr><td>17 462.6000</td><td>18 462.6250</td><td>19 462.6500</td><td>20 462.6750</td></tr>
+      <tr><td>21 462.7000</td><td>22 462.7250</td><td></td><td></td></tr>
+    </table>
+    <p class="muted">"Privacy codes" on shop walkie-talkies are CTCSS tones: they only hide other people, they don't make a call private. To hear everyone, listen with no tone (the channel file does).</p>
+  </section>
+
+  <section class="card" id="rules">
+    <h2>Who may transmit, and on what</h2>
+    <ul>
+      <li><b>In real distress, anyone may use any radio on any frequency to call for help.</b> This is an international rule (ITU Radio Regulations, No. 4.9), followed in the US, Canada and Brazil. Only for a threat to life or safety, and only when nothing else works.</li>
+      <li><b>Ham frequencies</b> (146.520, 446.000, repeaters) need an amateur license: <b>US</b> Technician (FCC exam), <b>Canada</b> Basic Qualification (ISED exam), <b>Brazil</b> COER class C from Anatel (local LABRE sections help). The exams are short and affordable, and with a license you can practise now.</li>
+      <li><b>FRS, GMRS, MURS and marine channels</b> need radios certified for them. The UV-5R and the ham version of the TD-H3 PLUS are <b>not</b>, so use them only to <b>listen</b> there. The channel file marks those channels listen-only, so you can't transmit on them by mistake.</li>
+      <li><b>GMRS version of the TD-H3 PLUS</b> (sold in the US): it transmits only on the 22 FRS/GMRS channels. In the US, GMRS needs an FCC GMRS license: no exam, it covers your family. In Canada, certified FRS/GMRS radios need no license.</li>
+      <li><b>Brazil:</b> to talk on FRS/GMRS channels, use a walkie-talkie with the <b>Anatel certification seal</b> (it's on the label and the box). Many such radios sold in Brazil use these channels.</li>
+    </ul>
+  </section>
+
+  <section class="card" id="uv5r">
+    <h2>Baofeng UV-5R</h2>
+    <p>Receives and transmits 136–174 MHz (VHF) and 400–520 MHz (UHF), about 4 W, plus FM broadcast radio. Menus differ slightly between versions: check the number shown on the screen.</p>
+    <table>
+      <tr><th>Knob (top)</th><td>On/off and volume.</td></tr>
+      <tr><th>PTT (side, big)</th><td>Hold to talk.</td></tr>
+      <tr><th>CALL (side, top)</th><td>Short press: FM broadcast radio on/off. Hold: loud alarm.</td></tr>
+      <tr><th>MONI (side, bottom)</th><td>Short press: flashlight. Hold: opens the squelch, to hear weak signals.</td></tr>
+      <tr><th>VFO/MR</th><td>Switches between typing a frequency (VFO) and saved channels (MR).</td></tr>
+      <tr><th>A/B</th><td>Picks the upper or lower line of the screen.</td></tr>
+      <tr><th>BAND</th><td>In VFO mode: switches VHF / UHF.</td></tr>
+      <tr><th># (hold)</th><td>Keypad lock on/off.</td></tr>
+      <tr><th>* (hold)</th><td>Scan.</td></tr>
+    </table>
+    <p><b>Settings to change once</b> (press MENU, the number, MENU, choose with ▲▼, MENU to save, EXIT):</p>
+    <table>
+      <tr><th>0 SQL</th><td>Squelch: 3 is a good balance. Lower hears weaker signals but more noise.</td></tr>
+      <tr><th>2 TXP</th><td>Power: LOW to save battery when close; HIGH to reach far.</td></tr>
+      <tr><th>3 SAVE</th><td>Battery saver: ON.</td></tr>
+      <tr><th>5 WN</th><td>WIDE for ham, marine and weather; NARR for FRS and MURS 1–3.</td></tr>
+      <tr><th>7 TDR</th><td>Dual watch: OFF saves battery; ON listens to both screen lines.</td></tr>
+      <tr><th>9 TOT</th><td>Transmit time limit: 60 seconds stops a stuck PTT draining the battery.</td></tr>
+      <tr><th>13 T-CTCS</th><td>Tone sent when you transmit: needed by most repeaters (the tone is in the repeater list).</td></tr>
+      <tr><th>25 SFT-D / 26 OFFSET</th><td>Repeater shift: OFF for simplex. Repeaters: + or −, offset 0.600 on 2 m, 5.000 on 70 cm.</td></tr>
+      <tr><th>27 MEM-CH / 28 DEL-CH</th><td>Save / delete a channel.</td></tr>
+      <tr><th>40 RESET</th><td>Back to factory settings.</td></tr>
+    </table>
+    <p><b>Save a channel with the keypad</b> (example: 146.520 in channel 1):</p>
+    <ol>
+      <li>Press <b>VFO/MR</b> until a frequency shows (VFO mode). Use A/B to pick the upper line.</li>
+      <li>Type <b>146520</b>. For FRS frequencies, first set MENU 1 STEP to 6.25K so 462.5625 can be typed.</li>
+      <li>Simplex: MENU 25 SFT-D = OFF. Repeater: set SFT-D, OFFSET (26) and T-CTCS (13).</li>
+      <li>MENU <b>27</b> MEM-CH → MENU → type <b>001</b> → MENU → EXIT.</li>
+      <li>Press <b>VFO/MR</b> to go back to channels, and ▲▼ to choose.</li>
+    </ol>
+    <p class="muted">Channel names can only be typed with CHIRP. To have the screen show them: MENU 21 MDF-A = NAME.</p>
+  </section>
+
+  <section class="card" id="h3">
+    <h2>TIDRADIO TD-H3 PLUS</h2>
+    <p>Ham version (US firmware): transmits 144–148 and 420–450 MHz, about 4 W. Receives FM broadcast (50–108), <b>aircraft AM 108–135</b> (so 121.500 works), and the 7 weather channels, which are already saved in channels 189–199. 199 channels, names up to 8 letters, 2500 mAh battery that <b>charges by USB-C</b> (red light charging, green full), so a power bank or solar charger works.</p>
+    <ul>
+      <li><b>Which version do I have?</b> The box and the start-up screen say GMRS or HAM. The firmware can switch between GMRS, HAM and normal modes; follow TIDRADIO's instructions for your firmware. The GMRS version transmits only on the FRS/GMRS channels.</li>
+      <li><b>Easiest setup: the phone app.</b> Install TIDRADIO's app (Android / iPhone). On the radio, <b>hold the blue MENU key</b> to turn on Bluetooth, connect from the app, then type in channels and settings on the phone.</li>
+      <li><b>With a computer:</b> a USB-C cable and TIDRADIO's programming software (or CHIRP, if it lists your model and firmware).</li>
+      <li><b>Keys:</b> blue MENU (settings), orange key (frequency / channel mode), A/B, key lock. Two PTT buttons on the side. The top key is the alarm, and the side keys can be set to FM radio, flashlight, monitor, tone or weather.</li>
+      <li><b>Copy one radio to another</b> (TD-H3 PLUS to TD-H3 PLUS): turn both off. On each, hold the lower side key while turning it on until "Wireless Copy" shows. Press the lower side key on the radio that sends. Channels, settings and tones are copied.</li>
+      <li><b>Copy one channel from another radio:</b> hold <b>1</b>, pick the channel, let the other radio transmit, then press Store. Repeater offsets must be added by hand.</li>
+      <li><b>Outside the US:</b> TIDRADIO's firmware allows 136–174 and 400–520 MHz (hold PTT and * while turning on). Keep to the bands your license allows.</li>
+    </ul>
+  </section>
+
+  <section class="card" id="chirp">
+    <h2>Programming with CHIRP (free, recommended)</h2>
+    <ol>
+      <li>Install <b>CHIRP-next</b> from chirpmyradio.com. You need a programming cable: K1 plug for the UV-5R; for the TD-H3 PLUS, a USB-C cable or a K1 cable.</li>
+      <li>Radio on, cable in. In CHIRP: <b>Radio → Download from radio</b>, then choose the port, the brand and the model.</li>
+      <li><b>Save that file first</b>: it's your backup.</li>
+      <li><b>File → Import</b> → <a href="radio/survival-channels.csv" download>survival-channels.csv</a> (also on the drive: <code>portal/radio/survival-channels.csv</code>).</li>
+      <li>Add your local repeaters in channels 4–9: frequency, Duplex + or −, Offset, Tone mode "Tone" and the repeater's tone.</li>
+      <li><b>Radio → Upload to radio.</b> Then check a few channels on the radio.</li>
+    </ol>
+    <p class="muted">Listen-only channels have Duplex = "off" (no transmit). In a real emergency you can still transmit on any frequency in VFO mode.</p>
+  </section>
+
+  <section class="card" id="range">
+    <h2>Range and battery</h2>
+    <ul>
+      <li><b>Radio to radio</b> on these frequencies works mostly by line of sight: about <b>2–8 km</b> over open ground, much less between buildings, hills or forest. <b>Through a repeater</b> on a hill or tower: often <b>30–80 km</b>.</li>
+      <li><b>Get high:</b> a hill, a roof, an upper floor or an open field helps more than power. Hold the antenna straight up, away from your body and metal.</li>
+      <li><b>A better antenna</b> (a longer whip such as a Nagoya NA-771 or Abree, or a roll-up "J-pole" thrown into a tree) helps more than any setting.</li>
+      <li><b>Battery:</b> use LOW power when you can, turn dual watch and the backlight off, listen at set times, keep a spare battery, and buy an AA battery case or use the H3 PLUS's USB-C with a power bank. Cold drains batteries: keep them in an inner pocket.</li>
+      <li><b>Keep it short:</b> transmitting uses much more battery than listening.</li>
+    </ul>
+  </section>
+
+  <section class="card" id="before">
+    <h2>Before a disaster</h2>
+    <ul>
+      <li>Program both radios (<a href="#chirp">CHIRP</a>), and label each one with its main channels on tape.</li>
+      <li>Find your local repeaters and nets: <b>repeaterbook.com</b> (US, Canada, Brazil), your local ham club, ARES/RACES (US), ARES (Canada), RENER / LABRE (Brazil). Write their frequency, offset and tone here: ____________________</li>
+      <li>Get licensed and practise: join a weekly net, so you know the radio and people know you.</li>
+      <li>Agree a plan with family: which channel, which times (3-3-3), and a meeting place if radios fail.</li>
+      <li>Store the radios charged, with the battery removed or charged every 3 months.</li>
+    </ul>
+  </section>
+</article>
+
+<!-- ======================================================= Português -->
+<article data-for="pt-BR" lang="pt-BR">
+  <h1>Rádio comunicador na emergência</h1>
+  <p class="lede">O que ouvir e como pedir socorro, as frequências para gravar, e como configurar um <b>Baofeng UV-5R</b> e um <b>TIDRADIO TD-H3 PLUS</b>. Imprima esta página e guarde junto com os rádios. As frequências estão escritas com ponto, como o rádio mostra.</p>
+  <p class="notice"><b>Grave os rádios agora, enquanto tem internet e tempo.</b> Digitar frequências no teclado, no escuro e sob estresse, é difícil. O <a href="radio/survival-channels.csv" download>arquivo de canais</a> grava de uma vez todas as frequências abaixo (veja <a href="#chirp-pt">Gravar com o CHIRP</a>).</p>
+
+  <nav class="toc">
+    <a href="#agora">Emergência agora</a><a href="#freqs-pt">Frequências</a><a href="#regras">Quem pode transmitir</a>
+    <a href="#uv5r-pt">Baofeng UV-5R</a><a href="#h3-pt">TIDRADIO TD-H3 PLUS</a><a href="#chirp-pt">Gravar com o CHIRP</a>
+    <a href="#alcance">Alcance e bateria</a><a href="#antes">Antes de um desastre</a>
+  </nav>
+
+  <section class="card" id="agora">
+    <h2>Numa emergência, agora</h2>
+    <ol>
+      <li><b>Escute primeiro.</b> Aumente o volume e escute por um minuto antes de falar. Talvez alguém já esteja coordenando.</li>
+      <li><b>Chame nesta ordem</b> até alguém responder:
+        <ul>
+          <li>uma <b>repetidora de radioamador local</b>, se você gravou uma: alcança dezenas de quilômetros;</li>
+          <li><b>146.520 MHz</b>, frequência de chamada de 2 metros, muito usada nas Américas;</li>
+          <li><b>canal 3 FRS/GMRS</b> (462.6125) e <b>canal 20</b> (462.675), onde famílias e vizinhos com rádios comunicadores escutam;</li>
+          <li><b>canal marítimo 16</b> (156.800) perto do mar, de lagos grandes ou rios.</li>
+        </ul></li>
+      <li><b>Aperte e segure o PTT, espere um segundo e fale</b> devagar, a 5 cm do rádio. Solte para escutar.</li>
+      <li><b>Diga:</b> <i>"MAYDAY, MAYDAY, MAYDAY. Aqui é [seu nome]. Estou em [local, ou as coordenadas do <a href="map.html">Mapa</a>]. [O que aconteceu]. [Quantas pessoas, feridos]. [Do que precisamos]. Câmbio."</i> Use "PAN-PAN" quando for urgente mas sem risco imediato de vida.</li>
+      <li><b>Escute por 30 segundos</b> e repita. Se ninguém responder, tente de novo a cada poucos minutos e depois nos horários do plano abaixo, para poupar bateria.</li>
+      <li><b>Escute as notícias</b> nas rádios FM comuns: a Defesa Civil divulga avisos por elas. Os dois rádios recebem FM.</li>
+    </ol>
+    <p><b>Plano de escuta (3-3-3):</b> muitos grupos de preparação ligam o rádio às <b>3, 6, 9 e 12 horas</b> (dia e noite) por <b>3 minutos</b> no <b>canal 3 FRS/GMRS</b>. Combine o mesmo plano, mais 146.520 MHz, com sua família e vizinhos.</p>
+  </section>
+
+  <section class="card" id="freqs-pt">
+    <h2>Frequências para ter</h2>
+    <p>"Escutar" quer dizer só receber com estes dois rádios (veja <a href="#regras">Quem pode transmitir</a>). Os números de canal são os do <a href="radio/survival-channels.csv" download>arquivo de canais</a>.</p>
+    <table>
+      <tr><th>Frequência (MHz)</th><th>O que é</th><th>Can.</th></tr>
+      <tr><td><b>146.520</b> FM</td><td>Radioamador 2 m, chamada em simplex: a principal frequência de chamada nas Américas. Precisa de licença, exceto em perigo. No Brasil, confirme com a LABRE da sua região qual frequência a rede de emergência usa.</td><td>1</td></tr>
+      <tr><td>146.550 FM</td><td>Radioamador 2 m simplex (EUA/Canadá).</td><td>2</td></tr>
+      <tr><td>446.000 FM</td><td>Chamada de 70 cm nos EUA e Canadá. <b>No Brasil não é faixa de radioamador</b> (a de 70 cm vai de 430 a 440 MHz).</td><td>3</td></tr>
+      <tr><td>suas repetidoras</td><td>Repetidoras de radioamador alcançam muito mais longe. Procure as da sua região antes (<a href="#antes">veja abaixo</a>) e grave nos canais 4–9.</td><td>4–9</td></tr>
+      <tr><td><b>462.6125</b> NFM</td><td>Canal 3 FRS/GMRS: chamada de preparação, sem código de privacidade. Escutar.</td><td>12</td></tr>
+      <tr><td><b>462.675</b></td><td>Canal 20 FRS/GMRS: nos EUA, usado com tom 141.3 por viajantes e em emergências. Escutar.</td><td>29</td></tr>
+      <tr><td>462.5625 … 462.725</td><td>Os 22 canais FRS/GMRS (lista abaixo), usados por rádios comunicadores de loja. Escutar.</td><td>10–31</td></tr>
+      <tr><td><b>156.800</b> FM</td><td>Canal marítimo 16: socorro e chamada, escutado pela Marinha e por embarcações no mundo todo. Escutar.</td><td>40</td></tr>
+      <tr><td>156.450 / 157.100</td><td>Marítimo canal 9 / 22A (uso nos EUA). Escutar.</td><td>41–42</td></tr>
+      <tr><td>162.400 – 162.550</td><td>Rádio do tempo dos EUA e Canadá (NOAA). <b>Não existe no Brasil</b>: útil só em viagem.</td><td>50–56</td></tr>
+      <tr><td>151.820 – 154.600</td><td>MURS: livre de licença só nos EUA. Escutar.</td><td>60–64</td></tr>
+      <tr><td>121.500 AM</td><td>Emergência da aviação. O TD-H3 PLUS escuta (banda aérea); o UV-5R não.</td><td>–</td></tr>
+      <tr><td>88 – 108 FM</td><td>Rádios FM comuns: notícias oficiais e avisos da Defesa Civil. Os dois rádios têm botão de rádio FM.</td><td>–</td></tr>
+      <tr><td>PX 27 MHz</td><td>Faixa do Cidadão: canal 9 = emergência. Precisa de um rádio PX: estes dois não chegam lá.</td><td>–</td></tr>
+    </table>
+    <p><b>Canais FRS/GMRS</b> (MHz):</p>
+    <table>
+      <tr><td>1 462.5625</td><td>2 462.5875</td><td>3 462.6125</td><td>4 462.6375</td></tr>
+      <tr><td>5 462.6625</td><td>6 462.6875</td><td>7 462.7125</td><td>8 467.5625</td></tr>
+      <tr><td>9 467.5875</td><td>10 467.6125</td><td>11 467.6375</td><td>12 467.6625</td></tr>
+      <tr><td>13 467.6875</td><td>14 467.7125</td><td>15 462.5500</td><td>16 462.5750</td></tr>
+      <tr><td>17 462.6000</td><td>18 462.6250</td><td>19 462.6500</td><td>20 462.6750</td></tr>
+      <tr><td>21 462.7000</td><td>22 462.7250</td><td></td><td></td></tr>
+    </table>
+    <p class="muted">Os "códigos de privacidade" dos rádios de loja são tons CTCSS: só escondem as outras pessoas, não deixam a conversa privada. Para ouvir todo mundo, escute sem tom (o arquivo de canais já faz assim).</p>
+  </section>
+
+  <section class="card" id="regras">
+    <h2>Quem pode transmitir, e onde</h2>
+    <ul>
+      <li><b>Em perigo real, qualquer pessoa pode usar qualquer rádio, em qualquer frequência, para pedir socorro.</b> É uma regra internacional (Regulamento de Radiocomunicações da UIT, nº 4.9), seguida no Brasil, nos EUA e no Canadá. Só quando há risco à vida ou à segurança, e nada mais funciona.</li>
+      <li><b>Frequências de radioamador</b> (146.520, repetidoras) exigem licença. <b>Brasil:</b> COER classe C da Anatel; as seções da LABRE ajudam com a prova. <b>EUA:</b> Technician (FCC). <b>Canadá:</b> Basic Qualification (ISED). A prova é curta e barata, e com licença você pode treinar desde já.</li>
+      <li><b>Canais FRS/GMRS, MURS e marítimos</b> exigem rádios certificados para eles. O UV-5R e a versão de radioamador do TD-H3 PLUS <b>não são</b>: use-os só para <b>escutar</b> ali. O arquivo de canais marca esses canais como só escuta, para você não transmitir neles por engano.</li>
+      <li><b>No Brasil:</b> para conversar nos canais FRS/GMRS, use um rádio comunicador com o <b>selo de homologação da Anatel</b> (na etiqueta e na caixa). Muitos rádios homologados vendidos no Brasil usam esses canais.</li>
+      <li><b>Versão GMRS do TD-H3 PLUS</b> (vendida nos EUA): transmite só nos 22 canais FRS/GMRS. Nos EUA, o GMRS exige licença da FCC (sem prova).</li>
+    </ul>
+  </section>
+
+  <section class="card" id="uv5r-pt">
+    <h2>Baofeng UV-5R</h2>
+    <p>Recebe e transmite de 136 a 174 MHz (VHF) e de 400 a 520 MHz (UHF), cerca de 4 W, e tem rádio FM. Os menus mudam um pouco entre versões: confira o número que aparece na tela.</p>
+    <table>
+      <tr><th>Botão giratório (em cima)</th><td>Liga/desliga e volume.</td></tr>
+      <tr><th>PTT (lateral, grande)</th><td>Segure para falar.</td></tr>
+      <tr><th>CALL (lateral, em cima)</th><td>Toque curto: rádio FM liga/desliga. Segurar: alarme alto.</td></tr>
+      <tr><th>MONI (lateral, embaixo)</th><td>Toque curto: lanterna. Segurar: abre o squelch, para ouvir sinais fracos.</td></tr>
+      <tr><th>VFO/MR</th><td>Alterna entre digitar frequência (VFO) e canais gravados (MR).</td></tr>
+      <tr><th>A/B</th><td>Escolhe a linha de cima ou de baixo da tela.</td></tr>
+      <tr><th>BAND</th><td>No modo VFO: alterna VHF / UHF.</td></tr>
+      <tr><th># (segurar)</th><td>Trava o teclado.</td></tr>
+      <tr><th>* (segurar)</th><td>Varredura (scan).</td></tr>
+    </table>
+    <p><b>Ajustes para fazer uma vez</b> (MENU, o número, MENU, escolha com ▲▼, MENU para gravar, EXIT):</p>
+    <table>
+      <tr><th>0 SQL</th><td>Squelch: 3 é um bom meio-termo. Mais baixo ouve sinais mais fracos, com mais chiado.</td></tr>
+      <tr><th>2 TXP</th><td>Potência: LOW poupa bateria quando está perto; HIGH para ir longe.</td></tr>
+      <tr><th>3 SAVE</th><td>Economia de bateria: ON.</td></tr>
+      <tr><th>5 WN</th><td>WIDE para radioamador e marítimo; NARR para FRS e MURS 1–3.</td></tr>
+      <tr><th>7 TDR</th><td>Escuta dupla: OFF poupa bateria; ON escuta as duas linhas.</td></tr>
+      <tr><th>9 TOT</th><td>Tempo máximo de transmissão: 60 segundos evita que um PTT preso gaste a bateria.</td></tr>
+      <tr><th>13 T-CTCS</th><td>Tom enviado ao transmitir: a maioria das repetidoras exige (está na lista da repetidora).</td></tr>
+      <tr><th>25 SFT-D / 26 OFFSET</th><td>Deslocamento de repetidora: OFF em simplex. Repetidoras: + ou −, 0.600 em 2 m, 5.000 em 70 cm.</td></tr>
+      <tr><th>27 MEM-CH / 28 DEL-CH</th><td>Gravar / apagar um canal.</td></tr>
+      <tr><th>40 RESET</th><td>Volta à configuração de fábrica.</td></tr>
+    </table>
+    <p><b>Gravar um canal pelo teclado</b> (exemplo: 146.520 no canal 1):</p>
+    <ol>
+      <li>Aperte <b>VFO/MR</b> até aparecer uma frequência (modo VFO). Use A/B para escolher a linha de cima.</li>
+      <li>Digite <b>146520</b>. Para frequências FRS, antes ponha MENU 1 STEP em 6.25K para conseguir digitar 462.5625.</li>
+      <li>Simplex: MENU 25 SFT-D = OFF. Repetidora: ajuste SFT-D, OFFSET (26) e T-CTCS (13).</li>
+      <li>MENU <b>27</b> MEM-CH → MENU → digite <b>001</b> → MENU → EXIT.</li>
+      <li>Aperte <b>VFO/MR</b> para voltar aos canais e ▲▼ para escolher.</li>
+    </ol>
+    <p class="muted">Nomes de canal só podem ser digitados pelo CHIRP. Para a tela mostrar os nomes: MENU 21 MDF-A = NAME.</p>
+  </section>
+
+  <section class="card" id="h3-pt">
+    <h2>TIDRADIO TD-H3 PLUS</h2>
+    <p>Versão de radioamador (firmware dos EUA): transmite em 144–148 e 420–450 MHz, cerca de 4 W. Recebe FM (50–108), <b>aviação em AM 108–135</b> (então 121.500 funciona) e os 7 canais de tempo dos EUA, já gravados nos canais 189–199. São 199 canais, com nomes de até 8 letras, e bateria de 2500 mAh que <b>carrega por USB-C</b> (luz vermelha carregando, verde cheia), então serve um power bank ou carregador solar.</p>
+    <ul>
+      <li><b>Qual versão eu tenho?</b> A caixa e a tela ao ligar dizem GMRS ou HAM. O firmware pode alternar entre os modos GMRS, HAM e normal; siga as instruções da TIDRADIO para o seu firmware. A versão GMRS só transmite nos canais FRS/GMRS.</li>
+      <li><b>Jeito mais fácil: o app no celular.</b> Instale o app da TIDRADIO (Android / iPhone). No rádio, <b>segure a tecla azul MENU</b> para ligar o Bluetooth, conecte pelo app e digite canais e ajustes no celular.</li>
+      <li><b>Pelo computador:</b> cabo USB-C e o programa da TIDRADIO (ou o CHIRP, se ele listar o seu modelo e firmware).</li>
+      <li><b>Teclas:</b> MENU azul (ajustes), tecla laranja (modo frequência / canal), A/B, trava do teclado. Dois botões PTT na lateral. A tecla de cima é o alarme, e as laterais podem virar rádio FM, lanterna, monitor, tom ou tempo.</li>
+      <li><b>Copiar um rádio para outro</b> (TD-H3 PLUS para TD-H3 PLUS): desligue os dois. Em cada um, segure a tecla lateral de baixo ao ligar, até aparecer "Wireless Copy". Aperte a tecla lateral de baixo no rádio que envia. Canais, ajustes e tons são copiados.</li>
+      <li><b>Copiar um canal de outro rádio:</b> segure <b>1</b>, escolha o canal, faça o outro rádio transmitir e aperte Store. O deslocamento de repetidora tem que ser posto à mão.</li>
+      <li><b>Fora dos EUA:</b> o firmware da TIDRADIO permite 136–174 e 400–520 MHz (segure PTT e * ao ligar). Fique nas faixas que sua licença permite.</li>
+    </ul>
+  </section>
+
+  <section class="card" id="chirp-pt">
+    <h2>Gravar com o CHIRP (grátis, recomendado)</h2>
+    <ol>
+      <li>Instale o <b>CHIRP-next</b> de chirpmyradio.com. Você precisa de um cabo de programação: plugue K1 para o UV-5R; para o TD-H3 PLUS, cabo USB-C ou cabo K1.</li>
+      <li>Rádio ligado, cabo conectado. No CHIRP: <b>Radio → Download from radio</b>, escolha a porta, a marca e o modelo.</li>
+      <li><b>Salve esse arquivo primeiro</b>: é o seu backup.</li>
+      <li><b>File → Import</b> → <a href="radio/survival-channels.csv" download>survival-channels.csv</a> (também no pendrive: <code>portal/radio/survival-channels.csv</code>).</li>
+      <li>Ponha suas repetidoras nos canais 4–9: frequência, Duplex + ou −, Offset, Tone mode "Tone" e o tom da repetidora. No Brasil, apague o canal 3 (446.000).</li>
+      <li><b>Radio → Upload to radio.</b> Depois confira alguns canais no rádio.</li>
+    </ol>
+    <p class="muted">Os canais só de escuta têm Duplex = "off" (não transmitem). Numa emergência real, você ainda pode transmitir em qualquer frequência pelo modo VFO.</p>
+  </section>
+
+  <section class="card" id="alcance">
+    <h2>Alcance e bateria</h2>
+    <ul>
+      <li><b>De rádio para rádio</b>, estas frequências dependem de visada: cerca de <b>2–8 km</b> em campo aberto, bem menos entre prédios, morros ou mata. <b>Por uma repetidora</b> num morro ou torre: muitas vezes <b>30–80 km</b>.</li>
+      <li><b>Suba:</b> um morro, uma laje, um andar alto ou um campo aberto ajudam mais que potência. Segure a antena reta para cima, longe do corpo e de metal.</li>
+      <li><b>Uma antena melhor</b> (mais comprida, como Nagoya NA-771 ou Abree, ou uma "J-pole" enrolável jogada numa árvore) ajuda mais que qualquer ajuste.</li>
+      <li><b>Bateria:</b> use potência LOW quando der, desligue a escuta dupla e a luz da tela, escute em horários combinados, tenha bateria reserva, e compre um estojo para pilhas AA ou use o USB-C do H3 PLUS com power bank. O frio gasta bateria: guarde num bolso interno.</li>
+      <li><b>Fale pouco:</b> transmitir gasta muito mais bateria que escutar.</li>
+    </ul>
+  </section>
+
+  <section class="card" id="antes">
+    <h2>Antes de um desastre</h2>
+    <ul>
+      <li>Grave os dois rádios (<a href="#chirp-pt">CHIRP</a>) e cole em cada um uma fita com os canais principais.</li>
+      <li>Descubra as repetidoras e redes da sua região: <b>repeaterbook.com</b> (Brasil, EUA, Canadá), o radioclube local, a <b>RENER</b> e a <b>LABRE</b> do seu estado. A Defesa Civil atende pelo <b>199</b>. Anote aqui frequência, deslocamento e tom: ____________________</li>
+      <li>Tire a licença e treine: participe de uma rodada semanal, para conhecer o rádio e ser conhecido.</li>
+      <li>Combine um plano com a família: qual canal, quais horários (3-3-3) e um ponto de encontro se os rádios falharem.</li>
+      <li>Guarde os rádios carregados, com a bateria removida ou recarregada a cada 3 meses.</li>
+    </ul>
+  </section>
+</article>
+
+</main>
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+<script>
+  // show the text in the reader's language (both stay visible if scripts are off)
+  document.querySelectorAll('article[data-for]').forEach(a => { a.hidden = a.dataset.for !== SURVIVAL.lang; });
+  if (!document.querySelector('article[data-for]:not([hidden])')) document.querySelector('article[data-for="en"]').hidden = false;
+  document.title = SURVIVAL.t('tile.radio.t');
+</script>
+</body>
+</html>

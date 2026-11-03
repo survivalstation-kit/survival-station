@@ -12,6 +12,18 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.3.0 (2026-11-02)
+
+- **New Radio page** (home tile 📡, English and Português), made to be printed and kept with the radios:
+  - how to call for help, and in which order to try channels;
+  - the 3-3-3 listening plan;
+  - the frequencies to have: ham 2 m and 70 cm calling, the 22 FRS/GMRS channels, marine 16/9/22A, weather radio, MURS, aviation 121.5, FM and CB, with Brazil notes;
+  - who may transmit where, and the license each country needs;
+  - setting up a **Baofeng UV-5R** (keys, menus, saving a channel with the keypad) and a **TIDRADIO TD-H3 PLUS** (versions, phone app, wireless copy);
+  - range and battery tips, and a checklist for before a disaster.
+- **Channel file for CHIRP** (`portal/radio/survival-channels.csv`): every frequency on the page in one import. Channels the radios may only listen to are set to receive only.
+- The emergency cards and the Help page link to it.
+
 ## 1.2.1 (2026-11-02)
 
 - **Pages refresh themselves after an update.** The AI server sends the pages with no caching rules, so after an update a browser could keep showing its saved copy of the old pages: the old version tag, and a map page that didn't know about the 1.2.0 map server. Each page now checks the kit's version and, if it changed, loads the page, scripts and styles fresh and reloads once. Browsers still holding pages from before 1.2.1 need one **Ctrl+F5** (Ctrl+Shift+R; on a phone, reload the page).

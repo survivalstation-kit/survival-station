@@ -1,0 +1,41 @@
+Location,Name,Frequency,Duplex,Offset,Tone,rToneFreq,cToneFreq,DtcsCode,DtcsPolarity,RxDtcsCode,CrossMode,Mode,TStep,Skip,Comment
+1,2M CALL,146.520000,,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,FM,5.00,,Ham 2 m national simplex calling (license; anyone in distress)
+2,2M 550,146.550000,,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,FM,5.00,,Ham 2 m simplex (US/Canada)
+3,70CM,446.000000,,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,FM,5.00,,Ham 70 cm simplex calling (US/Canada only; outside the Brazilian ham band)
+10,FRS1,462.562500,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,12.50,,FRS/GMRS 1 - listen only
+11,FRS2,462.587500,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,12.50,,FRS/GMRS 2 - listen only
+12,FRS3,462.612500,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,12.50,,FRS/GMRS 3 - preparedness calling (3-3-3 plan) - listen only
+13,FRS4,462.637500,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,12.50,,FRS/GMRS 4 - listen only
+14,FRS5,462.662500,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,12.50,,FRS/GMRS 5 - listen only
+15,FRS6,462.687500,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,12.50,,FRS/GMRS 6 - listen only
+16,FRS7,462.712500,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,12.50,,FRS/GMRS 7 - listen only
+17,FRS8,467.562500,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,12.50,,FRS 8 - listen only
+18,FRS9,467.587500,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,12.50,,FRS 9 - listen only
+19,FRS10,467.612500,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,12.50,,FRS 10 - listen only
+20,FRS11,467.637500,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,12.50,,FRS 11 - listen only
+21,FRS12,467.662500,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,12.50,,FRS 12 - listen only
+22,FRS13,467.687500,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,12.50,,FRS 13 - listen only
+23,FRS14,467.712500,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,12.50,,FRS 14 - listen only
+24,FRS15,462.550000,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,12.50,,FRS/GMRS 15 - listen only
+25,FRS16,462.575000,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,12.50,,FRS/GMRS 16 - listen only
+26,FRS17,462.600000,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,12.50,,FRS/GMRS 17 - listen only
+27,FRS18,462.625000,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,12.50,,FRS/GMRS 18 - listen only
+28,FRS19,462.650000,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,12.50,,FRS/GMRS 19 - listen only
+29,FRS20,462.675000,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,12.50,,FRS/GMRS 20 - US travelers/emergency use tone 141.3 - listen only
+30,FRS21,462.700000,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,12.50,,FRS/GMRS 21 - listen only
+31,FRS22,462.725000,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,12.50,,FRS/GMRS 22 - listen only
+40,MAR16,156.800000,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,FM,25.00,,Marine 16 - distress and calling - listen only
+41,MAR9,156.450000,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,FM,25.00,,Marine 9 - boaters calling (US) - listen only
+42,MAR22A,157.100000,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,FM,25.00,,Marine 22A - US Coast Guard working channel - listen only
+50,WX1,162.550000,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,FM,25.00,,Weather radio (NOAA / Environment Canada) - listen only
+51,WX2,162.400000,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,FM,25.00,,Weather radio - listen only
+52,WX3,162.475000,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,FM,25.00,,Weather radio - listen only
+53,WX4,162.425000,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,FM,25.00,,Weather radio - listen only
+54,WX5,162.450000,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,FM,25.00,,Weather radio - listen only
+55,WX6,162.500000,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,FM,25.00,,Weather radio - listen only
+56,WX7,162.525000,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,FM,25.00,,Weather radio - listen only
+60,MURS1,151.820000,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,5.00,,MURS 1 (US only) - listen only
+61,MURS2,151.880000,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,5.00,,MURS 2 (US only) - listen only
+62,MURS3,151.940000,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,NFM,5.00,,MURS 3 (US only) - listen only
+63,MURS4,154.570000,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,FM,5.00,,MURS 4 (US only) - listen only
+64,MURS5,154.600000,off,0.000000,,88.5,88.5,023,NN,023,Tone->Tone,FM,5.00,,MURS 5 (US only) - listen only
