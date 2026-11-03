@@ -12,6 +12,19 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.8.0 (2026-11-02)
+
+- **New Tools page** (home tile 🛠️, English and Português). Everything works without the AI or internet:
+  - **Make water safe with bleach:** drops for any amount of water, for Brazilian água sanitária 2–2.5% (Ministry of Health: 2 drops per litre) or US bleach 6% / 8.25% (EPA table), doubled for cloudy water, with the 30-minute wait and smell check.
+  - **Water and food for your group:** litres and kcal for adults and children over N days, with rice, beans or cans as examples.
+  - **Signal for help:**
+    - full-screen SOS flashing (screen kept awake where allowed);
+    - a loud whistle tone: three blasts, the international distress signal;
+    - SOS beeps;
+    - any short message in Morse code, by light or sound.
+  - **Sun, directions and daylight:** sunrise, sunset, solar noon, daylight left and where the sun is now, for the last point tapped or found on the Map, typed coordinates, or GPS on the computer itself. It also has finding north with a shadow stick or the noon sun, and a compass on devices and connections that allow it.
+- Tested against published times: Chicago 21 June 05:16 / 20:30, Toronto 21 December 07:48 / 16:44, Rio 2 November 05:07 / 18:07, and midnight sun in Tromsø.
+
 ## 1.7.0 (2026-11-02)
 
 - **Place search on the map.** A box at the top left finds:

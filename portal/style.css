@@ -108,6 +108,20 @@ body.map-page { display: flex; flex-direction: column; height: 100vh; height: 10
 #map { flex: 1; min-height: 0; }
 .map-panel { background: var(--surface); border-top: 1px solid var(--line); padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); font-size: 15px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; }
 .map-panel.warn { color: var(--warn); }
+.tools .form { display: flex; flex-wrap: wrap; gap: 10px 18px; margin: 8px 0; }
+.tools .form label { display: flex; flex-direction: column; gap: 4px; font-size: 15px; }
+.tools .form label.check { flex-direction: row; align-items: center; gap: 8px; flex-basis: 100%; }
+.tools .form input[type=number], .tools .form input[type=text], .tools .form select { font: inherit; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--text); min-width: 0; }
+.tools .form input[type=number] { width: 8em; }
+.tools .result { font-size: 18px; margin: 10px 0; }
+.tools .result b { font-size: 20px; }
+.tools .result table { font-size: 16px; }
+.tools .buttons { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.tools h3 { margin: 16px 0 6px; }
+.flash { position: fixed; inset: 0; z-index: 100; background: #000; display: flex; align-items: flex-end; justify-content: center; cursor: pointer; }
+.flash[hidden] { display: none; }
+.flash.on { background: #fff; }
+.flash p { color: #777; font-size: 16px; margin-bottom: 40px; }
 .search-form { display: flex; gap: 8px; margin: 0 0 14px; }
 .search-form input { flex: 1; min-width: 0; font: inherit; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--text); }
 .hits { list-style: none; padding: 0 !important; margin: 4px 0 10px; }

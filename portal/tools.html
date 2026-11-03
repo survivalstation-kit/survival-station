@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tools</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="tools">
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html">Survival <span>Station</span></a>
+  <nav class="links">
+    <a href="index.html" data-i18n="nav.home">Home</a>
+    <a href="chat.html" data-i18n="nav.chat">Ask AI</a>
+    <a href="map.html" data-i18n="nav.map">Map</a>
+    <a href="cards.html" data-cards data-i18n="nav.cards">Emergency</a>
+    <a href="search.html" data-i18n="nav.search">Search</a>
+    <a href="help.html" data-i18n="nav.help">Help</a>
+  </nav>
+  <select class="lang-select" aria-label="Language / Idioma"></select>
+  <button class="theme-btn" type="button" data-i18n="theme">Theme</button>
+</div></header>
+
+<main class="wrap help tools">
+  <h1 data-t="title"></h1>
+  <p class="lede" data-t="lede"></p>
+  <nav class="toc">
+    <a href="#water" data-t="water.h"></a><a href="#supplies" data-t="sup.h"></a>
+    <a href="#signal" data-t="sig.h"></a><a href="#sun" data-t="sun.h"></a>
+  </nav>
+
+  <section class="card" id="water">
+    <h2 data-t="water.h"></h2>
+    <div class="form">
+      <label><span data-t="water.litres"></span> <input type="number" id="w-litres" min="0.1" step="0.5" value="1" inputmode="decimal"></label>
+      <label><span data-t="water.product"></span>
+        <select id="w-product">
+          <option value="br" data-t="water.br"></option>
+          <option value="us6" data-t="water.us6"></option>
+          <option value="us825" data-t="water.us825"></option>
+        </select></label>
+      <label class="check"><input type="checkbox" id="w-cloudy"> <span data-t="water.cloudy"></span></label>
+    </div>
+    <p class="result" id="w-out"></p>
+    <ul>
+      <li data-t="water.how1"></li>
+      <li data-t="water.how2"></li>
+      <li data-t="water.how3"></li>
+      <li data-t="water.boil"></li>
+    </ul>
+    <p class="muted" id="w-source"></p>
+  </section>
+
+  <section class="card" id="supplies">
+    <h2 data-t="sup.h"></h2>
+    <div class="form">
+      <label><span data-t="sup.adults"></span> <input type="number" id="s-adults" min="0" step="1" value="2" inputmode="numeric"></label>
+      <label><span data-t="sup.children"></span> <input type="number" id="s-children" min="0" step="1" value="0" inputmode="numeric"></label>
+      <label><span data-t="sup.days"></span> <input type="number" id="s-days" min="1" step="1" value="3" inputmode="numeric"></label>
+      <label class="check"><input type="checkbox" id="s-hot"> <span data-t="sup.hot"></span></label>
+    </div>
+    <div class="result" id="s-out"></div>
+    <p class="muted" data-t="sup.note"></p>
+  </section>
+
+  <section class="card" id="signal">
+    <h2 data-t="sig.h"></h2>
+    <p data-t="sig.intro"></p>
+    <div class="buttons">
+      <button class="btn" type="button" id="b-flash" data-t="sig.flash"></button>
+      <button class="btn" type="button" id="b-whistle" data-t="sig.whistle"></button>
+      <button class="btn" type="button" id="b-sosbeep" data-t="sig.sosbeep"></button>
+    </div>
+    <div class="form">
+      <label><span data-t="sig.message"></span> <input type="text" id="m-text" maxlength="40" value="SOS"></label>
+    </div>
+    <div class="buttons">
+      <button class="btn ghost" type="button" id="b-mflash" data-t="sig.mflash"></button>
+      <button class="btn ghost" type="button" id="b-mbeep" data-t="sig.mbeep"></button>
+    </div>
+    <p class="muted" id="m-code"></p>
+    <p class="muted" data-t="sig.note"></p>
+  </section>
+
+  <section class="card" id="sun">
+    <h2 data-t="sun.h"></h2>
+    <div class="form">
+      <label><span data-t="sun.lat"></span> <input type="number" id="c-lat" step="any" inputmode="decimal" placeholder="-22.97"></label>
+      <label><span data-t="sun.lon"></span> <input type="number" id="c-lon" step="any" inputmode="decimal" placeholder="-43.18"></label>
+    </div>
+    <p class="muted" id="c-from"></p>
+    <div class="buttons">
+      <button class="btn ghost" type="button" id="b-gps" data-t="sun.gps" hidden></button>
+    </div>
+    <div class="result" id="sun-out"></div>
+    <h3 data-t="sun.compass"></h3>
+    <div class="buttons"><button class="btn ghost" type="button" id="b-compass" data-t="sun.compass.start"></button></div>
+    <p class="result" id="compass-out"></p>
+    <h3 data-t="sun.find"></h3>
+    <ul>
+      <li data-t="sun.find1"></li>
+      <li data-t="sun.find2"></li>
+      <li data-t="sun.find3"></li>
+    </ul>
+  </section>
+</main>
+
+<div class="flash" id="flash" hidden><p data-t="sig.tapstop"></p></div>
+
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+<script>
+(() => {
+  // ------------------------------------------------------------------ texts (this page only)
+  const TXT = {
+    en: {
+      title: 'Tools', lede: 'Calculators and signals that work without the AI or the internet. Check the numbers against the emergency cards when you can.',
+      'water.h': 'Make water safe with bleach', 'water.litres': 'Litres of water', 'water.product': 'Product',
+      'water.br': 'Água sanitária / bleach 2–2.5% (Brazil)', 'water.us6': 'Household bleach 6% (US)', 'water.us825': 'Concentrated bleach 8.25% (US)',
+      'water.cloudy': 'Cloudy, coloured or very cold water',
+      'water.how1': 'Use plain bleach only: no scent, no colour-safe or "with cleaner" types. Check the percentage on the label.',
+      'water.how2': 'Cloudy water: let it settle and pour it through a clean cloth first.',
+      'water.how3': 'Mix, cover, and wait 30 minutes. It should smell slightly of chlorine; if not, add the same dose again and wait 15 more minutes (US EPA).',
+      'water.boil': 'If you can, boiling is better: a rolling boil for 1 minute (3 minutes above 2,000 m). Bleach does not remove chemicals or fuel.',
+      'water.out': '{d} drops', 'water.tsp': 'about {t} teaspoons', 'water.wait': 'then wait 30 minutes',
+      'water.src.br': 'Dose: 2 drops per litre of 2–2.5% sodium hypochlorite (Brazilian Ministry of Health), doubled for cloudy water.',
+      'water.src.us': 'Dose: US EPA table, 8 drops (6%) or 6 drops (8.25%) per gallon of clear water, doubled for cloudy or very cold water.',
+      'sup.h': 'Water and food for your group', 'sup.adults': 'Adults', 'sup.children': 'Children', 'sup.days': 'Days', 'sup.hot': 'Hot weather, sick or nursing (more water)',
+      'sup.water': 'Water: {l} litres ({g} US gallons)', 'sup.waterhow': '4 litres per person per day, for drinking, cooking and a little washing{hot}.', 'sup.hotnote': ', doubled for heat or illness',
+      'sup.food': 'Food: about {k} kcal', 'sup.foodeg': 'For example {r} kg of dry rice and {b} kg of dry beans, or {c} cans of 400 g.',
+      'sup.note': 'Rough guide: about 2,000 kcal a day for an adult and 1,400 for a child. Store at least 3 days; 2 weeks is better. Pets, babies and medicines need their own supply.',
+      'sig.h': 'Signal for help', 'sig.intro': 'Flash the screen at night towards rescuers, a plane or a boat, or make a loud whistle tone. The international distress signal is three of anything: three flashes, three blasts, three fires.',
+      'sig.flash': '💡 Flash SOS', 'sig.whistle': '📢 Whistle: 3 blasts', 'sig.sosbeep': '🔊 Beep SOS',
+      'sig.message': 'Message in Morse code', 'sig.mflash': 'Flash the message', 'sig.mbeep': 'Beep the message',
+      'sig.note': 'Turn the volume and brightness all the way up. Tap the button again, or tap the white screen, to stop. A real whistle, mirror or torch carries much farther than a phone.',
+      'sig.tapstop': 'Tap to stop', 'sig.stop': '⏹ Stop',
+      'sun.h': 'Sun, directions and daylight', 'sun.lat': 'Latitude', 'sun.lon': 'Longitude', 'sun.gps': '📍 Use this device\'s GPS',
+      'sun.from': 'From the last point on the Map: {p}', 'sun.none': 'Tap a point on the Map (or type the coordinates) to see the sun times there.',
+      'sun.rise': 'Sunrise', 'sun.set': 'Sunset', 'sun.noon': 'Sun highest (solar noon)', 'sun.daylight': 'Daylight', 'sun.now': 'Sun now',
+      'sun.up': '{a}° ({dir}), {e}° above the horizon', 'sun.down': 'below the horizon', 'sun.left': 'Light left today', 'sun.polarday': 'The sun does not set today.', 'sun.polarnight': 'The sun does not rise today.',
+      'sun.noonnorth': 'At solar noon the sun is due north.', 'sun.noonsouth': 'At solar noon the sun is due south.',
+      'sun.clock': 'Times are in this device\'s time zone, so they are right when the device is at that place.',
+      'sun.compass': 'Compass', 'sun.compass.start': '🧭 Start the compass', 'sun.compass.heading': 'Phone pointing to {a}° ({dir})',
+      'sun.compass.none': 'No compass on this device or connection. Phones on the hotspot usually can\'t read it (the browser only allows it on secure pages); use the sun method below.',
+      'sun.find': 'Find north without a compass',
+      'sun.find1': 'Shadow stick: put a stick upright, mark the tip of its shadow, wait 15 minutes and mark it again. The line from the first mark to the second points east.',
+      'sun.find2': 'At solar noon (time above) the sun is due south in the northern hemisphere and due north in the southern hemisphere (Brazil).',
+      'sun.find3': 'The sun rises roughly in the east and sets roughly in the west.',
+      dirs: ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'],
+    },
+    'pt-BR': {
+      title: 'Ferramentas', lede: 'Calculadoras e sinais que funcionam sem IA e sem internet. Quando puder, confira os números com os cartões de emergência.',
+      'water.h': 'Tornar a água segura com água sanitária', 'water.litres': 'Litros de água', 'water.product': 'Produto',
+      'water.br': 'Água sanitária / hipoclorito 2–2,5% (Brasil)', 'water.us6': 'Alvejante 6% (EUA)', 'water.us825': 'Alvejante concentrado 8,25% (EUA)',
+      'water.cloudy': 'Água turva, com cor ou muito fria',
+      'water.how1': 'Use só água sanitária comum: sem perfume e sem "alvejante com sabão". Confira a porcentagem no rótulo.',
+      'water.how2': 'Água turva: deixe assentar e passe por um pano limpo antes.',
+      'water.how3': 'Misture, tampe e espere 30 minutos. Deve ficar um leve cheiro de cloro; se não ficar, ponha a mesma dose de novo e espere mais 15 minutos (EPA, EUA).',
+      'water.boil': 'Se puder, ferver é melhor: fervura forte por 1 minuto (3 minutos acima de 2.000 m). A água sanitária não tira produtos químicos nem combustível.',
+      'water.out': '{d} gotas', 'water.tsp': 'cerca de {t} colheres de chá', 'water.wait': 'e espere 30 minutos',
+      'water.src.br': 'Dose: 2 gotas de hipoclorito de sódio 2–2,5% por litro (Ministério da Saúde), dobrada para água turva.',
+      'water.src.us': 'Dose: tabela da EPA (EUA), 8 gotas (6%) ou 6 gotas (8,25%) por galão de água limpa, dobrada para água turva ou muito fria.',
+      'sup.h': 'Água e comida para o seu grupo', 'sup.adults': 'Adultos', 'sup.children': 'Crianças', 'sup.days': 'Dias', 'sup.hot': 'Calor, doença ou amamentação (mais água)',
+      'sup.water': 'Água: {l} litros', 'sup.waterhow': '4 litros por pessoa por dia, para beber, cozinhar e um pouco de higiene{hot}.', 'sup.hotnote': ', o dobro no calor ou doença',
+      'sup.food': 'Comida: cerca de {k} kcal', 'sup.foodeg': 'Por exemplo {r} kg de arroz cru e {b} kg de feijão cru, ou {c} latas de 400 g.',
+      'sup.note': 'Guia aproximado: cerca de 2.000 kcal por dia para um adulto e 1.400 para uma criança. Tenha pelo menos 3 dias; 2 semanas é melhor. Animais, bebês e remédios precisam de estoque próprio.',
+      'sig.h': 'Sinais de socorro', 'sig.intro': 'À noite, pisque a tela na direção do resgate, de um avião ou barco, ou faça um apito alto. O sinal internacional de socorro é três de qualquer coisa: três piscadas, três apitos, três fogueiras.',
+      'sig.flash': '💡 Piscar SOS', 'sig.whistle': '📢 Apito: 3 toques', 'sig.sosbeep': '🔊 Bipar SOS',
+      'sig.message': 'Mensagem em código Morse', 'sig.mflash': 'Piscar a mensagem', 'sig.mbeep': 'Bipar a mensagem',
+      'sig.note': 'Ponha volume e brilho no máximo. Toque no botão de novo, ou na tela branca, para parar. Um apito de verdade, espelho ou lanterna alcança muito mais longe que um celular.',
+      'sig.tapstop': 'Toque para parar', 'sig.stop': '⏹ Parar',
+      'sun.h': 'Sol, direções e luz do dia', 'sun.lat': 'Latitude', 'sun.lon': 'Longitude', 'sun.gps': '📍 Usar o GPS deste aparelho',
+      'sun.from': 'Do último ponto no Mapa: {p}', 'sun.none': 'Toque num ponto do Mapa (ou digite as coordenadas) para ver os horários do sol ali.',
+      'sun.rise': 'Nascer do sol', 'sun.set': 'Pôr do sol', 'sun.noon': 'Sol mais alto (meio-dia solar)', 'sun.daylight': 'Luz do dia', 'sun.now': 'Sol agora',
+      'sun.up': '{a}° ({dir}), {e}° acima do horizonte', 'sun.down': 'abaixo do horizonte', 'sun.left': 'Luz que resta hoje', 'sun.polarday': 'O sol não se põe hoje.', 'sun.polarnight': 'O sol não nasce hoje.',
+      'sun.noonnorth': 'No meio-dia solar o sol fica exatamente ao norte.', 'sun.noonsouth': 'No meio-dia solar o sol fica exatamente ao sul.',
+      'sun.clock': 'Os horários estão no fuso deste aparelho, então ficam certos quando o aparelho está nesse lugar.',
+      'sun.compass': 'Bússola', 'sun.compass.start': '🧭 Ligar a bússola', 'sun.compass.heading': 'Celular apontando para {a}° ({dir})',
+      'sun.compass.none': 'Sem bússola neste aparelho ou conexão. Celulares no roteador do kit normalmente não conseguem ler (o navegador só permite em páginas seguras); use o método do sol abaixo.',
+      'sun.find': 'Achar o norte sem bússola',
+      'sun.find1': 'Vareta e sombra: finque uma vareta em pé, marque a ponta da sombra, espere 15 minutos e marque de novo. A linha da primeira marca para a segunda aponta para o leste.',
+      'sun.find2': 'No meio-dia solar (horário acima) o sol fica ao norte no hemisfério sul (Brasil) e ao sul no hemisfério norte.',
+      'sun.find3': 'O sol nasce mais ou menos no leste e se põe mais ou menos no oeste.',
+      dirs: ['N', 'NE', 'L', 'SE', 'S', 'SO', 'O', 'NO'],
+    },
+  };
+  const T = TXT[SURVIVAL.lang] || TXT.en;
+  const tt = (k, v = {}) => (T[k] ?? TXT.en[k] ?? k).replace(/\{(\w+)\}/g, (_, n) => v[n] ?? '');
+  document.querySelectorAll('[data-t]').forEach(e => { e.textContent = tt(e.dataset.t); });
+  document.title = tt('title');
+  const $ = id => document.getElementById(id);
+  const num = id => Math.max(0, parseFloat(String($(id).value).replace(',', '.')) || 0);
+  const nf = (v, d = 0) => v.toLocaleString(SURVIVAL.lang, { maximumFractionDigits: d, minimumFractionDigits: d });
+
+  // ------------------------------------------------------------------ water
+  // drops per litre of clear water: Brazil MS 2 drops/L of 2-2.5%; US EPA 8 drops (6%) or 6 drops (8.25%) per gallon
+  const DOSE = { br: 2, us6: 8 / 3.785, us825: 6 / 3.785 };
+  function water() {
+    const p = $('w-product').value, litres = num('w-litres');
+    let drops = Math.ceil(litres * DOSE[p] * ($('w-cloudy').checked ? 2 : 1));
+    const parts = [tt('water.out', { d: nf(drops) })];
+    if (drops >= 48) parts.push(tt('water.tsp', { t: nf(drops / 64, 1) }));   // EPA: 8 drops = 1/8 teaspoon
+    $('w-out').textContent = parts.join(' — ') + ', ' + tt('water.wait');
+    $('w-source').textContent = tt(p === 'br' ? 'water.src.br' : 'water.src.us');
+  }
+  if (SURVIVAL.lang !== 'pt-BR') $('w-product').value = 'us6';
+  ['w-litres', 'w-product', 'w-cloudy'].forEach(id => ['input', 'change'].forEach(ev => $(id).addEventListener(ev, water)));
+  water();
+
+  // ------------------------------------------------------------------ supplies
+  function supplies() {
+    const a = Math.round(num('s-adults')), c = Math.round(num('s-children')), d = Math.round(num('s-days')) || 1;
+    const hot = $('s-hot').checked, litres = (a + c) * d * 4 * (hot ? 2 : 1), kcal = (a * 2000 + c * 1400) * d;
+    const out = $('s-out'); out.replaceChildren();
+    const line = (b, s) => { const p = document.createElement('p'); const strong = document.createElement('b'); strong.textContent = b; p.append(strong, document.createElement('br'), s); out.append(p); };
+    line(tt('sup.water', { l: nf(litres), g: nf(litres / 3.785, 1) }), tt('sup.waterhow', { hot: hot ? tt('sup.hotnote') : '' }));
+    // half the calories from rice (3,600 kcal/kg dry) and half from beans (3,400 kcal/kg dry); a 400 g can ~ 300 kcal
+    line(tt('sup.food', { k: nf(kcal) }), tt('sup.foodeg', { r: nf(kcal / 2 / 3600, 1), b: nf(kcal / 2 / 3400, 1), c: nf(Math.ceil(kcal / 300)) }));
+  }
+  ['s-adults', 's-children', 's-days', 's-hot'].forEach(id => ['input', 'change'].forEach(ev => $(id).addEventListener(ev, supplies)));
+  supplies();
+
+  // ------------------------------------------------------------------ signals
+  const MORSE = { a: '.-', b: '-...', c: '-.-.', d: '-..', e: '.', f: '..-.', g: '--.', h: '....', i: '..', j: '.---', k: '-.-', l: '.-..', m: '--',
+    n: '-.', o: '---', p: '.--.', q: '--.-', r: '.-.', s: '...', t: '-', u: '..-', v: '...-', w: '.--', x: '-..-', y: '-.--', z: '--..',
+    0: '-----', 1: '.----', 2: '..---', 3: '...--', 4: '....-', 5: '.....', 6: '-....', 7: '--...', 8: '---..', 9: '----.' };
+  // on/off steps in units: dot 1, dash 3, gap in a letter 1, between letters 3, between words 7
+  function morseSteps(text) {
+    const steps = [];
+    const words = text.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '').split(/\s+/).filter(Boolean);
+    words.forEach((w, wi) => {
+      [...w].map(ch => MORSE[ch]).filter(Boolean).forEach((code, li) => {
+        if (li) steps.push([false, 3]);
+        [...code].forEach((s, si) => { if (si) steps.push([false, 1]); steps.push([true, s === '.' ? 1 : 3]); });
+      });
+      if (wi < words.length - 1) steps.push([false, 7]);
+    });
+    return steps;
+  }
+  let running = null;   // { stop() }
+  const flash = $('flash');
+  let audio = null;
+  function tone(on) {   // a loud ~3 kHz tone (whistle pitch, where phone speakers are loudest)
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    if (audio.state === 'suspended') audio.resume();
+    if (!tone.osc) {
+      tone.osc = audio.createOscillator(); tone.gain = audio.createGain();
+      tone.osc.type = 'square'; tone.osc.frequency.value = 3100; tone.gain.gain.value = 0;
+      tone.osc.connect(tone.gain).connect(audio.destination); tone.osc.start();
+    }
+    tone.gain.gain.setTargetAtTime(on ? 0.9 : 0, audio.currentTime, 0.005);
+  }
+  async function wake() { try { return await navigator.wakeLock?.request('screen'); } catch { return null; } }
+  // play steps [on, units] again and again with light (screen) or sound, until stopped
+  function play(steps, unitMs, useLight, button, pauseUnits) {
+    if (running) { const was = running.button; running.stop(); if (was === button) return; }
+    if (!steps.length) return;
+    let alive = true, timer, lock;
+    const set = on => { if (useLight) flash.classList.toggle('on', on); else tone(on); };
+    if (useLight) { flash.hidden = false; flash.requestFullscreen?.().catch(() => {}); }
+    wake().then(l => lock = l);
+    const label = button.textContent; button.textContent = tt('sig.stop');
+    let i = 0;
+    const next = () => {
+      if (!alive) return;
+      if (i === steps.length) { i = 0; set(false); timer = setTimeout(next, pauseUnits * unitMs); return; }
+      const [on, units] = steps[i++]; set(on); timer = setTimeout(next, units * unitMs);
+    };
+    running = { button, stop() {
+      alive = false; clearTimeout(timer); set(false); running = null; button.textContent = label;
+      if (useLight) { flash.hidden = true; if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); }
+      lock?.release?.();
+    } };
+    next();
+  }
+  flash.addEventListener('click', () => running?.stop());
+  const SOS = morseSteps('sos');
+  $('b-flash').onclick = e => play(SOS, 250, true, e.currentTarget, 12);
+  $('b-sosbeep').onclick = e => play(SOS, 150, false, e.currentTarget, 14);
+  // three long blasts, then a pause
+  $('b-whistle').onclick = e => play([[true, 6], [false, 2], [true, 6], [false, 2], [true, 6]], 250, false, e.currentTarget, 16);
+  const showCode = () => { $('m-code').textContent = $('m-text').value.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '').split(/\s+/).map(w => [...w].map(c => MORSE[c] || '').join(' ')).join('  /  '); };
+  $('m-text').addEventListener('input', showCode); showCode();
+  $('b-mflash').onclick = e => play(morseSteps($('m-text').value), 300, true, e.currentTarget, 14);
+  $('b-mbeep').onclick = e => play(morseSteps($('m-text').value), 120, false, e.currentTarget, 14);
+
+  // ------------------------------------------------------------------ sun
+  // sun position: low-precision formulas from the Astronomical Almanac (about a minute for sunrise times)
+  function sunAt(date, lat, lon) {
+    const rad = Math.PI / 180, n = date.getTime() / 86400000 + 2440587.5 - 2451545.0;
+    const L = (280.460 + 0.9856474 * n) % 360, g = ((357.528 + 0.9856003 * n) % 360) * rad;
+    const lam = (L + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * rad, eps = (23.439 - 0.0000004 * n) * rad;
+    const ra = Math.atan2(Math.cos(eps) * Math.sin(lam), Math.cos(lam)), dec = Math.asin(Math.sin(eps) * Math.sin(lam));
+    const gmst = ((18.697374558 + 24.06570982441908 * n) % 24 + 24) % 24;
+    const H = (gmst * 15 + lon) * rad - ra, phi = lat * rad;
+    const el = Math.asin(Math.sin(phi) * Math.sin(dec) + Math.cos(phi) * Math.cos(dec) * Math.cos(H));
+    const az = Math.atan2(Math.sin(H), Math.cos(H) * Math.sin(phi) - Math.tan(dec) * Math.cos(phi)) / rad + 180;
+    return { el: el / rad, az: (az + 360) % 360 };
+  }
+  // sunrise / sunset (sun's top edge with refraction: -0.833°) and the highest point, minute by minute through today
+  function sunDay(lat, lon) {
+    const day = new Date(); day.setHours(0, 0, 0, 0);
+    let rise = null, set = null, noon = null, top = -99, prev = sunAt(day, lat, lon).el;
+    for (let m = 1; m <= 1440; m++) {
+      const t = new Date(day.getTime() + m * 60000), e = sunAt(t, lat, lon).el;
+      if (prev < -0.833 && e >= -0.833) rise = t;
+      if (prev >= -0.833 && e < -0.833) set = t;
+      if (e > top) { top = e; noon = t; }
+      prev = e;
+    }
+    return { rise, set, noon, top };
+  }
+  const dir = a => T.dirs[Math.round(a / 45) % 8];
+  const hm = d => d ? d.toLocaleTimeString(SURVIVAL.lang, { hour: '2-digit', minute: '2-digit' }) : '–';
+  const dur = ms => `${Math.floor(ms / 3600000)}h ${String(Math.floor(ms / 60000) % 60).padStart(2, '0')}m`;
+  function sun() {
+    const out = $('sun-out'); out.replaceChildren();
+    const lat = parseFloat($('c-lat').value), lon = parseFloat($('c-lon').value);
+    if (!isFinite(lat) || !isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) { $('c-from').textContent = tt('sun.none'); return; }
+    const d = sunDay(lat, lon), now = sunAt(new Date(), lat, lon);
+    const rows = [];
+    if (d.rise || d.set) {
+      rows.push([tt('sun.rise'), hm(d.rise)], [tt('sun.set'), hm(d.set)]);
+      if (d.rise && d.set && d.set > d.rise) rows.push([tt('sun.daylight'), dur(d.set - d.rise)]);
+      if (d.set && new Date() < d.set && (!d.rise || new Date() > d.rise)) rows.push([tt('sun.left'), dur(d.set - new Date())]);
+    } else rows.push(['', tt(d.top > 0 ? 'sun.polarday' : 'sun.polarnight')]);
+    rows.push([tt('sun.noon'), hm(d.noon)]);
+    rows.push([tt('sun.now'), now.el > -0.833 ? tt('sun.up', { a: Math.round(now.az), dir: dir(now.az), e: Math.round(now.el) }) : tt('sun.down')]);
+    const table = document.createElement('table');
+    for (const [k, v] of rows) { const tr = table.insertRow(); const th = document.createElement('th'); th.textContent = k; tr.append(th); tr.insertCell().textContent = v; }
+    const p = document.createElement('p'); p.className = 'muted';
+    const noonAz = sunAt(d.noon, lat, lon).az;
+    p.textContent = tt(noonAz < 90 || noonAz > 270 ? 'sun.noonnorth' : 'sun.noonsouth') + ' ' + tt('sun.clock');
+    out.append(table, p);
+  }
+  // coordinates: the last point tapped or found on the Map, unless typed here
+  try {
+    const pt = JSON.parse(SURVIVAL.store('map-point') || 'null');
+    if (pt) { $('c-lat').value = pt.lat.toFixed(4); $('c-lon').value = pt.lng.toFixed(4); $('c-from').textContent = tt('sun.from', { p: pt.title || `${pt.lat.toFixed(4)}, ${pt.lng.toFixed(4)}` }); }
+  } catch { }
+  ['c-lat', 'c-lon'].forEach(id => $(id).addEventListener('input', () => { $('c-from').textContent = ''; sun(); }));
+  if (window.isSecureContext && navigator.geolocation) {   // GPS: only on the computer itself (localhost)
+    $('b-gps').hidden = false;
+    $('b-gps').onclick = () => navigator.geolocation.getCurrentPosition(p => {
+      $('c-lat').value = p.coords.latitude.toFixed(4); $('c-lon').value = p.coords.longitude.toFixed(4); $('c-from').textContent = ''; sun();
+    }, () => {}, { enableHighAccuracy: true, timeout: 20000 });
+  }
+  sun();
+  setInterval(sun, 60000);
+
+  // ------------------------------------------------------------------ compass
+  $('b-compass').onclick = async () => {
+    const out = $('compass-out');
+    try { if (typeof DeviceOrientationEvent?.requestPermission === 'function') await DeviceOrientationEvent.requestPermission(); } catch { }
+    let got = false;
+    const show = e => {
+      // iPhone: webkitCompassHeading; Android: alpha of the absolute event counts anticlockwise from north
+      const h = e.webkitCompassHeading ?? (e.absolute && e.alpha != null ? 360 - e.alpha : null);
+      if (h == null) return;
+      got = true;
+      out.textContent = tt('sun.compass.heading', { a: Math.round(h) % 360, dir: dir(h) });
+    };
+    window.addEventListener('deviceorientationabsolute', show);
+    window.addEventListener('deviceorientation', show);
+    setTimeout(() => { if (!got) out.textContent = tt('sun.compass.none'); }, 2500);
+  };
+})();
+</script>
+</body>
+</html>
