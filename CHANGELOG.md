@@ -12,6 +12,13 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.13.0 (2026-11-02)
+
+- **Low power mode.**
+  - **⚡ Low power** switch on the home page: dark pages (less power on phone screens), the chat answers without the library lookup (it can still be ticked), and answers are capped at 400 words.
+  - **On battery, the start files pick the smallest model** (Llama-3.2-1B) as the default and say so. Windows checks the battery with Win32_Battery, Mac with `pmset`, Linux with `/sys/class/power_supply`.
+  - The home page shows the **battery level and time left** where the browser tells it (the computer itself), and suggests low power once when running on battery.
+
 ## 1.12.0 (2026-11-02)
 
 - **Check the kit** on the My kit page: **▶ Test everything** starts each part and checks that it really answers, then shows ✓ works, ✗ problem (with what to do) or – not on this kit. It checks:

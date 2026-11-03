@@ -64,9 +64,19 @@ const SURVIVAL = (() => {
     }
   }
 
+  // ---- low power (home page switch): dark pages, no library lookup and shorter answers in the chat
+  const lowPower = () => store('lowpower') === '1';
+  function setLowPower(on) {
+    store('lowpower', on ? '1' : '0');
+    const theme = on ? 'dark' : (store('theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+    document.documentElement.dataset.theme = theme;
+    document.dispatchEvent(new CustomEvent('themechange', { detail: theme }));
+  }
+
   function initTheme() {
     const saved = store('theme');
     if (saved) document.documentElement.dataset.theme = saved;
+    if (lowPower()) document.documentElement.dataset.theme = 'dark';   // dark screens use less power on phones
     const btn = document.querySelector('.theme-btn');
     if (!btn) return;
     btn.addEventListener('click', () => {
@@ -119,5 +129,5 @@ const SURVIVAL = (() => {
   initTheme();
   applyI18n();
   showVersion();
-  return { served, host, ai, library, up, store, lang, dict, t, isDark };
+  return { served, host, ai, library, up, store, lang, dict, t, isDark, lowPower, setLowPower };
 })();

@@ -82,9 +82,17 @@ for i in "${!MODELS[@]}"; do
   if [ -f "$ROOT/models/mmproj/$(basename "${MODELS[$i]}")" ]; then echo "   $((i + 1)). $name   [photos / fotos]"; else echo "   $((i + 1)). $name"; fi
   case "$name" in *Qwen3-4B*) DEF=$((i + 1)) ;; esac
 done
+# on battery, the smallest model is the default: it uses far less power
+ONBATTERY=
+if [ "$(uname -s)" = Darwin ]; then pmset -g batt 2>/dev/null | grep -q "'Battery Power'" && ONBATTERY=1
+else grep -qs Discharging /sys/class/power_supply/BAT*/status && ONBATTERY=1; fi
+if [ -n "$ONBATTERY" ]; then
+  for i in "${!MODELS[@]}"; do case "$(basename "${MODELS[$i]}")" in *Llama-3.2-1B*) DEF=$((i + 1)) ;; esac; done
+fi
 PICK=$DEF
 if [ ${#MODELS[@]} -gt 1 ]; then
   echo
+  [ -n "$ONBATTERY" ] && echo " On battery: the smallest model is picked to save power.  /  Na bateria: o menor modelo foi escolhido para economizar."
   echo " Old or slow computer? Pick Llama-3.2-1B.  /  Computador antigo ou lento? Escolha Llama-3.2-1B."
   read -r -t 10 -p "  Choose AI model / Modelo de IA [1-${#MODELS[@]}] (default $DEF): " PICK
   [[ "$PICK" =~ ^[0-9]+$ ]] && [ "$PICK" -ge 1 ] && [ "$PICK" -le ${#MODELS[@]} ] || PICK=$DEF

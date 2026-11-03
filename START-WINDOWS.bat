@@ -51,10 +51,21 @@ for %%f in (models\*.gguf) do (
   echo %%~nf | findstr /i "Qwen3-4B" >nul && set def=!n!
 )
 if %n%==0 goto noai
+rem on battery, the smallest model is the default: it uses far less power
+set "ONBATTERY="
+for /f %%b in ('%SYS%\WindowsPowerShell\v1.0\powershell.exe -NoProfile -Command "if (Get-CimInstance Win32_Battery -ErrorAction SilentlyContinue | Where-Object BatteryStatus -eq 1) { Write-Output yes }"') do set "ONBATTERY=%%b"
+if defined ONBATTERY (
+  set n2=0
+  for %%f in (models\*.gguf) do (
+    set /a n2+=1
+    echo %%~nf | findstr /i "Llama-3.2-1B" >nul && set def=!n2!
+  )
+)
 set keys=123456789
 set keys=!keys:~0,%n%!
 if %n% GTR 1 (
   echo.
+  if defined ONBATTERY echo  On battery: the smallest model is picked to save power.  /  Na bateria: o menor modelo foi escolhido para economizar.
   echo  Old or slow computer? Pick Llama-3.2-1B.  /  Computador antigo ou lento? Escolha Llama-3.2-1B.
   "%SYS%\choice.exe" /c !keys! /t 10 /d !def! /n /m "  AI model / Modelo de IA [1-%n%] (default/padrao !def!): "
   set pick=!errorlevel!

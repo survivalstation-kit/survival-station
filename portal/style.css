@@ -43,6 +43,9 @@ h2 { font-size: 20px; margin: 32px 0 12px; }
 .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; padding: 4px 10px; border-radius: 999px; background: var(--surface-2); color: var(--muted); }
 .pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
 .pill.ok::before { background: var(--ok); } .pill.bad::before { background: var(--bad); }
+.pill[hidden] { display: none; }
+button.pill { border: 0; font: inherit; font-size: 14px; cursor: pointer; }
+button.pill:hover { color: var(--text); }
 
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)); gap: 12px; }
 .tile { display: block; text-decoration: none; color: var(--text); background: var(--surface); border: 1px solid var(--line);

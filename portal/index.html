@@ -31,7 +31,10 @@
   <div class="status">
     <span class="pill" id="st-ai" data-i18n="st.ai.checking"></span>
     <span class="pill" id="st-lib" data-i18n="st.lib.checking"></span>
+    <span class="pill" id="st-batt" hidden></span>
+    <button class="pill power" type="button" id="st-power"></button>
   </div>
+  <p class="muted" id="power-note" hidden></p>
 
   <h2 data-i18n="home.start">Start here</h2>
   <div class="grid">
@@ -117,6 +120,33 @@
       $('docs').replaceChildren(ul);
     }
   } catch { /* opened as a file, or no index yet: keep the hint */ }
+
+  // low power switch, and the battery where the browser tells it (on the computer itself)
+  const power = () => {
+    const on = SURVIVAL.lowPower();
+    $('st-power').textContent = t(on ? 'power.on' : 'power.off');
+    $('st-power').classList.toggle('ok', on);
+    $('power-note').textContent = on ? t('power.note') : '';
+    $('power-note').hidden = !on;
+  };
+  $('st-power').onclick = () => { SURVIVAL.setLowPower(!SURVIVAL.lowPower()); power(); };
+  power();
+  try {
+    const b = await navigator.getBattery?.();
+    if (b) {
+      const show = () => {
+        const left = !b.charging && isFinite(b.dischargingTime) ? ` · ${Math.floor(b.dischargingTime / 3600)}h ${String(Math.floor(b.dischargingTime / 60) % 60).padStart(2, '0')}m` : '';
+        $('st-batt').textContent = `${b.charging ? '🔌' : '🔋'} ${Math.round(b.level * 100)}%${left}`;
+        $('st-batt').classList.toggle('bad', !b.charging && b.level < 0.2);
+        // computers with no battery report "plugged in, full": nothing worth showing
+        $('st-batt').hidden = b.charging && b.level === 1 && b.chargingTime === 0;
+        // on battery and not saving yet: suggest it once
+        if (!b.charging && !SURVIVAL.lowPower() && SURVIVAL.store('power-asked') !== '1') { $('power-note').textContent = t('power.suggest'); $('power-note').hidden = false; SURVIVAL.store('power-asked', '1'); }
+      };
+      b.addEventListener('levelchange', show); b.addEventListener('chargingchange', show); b.addEventListener('dischargingtimechange', show);
+      show();
+    }
+  } catch { }
 
   // QR code of the kit's address, for phones on the same hotspot or Wi-Fi. On the computer itself the page
   // is on localhost, so the start file writes the network addresses to kit-address.json; on a phone, the

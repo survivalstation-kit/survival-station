@@ -59,7 +59,7 @@ let busy = null;   // AbortController of the running reply
 
 try { history = JSON.parse(SURVIVAL.store(CHAT_KEY) || '[]'); } catch { history = []; }
 const save = () => SURVIVAL.store(CHAT_KEY, JSON.stringify(history.slice(-40)));
-useLib.checked = SURVIVAL.store('uselib') !== '0';
+useLib.checked = SURVIVAL.store('uselib') !== '0' && !SURVIVAL.lowPower();   // low power: no lookup unless ticked here
 useLib.onchange = () => SURVIVAL.store('uselib', useLib.checked ? '1' : '0');
 // a question handed over from the search page: filled in, not sent, so it can be edited first
 const handed = new URLSearchParams(location.search).get('q');
@@ -238,6 +238,7 @@ async function ask() {
       body: JSON.stringify({
         messages: [{ role: 'system', content: system }, ...turns],
         stream: true, temperature: 0.4,
+        ...(SURVIVAL.lowPower() ? { max_tokens: 400 } : {}),   // low power: shorter answers
         chat_template_kwargs: { enable_thinking: false },   // Qwen3: answer directly, much faster on CPUs
       }),
     });
