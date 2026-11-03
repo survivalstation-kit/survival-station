@@ -25,9 +25,35 @@
   <h1 data-t="title"></h1>
   <p class="lede" data-t="lede"></p>
   <nav class="toc">
-    <a href="#water" data-t="water.h"></a><a href="#supplies" data-t="sup.h"></a>
+    <a href="#cpr" data-t="cpr.h"></a><a href="#water" data-t="water.h"></a><a href="#supplies" data-t="sup.h"></a>
     <a href="#signal" data-t="sig.h"></a><a href="#sun" data-t="sun.h"></a>
   </nav>
+
+  <section class="card" id="cpr">
+    <h2 data-t="cpr.h"></h2>
+    <p data-t="cpr.first"></p>
+    <div class="form">
+      <label><span data-t="cpr.mode"></span>
+        <select id="cpr-mode">
+          <option value="30" data-t="cpr.m30"></option>
+          <option value="0" data-t="cpr.mhands"></option>
+        </select></label>
+    </div>
+    <div class="cpr">
+      <div class="cpr-beat" id="cpr-beat"><span id="cpr-count">–</span></div>
+      <div class="cpr-side">
+        <button class="btn" type="button" id="cpr-go" data-t="cpr.start"></button>
+        <p class="cpr-say" id="cpr-say"></p>
+        <p class="muted" id="cpr-time"></p>
+      </div>
+    </div>
+    <ul>
+      <li data-t="cpr.how1"></li>
+      <li data-t="cpr.how2"></li>
+      <li data-t="cpr.how3"></li>
+      <li data-t="cpr.how4"></li>
+    </ul>
+  </section>
 
   <section class="card" id="water">
     <h2 data-t="water.h"></h2>
@@ -115,6 +141,14 @@
   const TXT = {
     en: {
       title: 'Tools', lede: 'Calculators and signals that work without the AI or the internet. Check the numbers against the emergency cards when you can.',
+      'cpr.h': 'CPR rhythm', 'cpr.first': 'Not breathing normally? Shout for help and send someone to call for emergency help and bring a defibrillator (AED). Then start: this keeps you at the right speed, about 110 pushes a minute.',
+      'cpr.mode': 'How', 'cpr.m30': '30 pushes, 2 breaths (trained)', 'cpr.mhands': 'Hands-only: push without stopping',
+      'cpr.start': '▶ Start the rhythm', 'cpr.stop': '⏹ Stop', 'cpr.push': 'Push on every beat', 'cpr.breaths': 'Give 2 breaths now',
+      'cpr.swap': 'Two minutes: swap with another person if you can, without stopping for long.', 'cpr.time': 'Time: {t} · rounds: {n}',
+      'cpr.how1': 'Centre of the chest, on the lower half of the breastbone. Heel of one hand, the other hand on top, arms straight.',
+      'cpr.how2': 'Push hard and fast: 5–6 cm deep for an adult, and let the chest come all the way back up after each push.',
+      'cpr.how3': 'Breaths (only if trained and willing): tilt the head back, lift the chin, pinch the nose, one second each, watch the chest rise.',
+      'cpr.how4': 'Don\'t stop until help takes over, an AED tells you to, the person starts breathing normally, or you are too exhausted to go on. Children: 30:2 too, about 5 cm deep, one hand if small.',
       'water.h': 'Make water safe with bleach', 'water.litres': 'Litres of water', 'water.product': 'Product',
       'water.br': 'Água sanitária / bleach 2–2.5% (Brazil)', 'water.us6': 'Household bleach 6% (US)', 'water.us825': 'Concentrated bleach 8.25% (US)',
       'water.cloudy': 'Cloudy, coloured or very cold water',
@@ -150,6 +184,14 @@
     },
     'pt-BR': {
       title: 'Ferramentas', lede: 'Calculadoras e sinais que funcionam sem IA e sem internet. Quando puder, confira os números com os cartões de emergência.',
+      'cpr.h': 'Ritmo da RCP (massagem cardíaca)', 'cpr.first': 'Não respira normalmente? Grite por ajuda e mande alguém chamar o SAMU (192) e trazer um desfibrilador (DEA). Depois comece: isto mantém a velocidade certa, cerca de 110 compressões por minuto.',
+      'cpr.mode': 'Como', 'cpr.m30': '30 compressões, 2 ventilações (treinado)', 'cpr.mhands': 'Só com as mãos: comprimir sem parar',
+      'cpr.start': '▶ Iniciar o ritmo', 'cpr.stop': '⏹ Parar', 'cpr.push': 'Comprima a cada batida', 'cpr.breaths': 'Faça 2 ventilações agora',
+      'cpr.swap': 'Dois minutos: troque com outra pessoa se puder, sem parar por muito tempo.', 'cpr.time': 'Tempo: {t} · ciclos: {n}',
+      'cpr.how1': 'Centro do peito, na metade de baixo do osso esterno. Base de uma mão, a outra mão por cima, braços esticados.',
+      'cpr.how2': 'Comprima forte e rápido: 5 a 6 cm de profundidade num adulto, e deixe o peito voltar totalmente depois de cada compressão.',
+      'cpr.how3': 'Ventilações (só se for treinado e quiser): incline a cabeça para trás, levante o queixo, tampe o nariz, um segundo cada, veja o peito subir.',
+      'cpr.how4': 'Não pare até o socorro assumir, o DEA mandar, a pessoa voltar a respirar normalmente ou você não aguentar mais. Crianças: também 30:2, cerca de 5 cm, uma mão só se for pequena.',
       'water.h': 'Tornar a água segura com água sanitária', 'water.litres': 'Litros de água', 'water.product': 'Produto',
       'water.br': 'Água sanitária / hipoclorito 2–2,5% (Brasil)', 'water.us6': 'Alvejante 6% (EUA)', 'water.us825': 'Alvejante concentrado 8,25% (EUA)',
       'water.cloudy': 'Água turva, com cor ou muito fria',
@@ -191,6 +233,55 @@
   const $ = id => document.getElementById(id);
   const num = id => Math.max(0, parseFloat(String($(id).value).replace(',', '.')) || 0);
   const nf = (v, d = 0) => v.toLocaleString(SURVIVAL.lang, { maximumFractionDigits: d, minimumFractionDigits: d });
+
+  // ------------------------------------------------------------------ CPR rhythm
+  // 110 a minute (guidelines: 100-120). 30:2 stops 6 seconds for two breaths; hands-only never stops.
+  // Timed against the audio clock, so it stays steady even when the page is busy.
+  let cpr = null;
+  function click(at, high) {
+    const ctx = audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.frequency.value = high ? 1500 : 900; o.type = 'square';
+    g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(0.8, at + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, at + (high ? 0.35 : 0.06));
+    o.connect(g).connect(ctx.destination); o.start(at); o.stop(at + 0.4);
+  }
+  $('cpr-go').onclick = async () => {
+    if (cpr) { cpr.stop(); return; }
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    if (audio.state === 'suspended') await audio.resume();
+    const per = Number($('cpr-mode').value), beat = 60 / 110;
+    let n = 0, rounds = 0, next = audio.currentTime + 0.3, pause = 0, timer, lock = await wake();
+    const start = Date.now(), say = $('cpr-say'), count = $('cpr-count'), ring = $('cpr-beat');
+    say.textContent = tt('cpr.push');
+    const tick = () => {
+      // schedule the beats due in the next 200 ms, and show each one as it sounds
+      while (next < audio.currentTime + 0.2) {
+        const at = next;
+        if (pause) {   // the breaths: one tone, then wait
+          click(at, true);
+          setTimeout(() => { say.textContent = tt('cpr.breaths'); count.textContent = '💨'; ring.classList.remove('beat'); }, Math.max(0, (at - audio.currentTime) * 1000));
+          next += 6; pause = 0; n = 0; rounds++;
+          continue;
+        }
+        n++;
+        const shown = n;
+        click(at, false);
+        setTimeout(() => {
+          if (!cpr) return;
+          count.textContent = per ? shown : '•'; say.textContent = tt('cpr.push');
+          ring.classList.remove('beat'); void ring.offsetWidth; ring.classList.add('beat');
+          const s = Math.floor((Date.now() - start) / 1000);
+          $('cpr-time').textContent = tt('cpr.time', { t: `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`, n: rounds });
+          if (s >= 120 && s % 120 < 4) say.textContent = tt('cpr.swap');   // every 2 minutes, for a few seconds
+        }, Math.max(0, (at - audio.currentTime) * 1000));
+        next += beat;
+        if (per && n === per) pause = 1;
+      }
+    };
+    timer = setInterval(tick, 50); tick();
+    $('cpr-go').textContent = tt('cpr.stop');
+    cpr = { stop() { clearInterval(timer); cpr = null; lock?.release?.(); $('cpr-go').textContent = tt('cpr.start'); say.textContent = ''; count.textContent = '–'; ring.classList.remove('beat'); } };
+  };
 
   // ------------------------------------------------------------------ water
   // drops per litre of clear water: Brazil MS 2 drops/L of 2-2.5%; US EPA 8 drops (6%) or 6 drops (8.25%) per gallon

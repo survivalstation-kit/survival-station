@@ -12,6 +12,17 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.10.0 (2026-11-02)
+
+- **CPR rhythm** at the top of the Tools page:
+  - a click and a pulsing circle at 110 compressions a minute (guidelines: 100–120);
+  - **30:2** mode counts to 30, then says "Give 2 breaths now" for 6 seconds, then starts again;
+  - **hands-only** mode never stops;
+  - a reminder every 2 minutes to swap rescuers;
+  - the steps (where to push, how deep, when to stop), and the screen kept awake where allowed.
+
+  Timed against the audio clock: measured at 110.1 a minute, with a 6.0-second breath pause.
+
 ## 1.9.0 (2026-11-02)
 
 - **The AI can look at photos.**
