@@ -131,6 +131,14 @@ body.map-page { display: flex; flex-direction: column; height: 100vh; height: 10
 .tools .buttons { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
 .tools h3 { margin: 16px 0 6px; }
 .flash { position: fixed; inset: 0; z-index: 100; background: #000; display: flex; align-items: flex-end; justify-content: center; cursor: pointer; }
+.checks { border-collapse: collapse; width: 100%; font-size: 15px; }
+.checks td { padding: 6px 6px; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
+.checks td:first-child { width: 1.6em; font-weight: 700; }
+.checks td:nth-child(2) { font-weight: 600; width: 38%; }
+.checks td:nth-child(3) { color: var(--muted); }
+.checks tr.ok td:first-child, .checks td.ok { color: var(--ok); }
+.checks tr.bad td:first-child, .checks td.bad { color: var(--bad); font-weight: 600; }
+.checks tr.na td:first-child { color: var(--muted); }
 .qr { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
 .qr[hidden] { display: none; }
 .qr #qr-code { width: 180px; height: 180px; background: #fff; padding: 6px; border-radius: 10px; flex: none; }

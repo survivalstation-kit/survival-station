@@ -31,6 +31,13 @@
     <p class="muted" id="progress-text"></p>
   </section>
 
+  <section class="card" id="selftest">
+    <h2 id="test-title"></h2>
+    <p id="test-intro"></p>
+    <p><button class="btn" type="button" id="test-go"></button></p>
+    <table class="checks" id="test-list"></table>
+  </section>
+
   <section class="card" id="manage">
     <h2 id="manage-title"></h2>
     <div id="manage-body"></div>
@@ -168,6 +175,113 @@
   }
   // with the helper, keep the inventory and build progress live
   refresh().then(live => { if (live) setInterval(() => { if (!document.hidden) refresh(); }, 5000); });
+
+  // ---- check the kit: start each part and see that it really answers (any device; some checks only on the computer)
+  $('test-title').textContent = L('Check the kit', 'Testar o kit');
+  $('test-intro').textContent = L('Tests that each part really starts and answers: worth doing after building or copying a kit, and before you store it. Takes about a minute.',
+                                  'Testa se cada parte realmente inicia e responde: vale fazer depois de montar ou copiar um kit, e antes de guardá-lo. Leva cerca de um minuto.');
+  $('test-go').textContent = L('▶ Test everything', '▶ Testar tudo');
+  const timed = (url, opts = {}, ms = 15000) => { const c = new AbortController(); const t = setTimeout(() => c.abort(), ms); return fetch(url, { ...opts, signal: c.signal }).finally(() => clearTimeout(t)); };
+  const json = async (url, opts, ms) => { const r = await timed(url, opts, ms); if (!r.ok) throw new Error(r.status); return r.json(); };
+  const host = location.hostname;
+  // [name, test] - a test returns [true | false | null (not on this kit / not here), detail]
+  const CHECKS = [
+    [L('Pages', 'Páginas'), async () => [true, 'v' + (window.SURVIVAL_VERSION?.version || '?')]],
+    [L('AI answers', 'A IA responde'), async () => {
+      const m = await json(SURVIVAL.ai + '/v1/models');
+      const t0 = performance.now();
+      const r = await json(SURVIVAL.ai + '/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: [{ role: 'user', content: 'Reply with just: OK' }], max_tokens: 8, chat_template_kwargs: { enable_thinking: false } }) }, 120000);
+      const speed = r.timings?.predicted_per_second;
+      return [!!r.choices?.[0]?.message, `${(m.data?.[0]?.id || '').split(/[\\/]/).pop()} · ${((performance.now() - t0) / 1000).toFixed(1)} s` + (speed ? ` · ${speed.toFixed(1)} ${L('words/s', 'palavras/s')}` : '')];
+    }, L('is the "AI server" window open? Try a smaller model', 'a janela "AI server" está aberta? Tente um modelo menor')],
+    [L('Photos (AI looks at pictures)', 'Fotos (a IA olha imagens)'), async () => {
+      const p = await json(SURVIVAL.ai + '/props');
+      return p.modalities?.vision ? [true, L('this model can look at photos', 'este modelo olha fotos')] : [null, L('this model can\'t: start the kit with the [photos / fotos] model', 'este modelo não olha: inicie o kit com o modelo [photos / fotos]')];
+    }],
+    [L('Library', 'Biblioteca'), async () => {
+      const x = new DOMParser().parseFromString(await (await timed(SURVIVAL.library + '/catalog/v2/entries?count=-1')).text(), 'application/xml');
+      const n = x.querySelectorAll('entry').length;
+      return [n > 0, L(`${n} books`, `${n} livros`)];
+    }, L('is the "Library server" window open? Close the kit and start it again', 'a janela "Library server" está aberta? Feche o kit e inicie de novo')],
+    [L('Library search and articles', 'Busca e artigos da biblioteca'), async () => {
+      const x = new DOMParser().parseFromString(await (await timed(`${SURVIVAL.library}/search?format=xml&pageLength=3&books.filter.lang=${SURVIVAL.dict._kiwix}&pattern=water%20agua`)).text(), 'application/xml');
+      const link = x.querySelector('item > link')?.textContent;
+      if (!link) return [false, L('no results for "water"', 'nenhum resultado para "água"')];
+      const a = await timed(SURVIVAL.library + link);
+      return [a.ok, x.querySelector('item > title')?.textContent];
+    }, L('the library server isn\'t running', 'o servidor da biblioteca não está rodando')],
+    [L('Map', 'Mapa'), async () => {
+      const maps = await json('maps/index.json', { cache: 'no-store' });
+      const out = [];
+      for (const m of maps) {
+        let ok;
+        if (m.size >= 2147483648 - 1048576) {   // big maps come from the map server on Windows (see map.html)
+          const direct = await timed('maps/' + encodeURIComponent(m.file), { headers: { Range: 'bytes=0-126' } }).then(r => r.status === 206).catch(() => false);
+          ok = direct || await timed(`${location.protocol}//${host}:8092/${encodeURIComponent(m.name)}/0/0/0.mvt`).then(r => r.ok).catch(() => false);
+        } else ok = await timed('maps/' + encodeURIComponent(m.file), { headers: { Range: 'bytes=0-126' } }).then(r => r.status === 206).catch(() => false);
+        out.push((ok ? '✓ ' : '✗ ') + m.name);
+        if (!ok && m.size >= 2147483648 - 1048576) out.big = true;
+      }
+      return [!out.some(s => s.startsWith('✗')), out.join(', ') + (out.big
+        ? L(' — maps over 2 GB need the "Map server" window: run Verify / repair, then start the kit again', ' — mapas acima de 2 GB precisam da janela "Map server": rode Verificar / reparar e inicie o kit de novo') : '')];
+    }],
+    [L('Place search on the map', 'Busca de lugares no mapa'), async () => {
+      const r = await timed('maps/places/version.txt', { cache: 'no-store' });
+      return r.ok ? [true, L('ready', 'pronta')] : [false, L('missing: run Verify / repair (needs internet)', 'falta: rode Verificar / reparar (precisa de internet)')];
+    }],
+    ['Survival-Data', async () => {
+      const r = await timed('survival-data/index.html');
+      if (!r.ok) return [null, L('not on this kit', 'não está no kit')];
+      const idx = await timed('survival-data/search-index/docs.json').then(r => r.ok).catch(() => false);
+      return [idx, idx ? L('guides and search inside them', 'guias e busca dentro deles') : L('search inside the PDFs missing: run Verify / repair', 'falta a busca dentro dos PDFs: rode Verificar / reparar')];
+    }],
+    [L('Emergency cards', 'Cartões de emergência'), async () => { const r = await timed(SURVIVAL.dict._cards); return [r.ok, SURVIVAL.dict._cards]; }],
+    [L('Read answers aloud', 'Ler respostas em voz alta'), async () => {
+      if (!('speechSynthesis' in window)) return [null, L('this browser can\'t', 'este navegador não consegue')];
+      let v = speechSynthesis.getVoices();
+      if (!v.length) { await new Promise(r => setTimeout(r, 1000)); v = speechSynthesis.getVoices(); }
+      const mine = v.filter(x => x.lang.startsWith(SURVIVAL.lang.slice(0, 2)));
+      return mine.length ? [true, mine[0].name] : [null, L('no voice for this language on this device: add one in its settings', 'nenhuma voz neste idioma no aparelho: adicione uma nas configurações')];
+    }],
+    [L('Speak questions (voice)', 'Falar as perguntas (voz)'), async () => {
+      if (!onThisComputer) return [null, L('on phones, dictate with the keyboard microphone', 'no celular, dite pelo microfone do teclado')];
+      const ok = await timed(`${location.protocol}//${host}:8093/`).then(r => r.ok).catch(() => false);
+      return ok ? [true, L('speech server running', 'servidor de voz rodando')] : [null, L('not installed: tick Voice in MAKE-USB.bat', 'não instalada: marque Voz no MAKE-USB.bat')];
+    }],
+    [L('Phones can connect', 'Celulares conseguem conectar'), async () => {
+      if (!onThisComputer) return [true, L('this device is connected', 'este aparelho está conectado')];
+      const a = await json('kit-address.json', { cache: 'no-store' }).catch(() => null);
+      return a?.ips?.length ? [true, a.ips.map(ip => `http://${ip}:${a.port}/`).join('  ')] : [false, L('no network: turn on a phone hotspot and connect this computer to it', 'sem rede: ligue o roteador de um celular e conecte este computador a ele')];
+    }],
+  ];
+  $('test-go').onclick = async () => {
+    const btn = $('test-go'), table = $('test-list');
+    btn.disabled = true; table.replaceChildren();
+    const rows = CHECKS.map(([name]) => {
+      const tr = table.insertRow(); tr.className = 'wait';
+      tr.insertCell().textContent = '⏳'; tr.insertCell().textContent = name; tr.insertCell().textContent = '';
+      return tr;
+    });
+    let bad = 0;
+    for (let i = 0; i < CHECKS.length; i++) {
+      let res;
+      try { res = await CHECKS[i][1](); }
+      catch (e) {
+        res = [false, (e.name === 'AbortError' ? L('no answer (timed out)', 'sem resposta (tempo esgotado)') : L('not answering', 'não responde'))
+          + (CHECKS[i][2] ? ': ' + CHECKS[i][2] : '')];
+      }
+      const [ok, detail] = res;
+      rows[i].className = ok === true ? 'ok' : ok === false ? 'bad' : 'na';
+      rows[i].cells[0].textContent = ok === true ? '✓' : ok === false ? '✗' : '–';
+      rows[i].cells[2].textContent = detail || '';
+      if (ok === false) bad++;
+    }
+    const sum = table.insertRow(); const c = sum.insertCell(); c.colSpan = 3; c.className = bad ? 'bad' : 'ok';
+    c.textContent = bad ? L(`${bad} problem(s). Fix them with Verify / repair (MAKE-USB.bat), then test again.`, `${bad} problema(s). Corrija com Verificar / reparar (MAKE-USB.bat) e teste de novo.`)
+                        : L('Everything that is on this kit works.', 'Tudo o que está neste kit funciona.');
+    btn.disabled = false;
+  };
 })();
 </script>
 </body>

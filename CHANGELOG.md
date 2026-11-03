@@ -12,6 +12,19 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.12.0 (2026-11-02)
+
+- **Check the kit** on the My kit page: **▶ Test everything** starts each part and checks that it really answers, then shows ✓ works, ✗ problem (with what to do) or – not on this kit. It checks:
+  - the pages' version;
+  - the AI, with its speed;
+  - photos;
+  - the library and an article from it;
+  - every map, including the over-2 GB ones through the map server;
+  - place search, Survival-Data and its PDF search, and the emergency cards;
+  - read-aloud voices, the voice server, and the addresses phones can use.
+
+  It works on phones too. Worth doing after building or copying a kit, and before storing it. Tested: every part passed with everything running, and with the library or map server stopped it reported exactly those.
+
 ## 1.11.0 (2026-11-02)
 
 - **QR code for phones** on the home page ("Use it on a phone"): point a phone camera at it to open the kit, with nothing to type.
