@@ -185,7 +185,29 @@ mark { background: #ffe08a; color: #1d1b16; border-radius: 3px; padding: 0 1px; 
 .empty { max-width: 760px; margin: 8vh auto 16px; padding: 0 16px; color: var(--muted); }
 .empty h1 { color: var(--text); }
 
+.plan-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px 12px; align-items: end; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.plan-row label { display: flex; flex-direction: column; gap: 3px; font-size: 14px; color: var(--muted); }
+.plan-row label.wide { grid-column: span 2; }
+.plan-row input, .plan-row textarea, .plan #pw { font: inherit; font-size: 15px; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; min-width: 0; }
+.plan-row textarea { resize: vertical; }
+.plan-row > .btn { justify-self: start; }
+.plan .buttons { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.printout { display: none; }
+p.warn { color: var(--warn); font-weight: 600; }
+.copy-row input.pw { font: inherit; font-size: 15px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--text); min-width: 0; }
+.print-choices { display: flex; flex-direction: column; }
+.print-choices .uselib { margin: 4px 0; padding: 0; font-size: 15px; color: var(--text); }
+.print-part { border-top: 2px dashed var(--line); padding-top: 10px; margin-top: 16px; }
+.print-part table { border-collapse: collapse; width: 100%; margin: 6px 0 14px; }
+.print-part th, .print-part td { border: 1px solid var(--line); padding: 4px 6px; text-align: left; vertical-align: top; white-space: pre-wrap; }
+@media (max-width: 420px) { .plan-row label.wide { grid-column: auto; } }
 @media print {
+  [data-page=plan] main, [data-page=plan] header.top { display: none; }
+  .no-print { display: none; }
+  .print-part + .print-part { break-before: page; }
+  .printout { display: block; }
+  .printout table { border-collapse: collapse; width: 100%; margin: 6px 0 14px; }
+  .printout th, .printout td { border: 1px solid #999; padding: 4px 6px; text-align: left; vertical-align: top; white-space: pre-wrap; font-size: 12px; }
   header.top, nav, .toc, .theme-btn, footer { display: none; }
   .card { break-inside: avoid; border-color: #999; }
   body { background: #fff; color: #000; }

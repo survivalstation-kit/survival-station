@@ -38,6 +38,11 @@
     <table class="checks" id="test-list"></table>
   </section>
 
+  <section class="card" id="private">
+    <h2 id="priv-title"></h2>
+    <div id="priv-body"></div>
+  </section>
+
   <section class="card" id="manage">
     <h2 id="manage-title"></h2>
     <div id="manage-body"></div>
@@ -160,15 +165,63 @@
     return st;
   }
 
+  // ---- private documents (setup\private-docs.ps1 through the helper): the kit's private\ folder, locked
+  $('priv-title').textContent = L('🔒 Private documents', '🔒 Documentos privados');
+  let privShown = false;
+  function showPrivate(pv) {
+    const box = $('priv-body');
+    if (!pv) {
+      box.replaceChildren(el('p', onThisComputer
+        ? L('Put IDs, insurance papers and other personal files in the "private" folder on the kit and lock them with PRIVATE-DOCS.bat (Mac/Linux: bash launch/private-docs.sh). Phones on the hotspot can never see that folder.',
+            'Ponha documentos, papéis do seguro e outros arquivos pessoais na pasta "private" do kit e tranque com PRIVATE-DOCS.bat (Mac/Linux: bash launch/private-docs.sh). Celulares no roteador nunca veem essa pasta.')
+        : L('Private documents can only be opened on the computer running the kit, with the password. They are never sent to phones.',
+            'Documentos privados só abrem no computador que roda o kit, com a senha. Eles nunca são enviados aos celulares.')));
+      return;
+    }
+    const status = el('p');
+    const waiting = pv.plain.length ? L(` · ${pv.plain.length} not locked yet: ${pv.plain.join(', ')}`, ` · ${pv.plain.length} ainda sem trancar: ${pv.plain.join(', ')}`) : '';
+    status.textContent = L(`${pv.locked} locked file(s)`, `${pv.locked} arquivo(s) trancado(s)`) + waiting + (pv.opened ? L(` · open on this computer (${pv.opened})`, ` · abertos neste computador (${pv.opened})`) : '');
+    if (pv.plain.length) status.className = 'warn';
+    if (privShown) { box.querySelector('p').replaceWith(status); return; }
+    privShown = true;
+    const intro = el('p', L('Personal files (IDs, insurance, the family plan) go in the kit\'s "private" folder, which phones on the hotspot can never see. Lock them with a password: write it down somewhere safe, because without it they can\'t be opened. Open them only on a computer you trust; closing deletes the opened copies from it.',
+      'Arquivos pessoais (documentos, seguros, o plano da família) ficam na pasta "private" do kit, que os celulares no roteador nunca veem. Tranque com uma senha: anote num lugar seguro, porque sem ela não abrem. Abra só num computador de confiança; fechar apaga as cópias abertas dele.'), 'muted');
+    const pw = el('input'); pw.type = 'password'; pw.placeholder = L('Password (6+ characters)', 'Senha (6+ caracteres)'); pw.className = 'pw';
+    const msg = el('p', '', 'muted');
+    const call = async (path, body) => {
+      const r = await fetch(HELPER + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(/wrong password/i.test(j.error) ? L('Wrong password.', 'Senha errada.') : /at least 6/i.test(j.error) ? L('Choose a password of at least 6 characters.', 'Escolha uma senha de pelo menos 6 caracteres.') : j.error);
+      return j;
+    };
+    const btn = (label, fn) => { const b = el('button', label, 'btn ghost'); b.type = 'button'; b.onclick = async () => { msg.textContent = '…'; try { msg.textContent = await fn(); } catch (e) { msg.textContent = e.message; } refresh(); }; return b; };
+    const row = el('p', null, 'copy-row');
+    row.append(pw,
+      btn(L('📁 Show the folder', '📁 Mostrar a pasta'), async () => { await call('/private/show'); return L('The "private" folder opened on this computer.', 'A pasta "private" abriu neste computador.'); }),
+      btn(L('🔒 Lock', '🔒 Trancar'), async () => { const j = await call('/private/lock', { password: pw.value }); return L(`Locked ${j.locked} file(s).`, `${j.locked} arquivo(s) trancado(s).`); }),
+      btn(L('🔓 Open', '🔓 Abrir'), async () => { await call('/private/open', { password: pw.value }); return L('Opened in a folder on this computer. Choose "Close" when you finish.', 'Abertos numa pasta deste computador. Escolha "Fechar" quando terminar.'); }),
+      btn(L('✖ Close', '✖ Fechar'), async () => {
+        let j = await call('/private/close', {});
+        if (j.unsaved?.length) {
+          if (confirm(L(`Changed or new since opening: ${j.unsaved.join(', ')}. Save them back to the kit, locked? (Cancel = delete them)`, `Alterados ou novos desde que abriu: ${j.unsaved.join(', ')}. Salvar de volta no kit, trancados? (Cancelar = apagar)`)))
+            await call('/private/close', { password: pw.value, save: true });
+          else if (confirm(L('Delete the opened copies without saving?', 'Apagar as cópias abertas sem salvar?'))) await call('/private/close', { discard: true });
+          else return L('Left open.', 'Continuam abertos.');
+        }
+        return L('Closed: the opened copies were deleted from this computer.', 'Fechado: as cópias abertas foram apagadas deste computador.');
+      }));
+    box.replaceChildren(status, intro, row, msg);
+  }
+
   let buttonsShown = false;
   async function refresh() {
     let st = null;
     if (onThisComputer) { try { const r = await fetch(HELPER + '/status', { cache: 'no-store' }); if (r.ok) st = await r.json(); } catch {} }
     if (st) {
       if (!buttonsShown) { st.canBuild ? showButtons(st) : explainNoHelper(); buttonsShown = true; }
-      showInventory(st); showProgress(st.progress);
+      showInventory(st); showProgress(st.progress); showPrivate(st.private);
     } else if (!buttonsShown) {
-      explainNoHelper();
+      explainNoHelper(); showPrivate(null);
       showInventory(await fallbackInventory());
     }
     return !!st;

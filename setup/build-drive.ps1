@@ -366,7 +366,7 @@ function Norm-Path($p) { $p.TrimEnd('\').ToLower() }
 
 # The app itself: start files, portal pages, launchers and this builder. MAKE-USB.bat and COPY-KIT.bat
 # go on the kit too, so it can update itself and be copied without the project folder.
-$AppRootFiles = 'START-WINDOWS.bat', 'START-MAC.command', 'START-LINUX.sh', 'MAKE-USB.bat', 'COPY-KIT.bat', 'README.md', 'LEIA-ME.md', 'CHANGELOG.md'
+$AppRootFiles = 'START-WINDOWS.bat', 'START-MAC.command', 'START-LINUX.sh', 'MAKE-USB.bat', 'COPY-KIT.bat', 'PRIVATE-DOCS.bat', 'README.md', 'LEIA-ME.md', 'CHANGELOG.md'
 function Get-AppFiles {   # relative paths of every app file in the project (not the drive's data folders)
   foreach ($f in $AppRootFiles) { if (Test-Path (Join-Path $Root $f)) { $f } }
   foreach ($d in 'portal', 'launch', 'setup') {
@@ -498,7 +498,8 @@ public class PdfIndexBuilder {
 # pdftotext from Poppler for Windows (~42 MB download), kept in %TEMP% for the next build
 function Get-PdfTextTool {
   $dir = Join-Path $env:TEMP 'survival-station-tools\poppler'
-  $exe = Get-ChildItem $dir -Recurse -Filter pdftotext.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+  # (Test-Path first: on a missing folder, -Recurse would search the whole folder above it)
+  $exe = if (Test-Path $dir) { Get-ChildItem $dir -Recurse -Filter pdftotext.exe -ErrorAction SilentlyContinue | Select-Object -First 1 }
   if ($exe) { return $exe.FullName }
   $rel = Invoke-RestMethod 'https://api.github.com/repos/oschwartz10612/poppler-windows/releases/latest'
   $asset = $rel.assets | Where-Object { $_.name -like '*.zip' } | Select-Object -First 1

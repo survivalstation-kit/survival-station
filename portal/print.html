@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Print pack</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="print">
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html">Survival <span>Station</span></a>
+  <nav class="links">
+    <a href="index.html" data-i18n="nav.home">Home</a>
+    <a href="chat.html" data-i18n="nav.chat">Ask AI</a>
+    <a href="map.html" data-i18n="nav.map">Map</a>
+    <a href="cards.html" data-cards data-i18n="nav.cards">Emergency</a>
+    <a href="search.html" data-i18n="nav.search">Search</a>
+    <a href="help.html" data-i18n="nav.help">Help</a>
+  </nav>
+  <select class="lang-select" aria-label="Language / Idioma"></select>
+  <button class="theme-btn" type="button" data-i18n="theme">Theme</button>
+</div></header>
+
+<main class="wrap help">
+  <div class="no-print">
+    <h1 id="title"></h1>
+    <p class="lede" id="lede"></p>
+    <div class="card">
+      <div id="choices" class="print-choices"></div>
+      <p><button class="btn" type="button" id="go"></button></p>
+      <p class="muted" id="note"></p>
+    </div>
+  </div>
+  <div id="pack"></div>
+</main>
+
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+<script src="plan.js"></script>
+<script>
+(async () => {
+  const L = (en, pt) => SURVIVAL.lang === 'pt-BR' ? pt : en;
+  const $ = id => document.getElementById(id);
+  document.title = L('Print pack', 'Pacote para imprimir');
+  $('title').textContent = L('Print pack', 'Pacote para imprimir');
+  $('lede').textContent = L('Paper works when batteries don\'t. Tick what to print: each part starts on a new page. Keep a copy in the go-bag and one at home.',
+                            'Papel funciona quando a bateria acaba. Marque o que imprimir: cada parte começa numa página nova. Guarde uma cópia na mochila de emergência e outra em casa.');
+  $('go').textContent = L('🖨 Print', '🖨 Imprimir');
+  $('note').textContent = L('Tip: in the print window, "Save as PDF" makes a file you can copy to phones.', 'Dica: na janela de impressão, "Salvar como PDF" gera um arquivo para copiar para os celulares.');
+
+  const page = async url => new DOMParser().parseFromString(await (await fetch(url)).text(), 'text/html');
+  const sectionsOf = (doc, ids) => ids.map(id => doc.getElementById(id)).filter(Boolean).map(s => document.importNode(s, true));
+  const radioIds = SURVIVAL.lang === 'pt-BR' ? ['agora', 'freqs-pt'] : ['now', 'freqs'];
+  const startId = SURVIVAL.lang === 'pt-BR' ? 'iniciar' : 'start';
+  const plan = FAMILY_PLAN.load();
+  const hasPlan = plan && (plan.people || []).concat(plan.contacts || []).some(r => Object.values(r).some(Boolean));
+
+  // [id, label, ticked, () => nodes]
+  const PARTS = [
+    ['cards', L('Emergency cards (first aid, water, shelter, signals, radio)', 'Cartões de emergência (primeiros socorros, água, abrigo, sinais, rádio)'), true,
+      async () => { const d = await page(SURVIVAL.dict._cards); return [...d.querySelectorAll('main section.card')].map(s => document.importNode(s, true)); }],
+    ['radio', L('Radio: what to do now, and the frequencies', 'Rádio: o que fazer agora e as frequências'), true,
+      async () => sectionsOf(await page('radio.html'), radioIds)],
+    ['plan', hasPlan ? L('Family plan (from this device)', 'Plano da família (deste aparelho)') : L('Family plan: none on this device yet (fill it in on the Family plan page)', 'Plano da família: ainda não há neste aparelho (preencha na página Plano da família)'), hasPlan,
+      async () => [FAMILY_PLAN.printable(plan)]],
+    ['start', L('How to start the kit', 'Como iniciar o kit'), true,
+      async () => sectionsOf(await page('help.html'), [startId])],
+  ];
+  const box = $('choices');
+  for (const [id, label, on] of PARTS) {
+    const lab = document.createElement('label'); lab.className = 'uselib';
+    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.id = 'p-' + id; cb.checked = on;
+    if (id === 'plan' && !hasPlan) cb.disabled = true;
+    lab.append(cb, ' ' + label); box.append(lab);
+  }
+
+  // the pack, assembled below so it can be checked before printing
+  async function build() {
+    const pack = $('pack'); pack.replaceChildren();
+    for (const [id, , , get] of PARTS) {
+      if (!$('p-' + id).checked) continue;
+      const part = document.createElement('div'); part.className = 'print-part';
+      try { part.append(...await get()); } catch { continue; }
+      // links and the cards' "back to top" bits mean nothing on paper
+      part.querySelectorAll('nav, .toc, script').forEach(e => e.remove());
+      pack.append(part);
+    }
+  }
+  box.addEventListener('change', build);
+  await build();
+  $('go').onclick = () => window.print();
+})();
+</script>
+</body>
+</html>

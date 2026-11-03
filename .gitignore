@@ -5,6 +5,8 @@ logs/
 *.part
 # written by the start files each time the kit starts (this computer's network addresses)
 portal/kit-address.json
+# personal documents, if the project folder is ever used as a kit (PRIVATE-DOCS.bat)
+private/
 # local editor and tool settings
 .claude/
 __pycache__/

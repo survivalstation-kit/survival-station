@@ -10,6 +10,7 @@ An offline survival kit that runs from a USB drive. Plug it into a computer, dou
 - **[Survival-Data](https://github.com/PR0M3TH3AN/Survival-Data)**: preparedness, radio and emergency medical reference.
 - **Emergency cards**: CPR, bleeding, burns, water purification, signals and radio. They are plain HTML pages, so they open even if nothing else starts, and they print well. The Portuguese version adds Brazil-specific cards: snakebites, leptospirosis, landslides, and the local emergency numbers.
 - **Languages**: English and Português (Brasil). The interface, AI answers, emergency cards, library search and map labels all switch together. The phone or computer's language is picked automatically, and you can change it from the menu at the top.
+- **Family plan, print pack and private documents**: a family emergency plan to fill in and print, a one-click print pack (cards, radio, plan, start instructions), and a `private/` folder for IDs and insurance papers that phones never see, locked with a password by `PRIVATE-DOCS.bat` (OpenSSL format: Mac/Linux use `bash launch/private-docs.sh`, or `openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -md sha256`).
 - **Search**: one box searches the emergency cards and kit pages, the Survival Data guides (including the text inside the PDFs, opening at the right page), your documents and the full text of the library.
 - **Radio page**: emergency frequencies, how to call for help, and how to set up a Baofeng UV-5R or TIDRADIO TD-H3 PLUS, with a CHIRP channel file (`portal/radio/survival-channels.csv`).
 - **Phone access**: phones on the same hotspot or Wi-Fi open the computer's address in a browser.
@@ -115,6 +116,8 @@ portal/        web pages: home, AI chat, map, emergency cards (one per language)
 engine/<os>/   llama-server (AI) for win, mac-arm64, mac-x64, linux-x64, linux-arm64
 kiwix/<os>/    kiwix-serve (library)
 tools/win/     pmtiles.exe: map server for maps over 2 GB on Windows (only on kits with such a map)
+tools/<os>/whisper/  speech to text for the chat (the Voice extra)
+private/       your personal documents, locked with PRIVATE-DOCS.bat; not reachable from phones
 models/        .gguf AI models
 library/       .zim offline archives
 apps/android/  Kiwix, PocketPal AI, Organic Maps APKs

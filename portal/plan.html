@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Family plan</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="plan">
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html">Survival <span>Station</span></a>
+  <nav class="links">
+    <a href="index.html" data-i18n="nav.home">Home</a>
+    <a href="chat.html" data-i18n="nav.chat">Ask AI</a>
+    <a href="map.html" data-i18n="nav.map">Map</a>
+    <a href="cards.html" data-cards data-i18n="nav.cards">Emergency</a>
+    <a href="search.html" data-i18n="nav.search">Search</a>
+    <a href="help.html" data-i18n="nav.help">Help</a>
+  </nav>
+  <select class="lang-select" aria-label="Language / Idioma"></select>
+  <button class="theme-btn" type="button" data-i18n="theme">Theme</button>
+</div></header>
+
+<main class="wrap help plan">
+  <h1 data-t="title"></h1>
+  <p class="lede" data-t="lede"></p>
+  <div class="card plan-actions">
+    <div class="buttons">
+      <button class="btn" type="button" id="b-print" data-t="print"></button>
+      <button class="btn ghost" type="button" id="b-download" data-t="download"></button>
+      <button class="btn ghost" type="button" id="b-clear" data-t="clear"></button>
+    </div>
+    <div id="kit-box" hidden>
+      <p data-t="kit.intro"></p>
+      <div class="buttons">
+        <input type="password" id="pw" autocomplete="off" data-t-ph="kit.pw">
+        <button class="btn" type="button" id="b-save" data-t="kit.save"></button>
+        <button class="btn ghost" type="button" id="b-load" data-t="kit.load"></button>
+      </div>
+    </div>
+    <p class="muted" id="msg"></p>
+  </div>
+  <form id="plan" autocomplete="off"></form>
+</main>
+<div id="printout" class="printout"></div>
+
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+<script src="plan.js"></script>
+<script>
+(() => {
+  const { tt, PERSON, CONTACT, SECTIONS, LONG, printable: printOf } = FAMILY_PLAN;
+  const printable = () => printOf(plan);
+  document.querySelectorAll('[data-t]').forEach(e => { e.textContent = tt(e.dataset.t); });
+  document.querySelectorAll('[data-t-ph]').forEach(e => { e.placeholder = tt(e.dataset.tPh); });
+  document.title = tt('title');
+  const $ = id => document.getElementById(id);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+
+  let plan = FAMILY_PLAN.load() || {};
+  plan.people = plan.people?.length ? plan.people : [{}, {}, {}];
+  plan.contacts = plan.contacts?.length ? plan.contacts : [{}, {}];
+  plan.fields = plan.fields || {};
+
+  const save = () => { plan.updated = new Date().toISOString(); SURVIVAL.store('family-plan', JSON.stringify(plan)); $('msg').textContent = `${tt('saved')} · ${new Date().toLocaleTimeString(SURVIVAL.lang, { hour: '2-digit', minute: '2-digit' })}`; };
+  function input(key, value, onChange) {
+    const lab = el('label', LONG.has(key) ? 'wide' : null);
+    lab.append(el('span', null, tt(key === 'docs' ? 'docs.h' : key)));
+    const f = LONG.has(key) ? el('textarea') : el('input');
+    if (!LONG.has(key)) f.type = key === 'born' ? 'date' : key === 'phone' ? 'tel' : 'text';
+    if (LONG.has(key)) f.rows = key === 'notes' || key === 'docs' ? 4 : 2;
+    f.value = value || '';
+    f.addEventListener('input', () => { onChange(f.value); save(); });
+    lab.append(f);
+    return lab;
+  }
+  function render() {
+    const form = $('plan'); form.replaceChildren();
+    const group = (title, note, rows, keys, addLabel, blank) => {
+      const sec = el('section', 'card'); sec.append(el('h2', null, tt(title)));
+      if (note) sec.append(el('p', 'muted', tt(note)));
+      rows.forEach((row, i) => {
+        const box = el('div', 'plan-row');
+        keys.forEach(k => box.append(input(k, row[k], v => { row[k] = v; })));
+        const x = el('button', 'btn ghost small', '✕'); x.type = 'button';
+        x.onclick = () => { rows.splice(i, 1); if (!rows.length) rows.push({}); save(); render(); };
+        box.append(x);
+        sec.append(box);
+      });
+      const add = el('button', 'btn ghost small', tt(addLabel)); add.type = 'button';
+      add.onclick = () => { rows.push(blank()); save(); render(); };
+      sec.append(add);
+      form.append(sec);
+    };
+    group('people.h', null, plan.people, PERSON, 'people.add', () => ({}));
+    group('contacts.h', 'contacts.note', plan.contacts, CONTACT, 'contacts.add', () => ({}));
+    for (const [title, note, keys] of SECTIONS) {
+      const sec = el('section', 'card'); sec.append(el('h2', null, tt(title)));
+      if (note) sec.append(el('p', 'muted', tt(note)));
+      const box = el('div', 'plan-row');
+      keys.forEach(k => box.append(input(k, plan.fields[k], v => { plan.fields[k] = v; })));
+      sec.append(box);
+      form.append(sec);
+    }
+  }
+  render();
+
+  const pageHtml = () => `<!doctype html><html lang="${SURVIVAL.lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${tt('print.h')}</title>
+<style>body{font-family:system-ui,sans-serif;margin:24px;color:#111}table{border-collapse:collapse;width:100%;margin:6px 0 16px}th,td{border:1px solid #999;padding:5px 7px;text-align:left;vertical-align:top;white-space:pre-wrap}th{background:#eee}h2{margin:18px 0 6px;font-size:18px}</style>
+</head><body>${printable().innerHTML}</body></html>`;
+  const empty = () => !plan.people.concat(plan.contacts).some(r => Object.values(r).some(Boolean)) && !Object.values(plan.fields).some(Boolean);
+
+  $('b-print').onclick = () => { $('printout').replaceChildren(printable()); window.print(); };
+  $('b-download').onclick = () => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([pageHtml()], { type: 'text/html' }));
+    a.download = 'family-plan.html'; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  };
+  $('b-clear').onclick = () => { if (confirm(tt('clear.ask'))) { SURVIVAL.store('family-plan', ''); plan = { people: [{}, {}, {}], contacts: [{}, {}], fields: {} }; render(); $('msg').textContent = ''; } };
+
+  // ---- on the computer running the kit: the helper keeps a locked copy in the kit's private folder
+  const HELPER = 'http://localhost:8091';
+  const post = async (path, body) => {
+    let r;
+    try { r = await fetch(HELPER + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); }
+    catch { throw new Error(tt('err.helper')); }
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(/wrong password/i.test(j.error) ? tt('err.wrong') : /at least 6/i.test(j.error) ? tt('err.short') : j.error || r.status);
+    return j;
+  };
+  if (['localhost', '127.0.0.1'].includes(location.hostname)) {
+    fetch(HELPER + '/status').then(r => { if (r.ok) $('kit-box').hidden = false; }).catch(() => {});
+  }
+  $('b-save').onclick = async () => {
+    if (empty()) { $('msg').textContent = tt('kit.noplan'); return; }
+    $('msg').textContent = '…';   // a few seconds: the password is stretched 200,000 times on purpose
+    try { await post('/private/plan-save', { password: $('pw').value, json: JSON.stringify(plan), html: pageHtml() }); $('msg').textContent = tt('kit.saved'); }
+    catch (e) { $('msg').textContent = e.message; }
+  };
+  $('b-load').onclick = async () => {
+    $('msg').textContent = '…';
+    try {
+      const j = await post('/private/plan-load', { password: $('pw').value });
+      if (!j.json) { $('msg').textContent = tt('kit.none'); return; }
+      plan = JSON.parse(j.json); SURVIVAL.store('family-plan', j.json); render(); $('msg').textContent = tt('kit.loaded');
+    } catch (e) { $('msg').textContent = e.message; }
+  };
+})();
+</script>
+</body>
+</html>

@@ -12,6 +12,25 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.14.0 (2026-11-02)
+
+- **Family emergency plan** (home tile 👪, English and Português):
+  - each person's blood type, allergies, medicines and health needs;
+  - emergency contacts (including one far away), where to meet (near home, in the neighbourhood, out of town);
+  - doctor and insurance, documents, utility shut-offs, pets and notes.
+
+  It's kept in the browser as you type. It can be printed as clean tables or downloaded as a file. On the computer running the kit it can be **saved on the stick, locked**, and loaded back with the password.
+- **Private documents**:
+  - IDs, insurance papers and other personal files go in the kit's new `private/` folder, outside the web pages, so phones on the hotspot can never reach them.
+  - **PRIVATE-DOCS.bat** (and the My kit page) locks them with a password (AES-256, in OpenSSL's format): Mac and Linux open them with `bash launch/private-docs.sh` or plain `openssl`. A wrong password is refused.
+  - Opening decrypts copies into a folder on the computer, never back onto the stick. Closing deletes them, and offers to lock changed or new files back first.
+  - Tested: Windows ⇄ OpenSSL in both directions, an 8 MB scan, accented passwords.
+- **Print pack** (home tile 🖨️): the emergency cards, the radio essentials and frequencies, the family plan and how to start the kit, each on its own page. Untick what you don't need; "Save as PDF" makes a file for phones.
+- **Fixed in the kit helper:**
+  - The first visit to My kit took about 10 seconds: the helper loaded Windows' storage module on its first call.
+  - Pages couldn't post JSON to the helper: it now answers the browser's CORS check, still only for the kit's own pages.
+  - A PowerShell 5.1 trap is avoided: listing the files of a folder that doesn't exist yet searched the whole folder above it.
+
 ## 1.13.0 (2026-11-02)
 
 - **Low power mode.**
