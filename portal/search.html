@@ -46,20 +46,42 @@
 
   // accent- and case-insensitive words, so "agua" finds "água"
   const fold = s => s.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '');
-  const words = [...new Set(fold(q).split(/[^\p{L}\p{N}]+/u).filter(w => w.length > 1))];
+  const split = s => s.split(/[^\p{L}\p{N}]+/u).filter(w => w.length > 1);
+  // "in quotes" = an exact phrase: those words, in that order, next to each other
+  const QUOTE = /["“”„«»]([^"“”„«»]+)["“”„«»]/g;
+  const phrases = [...fold(q).matchAll(QUOTE)].map(m => split(m[1])).filter(p => p.length);
+  const loose = split(fold(q).replace(QUOTE, ' '));   // the words outside quotes
+  const words = [...new Set([...phrases.flat(), ...loose])];
   if (!words.length) return;
+  const busyNote = note(t('search.busy'));   // the groups appear one by one; this goes when all are in
+  results.after(busyNote);
+  // a phrase matches whole words, across spaces, line breaks and punctuation between them
+  // (group 1 = the phrase itself; no lookbehind, which older iPhones' Safari can't parse)
+  const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const phraseRes = phrases.map(p => new RegExp('(?:^|[^\\p{L}\\p{N}])(' + p.map(esc).join('[^\\p{L}\\p{N}]+') + ')(?![\\p{L}\\p{N}])', 'gu'));
+  const hasPhrases = text => { const f = fold(text); return phraseRes.every(re => { re.lastIndex = 0; return re.test(f); }); };
 
-  // score = how many of the words the text contains; 0 = no match
+  // score = how many of the words the text contains; 0 = no match, or a phrase missing
   const score = text => { const f = fold(text); return words.filter(w => f.includes(w)).length; };
 
   function note(text) { const p = document.createElement('p'); p.className = 'muted'; p.textContent = text; return p; }
 
+  // where the phrases and words are in the text: [start, end] pairs, phrases first
+  function spots(f) {
+    const hits = [];
+    for (const re of phraseRes) {
+      re.lastIndex = 0;
+      for (const m of f.matchAll(re)) { const s = m.index + m[0].length - m[1].length; hits.push([s, s + m[1].length, 1]); }
+    }
+    // "de", "of": only inside their phrase, or every "desambiguação" lights up
+    for (const w of words.filter(w => w.length > 2)) for (let i = f.indexOf(w); i >= 0; i = f.indexOf(w, i + w.length)) hits.push([i, i + w.length, 0]);
+    return hits;
+  }
+
   // text with the search words wrapped in <mark>, built from text nodes (never as HTML)
   function marked(text) {
     const f = fold(text), out = document.createDocumentFragment();
-    const hits = [];
-    for (const w of words) for (let i = f.indexOf(w); i >= 0; i = f.indexOf(w, i + w.length)) hits.push([i, i + w.length]);
-    hits.sort((a, b) => a[0] - b[0]);
+    const hits = spots(f).sort((a, b) => a[0] - b[0] || b[1] - a[1]);   // at the same place, the longer (a phrase) wins
     let at = 0;
     for (const [s, e] of hits) {
       if (s < at) continue;
@@ -76,7 +98,9 @@
   function snippet(text) {
     const f = fold(text);
     let i = Infinity, most = 0;
-    for (const w of words) for (let at = f.indexOf(w); at >= 0; at = f.indexOf(w, at + w.length)) {
+    const phraseAt = spots(f).filter(h => h[2]).map(h => h[0]);
+    if (phraseAt.length) i = Math.min(...phraseAt), most = Infinity;   // centre on the exact phrase
+    else for (const w of words) for (let at = f.indexOf(w); at >= 0; at = f.indexOf(w, at + w.length)) {
       const near = f.slice(Math.max(0, at - 100), at + 100);
       const n = words.filter(x => near.includes(x)).length;
       if (n > most || (n === most && at < i)) { most = n; i = at; }
@@ -105,7 +129,8 @@
     results.append(sec);
   }
 
-  const best = (list, n) => list.filter(x => x.score > 0)
+  // .check = the text an exact phrase must be in
+  const best = (list, n) => list.filter(x => x.score > 0 && (!phrases.length || hasPhrases(x.check || x.title)))
     .sort((a, b) => b.score - a.score).filter((x, _, all) => x.score === all[0].score || x.score >= Math.min(2, words.length))
     .slice(0, n);
 
@@ -126,7 +151,7 @@
       for (const s of scope.querySelectorAll('section[id]')) {
         const h = s.querySelector('h2')?.textContent.trim() || name;
         const text = s.textContent.replace(/\s+/g, ' ').replace(h, '').trim();
-        sections.push({ title: h, where: name, href: `${url}#${s.id}`, text, score: score(h) * 2 + score(text) });
+        sections.push({ title: h, where: name, href: `${url}#${s.id}`, text, check: h + ' \n ' + text, score: score(h) * 2 + score(text) });
       }
     } catch { }
   }));
@@ -141,7 +166,7 @@
       const sec = a.closest('section')?.querySelector(':scope > h2')?.textContent.trim() || '';
       return {
         title: a.textContent.trim(), where: sec, newTab: true,
-        href: 'survival-data/' + a.getAttribute('href'),
+        href: 'survival-data/' + a.getAttribute('href'), check: a.textContent + ' \n ' + sec,
         score: score(a.textContent) * 2 + score(sec),
       };
     });
@@ -157,21 +182,40 @@
     const docs = await (await fetch(base + 'docs.json')).json();
     const shardKey = w => [...w.slice(0, 2)].map(c => /[a-z0-9]/.test(c) ? c : '_').join('');   // as in the builder
     const shards = {};
-    const pagesWith = async w => {   // the word, or longer words starting with it ("purif" finds "purifying")
+    // the word, or (exact = false) longer words starting with it ("purif" finds "purifying")
+    const pagesWith = async (w, exact) => {
       const k = shardKey(w);
       shards[k] = shards[k] || fetch(base + 'w/' + k + '.json').then(r => r.ok ? r.json() : {}).catch(() => ({}));
       const shard = await shards[k], found = new Set();
       for (const tok in shard) {
-        if (tok !== w && !(w.length >= 4 && tok.startsWith(w) && tok.length <= w.length + 4)) continue;
+        if (tok !== w && (exact || !(w.length >= 4 && tok.startsWith(w) && tok.length <= w.length + 4))) continue;
         const list = shard[tok];
         for (let i = 0; i < list.length; i += 2) found.add(list[i] * 100000 + list[i + 1]);
       }
       return found;
     };
-    const sets = await Promise.all(words.filter(w => w.length >= 3).map(pagesWith));
-    const hits = new Map();   // doc*100000+page -> how many search words it has
-    sets.forEach(s => s.forEach(k => hits.set(k, (hits.get(k) || 0) + 1)));
-    const most = Math.max(0, ...hits.values());
+    // words the builder leaves out of the index (same list as PdfIndexBuilder.Stop, plus anything under 3 letters)
+    const STOP = new Set(('the and for are but not you all any can had her was one our out has have this that with from they will would there their what about ' +
+      'which when your into than then them these some could other more also only its may been were his him she who how should each such those ' +
+      'very most must over same both just where while upon').split(' '));
+    const indexed = w => w.length >= 3 && !STOP.has(w);
+    const hits = new Map();   // doc*100000+page -> how many search words outside quotes it has
+    let most = 0;
+    if (phrases.length) {
+      // pages with every indexed word of the phrases; the page text is checked for the exact phrase below
+      const need = [...new Set(phrases.flat().filter(indexed))];
+      if (need.length) {
+        const sets = await Promise.all(need.map(w => pagesWith(w, true)));
+        const extra = await Promise.all(loose.filter(indexed).map(w => pagesWith(w, false)));
+        for (const k of sets.reduce((a, b) => a.size < b.size ? a : b)) {
+          if (sets.every(s => s.has(k))) hits.set(k, 1 + extra.filter(s => s.has(k)).length);
+        }
+      }
+    } else {
+      const sets = await Promise.all(words.filter(indexed).map(w => pagesWith(w, false)));
+      sets.forEach(s => s.forEach(k => hits.set(k, (hits.get(k) || 0) + 1)));
+    }
+    most = Math.max(0, ...hits.values());
     if (most) {
       // Survival Data keeps some guides in two sections: same title and size = the same PDF, shown once
       const same = new Map(), keep = docs.map((doc, d) => {
@@ -188,8 +232,8 @@
       }
       // guides with the search words in their title first, then the ones with the most matching pages
       const ranked = [...byDoc].map(([d, pages]) => ({ d, pages: pages.sort((a, b) => a - b), rank: score(docs[d].t) * 1000 + pages.length }))
-        .sort((a, b) => b.rank - a.rank).slice(0, 10);
-      const items = await Promise.all(ranked.map(async ({ d, pages }) => {
+        .sort((a, b) => b.rank - a.rank).slice(0, phrases.length ? 25 : 10);
+      const items = (await Promise.all(ranked.map(async ({ d, pages }) => {
         const doc = docs[d], pdf = 'survival-data/' + doc.f.split('/').map(encodeURIComponent).join('/');
         // one page's text; a table of contents (dot leaders) matches everything, so prefer a later page
         const pageText = async p => {
@@ -199,11 +243,24 @@
           } catch { return ''; }
         };
         const contents = s => (s.match(/(\.\s?){6,}/g) || []).length >= 3;
-        let page = pages[0], text = await pageText(page);
-        for (const p of pages.slice(1, 3)) {
-          if (!contents(text)) break;
-          const next = await pageText(p);
-          if (next) { page = p; text = next; }
+        let page = pages[0], text;
+        if (phrases.length) {
+          // keep only pages that really have the phrase (the index only knows they have its words)
+          const found = [];
+          for (const p of pages.slice(0, 8)) {
+            const s = await pageText(p);
+            if (s && hasPhrases(s)) found.push([p, s]);
+          }
+          if (!found.length) return null;
+          [page, text] = found.find(([, s]) => !contents(s)) || found[0];
+          pages = found.map(([p]) => p);
+        } else {
+          text = await pageText(page);
+          for (const p of pages.slice(1, 3)) {
+            if (!contents(text)) break;
+            const next = await pageText(p);
+            if (next) { page = p; text = next; }
+          }
         }
         const others = pages.filter(p => p !== page);
         let extra;
@@ -217,8 +274,8 @@
           if (others.length > 11) extra.append('…');
         }
         return { title: doc.t, where: `${doc.s} · ${t('search.page').replace('{n}', page)}`, href: `${pdf}#page=${page}`, newTab: true, text, extra };
-      }));
-      group(t('search.inpdf'), items);
+      }))).filter(Boolean).slice(0, 10);
+      if (items.length) group(t('search.inpdf'), items);
     }
   } catch { /* no index on this kit yet: Verify / repair builds it */ }
 
@@ -226,7 +283,7 @@
   try {
     const files = await (await fetch('docs/index.json', { cache: 'no-store' })).json();
     const docHits = best(files.map(f => ({
-      title: f.path, newTab: true, score: score(f.path.replace(/[-_.\/]+/g, ' ')),
+      title: f.path, newTab: true, score: score(f.path.replace(/[-_.\/]+/g, ' ')), check: f.path.replace(/[-_.\/]+/g, ' '),
       href: 'docs/' + f.path.split('/').map(encodeURIComponent).join('/'),
     })), 10);
     if (docHits.length) group(t('search.docs'), docHits);
@@ -237,7 +294,9 @@
   let libUp = false;
   for (const lang of langs) {
     try {
-      const url = `${SURVIVAL.library}/search?format=xml&pageLength=10&books.filter.lang=${lang}&pattern=${encodeURIComponent(q)}`;
+      // the library ignores quotes, so for a phrase take more results and keep the articles that have it
+      const pattern = encodeURIComponent(q.replace(QUOTE, ' $1 ').replace(/\s+/g, ' ').trim());
+      const url = `${SURVIVAL.library}/search?format=xml&pageLength=${phrases.length ? 30 : 10}&books.filter.lang=${lang}&pattern=${pattern}`;
       const res = await fetch(url);
       libUp = true;
       if (!res.ok) continue;
@@ -252,24 +311,41 @@
         };
       // Wikipedia's category pages are only lists of links
       }).filter(h => h.title && !/^(category|categoria):|_categories_partials/i.test(h.title + ' ' + h.href));
+      if (phrases.length) {
+        const checked = await Promise.all(hits.map(async h => {
+          if (hasPhrases(h.title + ' \n ' + h.text)) return h;
+          try {   // the phrase may be further into the article than the library's excerpt
+            const res = await fetch(h.href);
+            const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
+            doc.querySelectorAll('script, style').forEach(e => e.remove());
+            // a space after each block, or "Bairro" + "Praia de Ipanema" reads as one word
+            doc.querySelectorAll('p, li, td, th, div, dd, dt, h1, h2, h3, h4, caption, br').forEach(e => e.append(' '));
+            const body = doc.body.textContent.replace(/\s+/g, ' ');
+            return hasPhrases(body) ? { ...h, text: body } : null;
+          } catch { return null; }
+        }));
+        hits.splice(0, hits.length, ...checked.filter(Boolean).slice(0, 10));
+      }
       if (!hits.length) continue;
       const name = Object.values(I18N).find(d => d._kiwix === lang)?._name || lang;
       const more = document.createElement('p');
       const a = document.createElement('a');
-      a.href = `${SURVIVAL.library}/search?books.filter.lang=${lang}&pattern=${encodeURIComponent(q)}`;
+      a.href = `${SURVIVAL.library}/search?books.filter.lang=${lang}&pattern=${pattern}`;
       a.target = '_blank'; a.rel = 'noopener'; a.textContent = t('search.more');
       more.append(a);
       group(`${t('search.lib')} (${name})`, hits, more);
     } catch { }
   }
+  busyNote.remove();
   if (!libUp) results.append(note(t('search.libdown')));
 
   if (!results.children.length) results.append(note(t('search.none')));
 
   // 5. or ask the AI
   const ask = document.createElement('p');
-  const a = document.createElement('a'); a.className = 'btn ghost'; a.href = 'chat.html?q=' + encodeURIComponent(q);
-  a.textContent = t('search.ai').replace('{q}', q);
+  const plain = q.replace(QUOTE, '$1');   // the AI doesn't need the search quotes
+  const a = document.createElement('a'); a.className = 'btn ghost'; a.href = 'chat.html?q=' + encodeURIComponent(plain);
+  a.textContent = t('search.ai').replace('{q}', plain);
   ask.append(a); results.append(ask);
 })();
 </script>

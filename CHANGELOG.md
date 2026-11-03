@@ -12,6 +12,15 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.6.0 (2026-11-02)
+
+- **Exact phrases in the search: put them in quotes**, for example `"praia de ipanema"` or `"rolling boil" minutes`. A result must have those words in that order, next to each other, as whole words. Accents, capitals, line breaks and punctuation between the words are ignored. Words outside the quotes still help ranking. The whole phrase is highlighted.
+  - It applies everywhere: kit pages, Survival-Data titles, inside the PDFs (pages are checked for the actual phrase), your documents and the library.
+  - The library server ignores quotes, so for a phrase the page takes its top 30 results and keeps the articles that really contain it. It reads the whole article when the excerpt doesn't show the phrase.
+  - Tested: `"praia de ipanema"` finds 10 articles that all contain it; `"ipanema de praia"` finds nothing.
+- A "Searching…" line shows until all results are in.
+- Short words like "de" are highlighted only inside their phrase, not inside every longer word.
+
 ## 1.5.0 (2026-11-02)
 
 - **Search looks inside the Survival-Data PDFs.** Results show the guide, the page, a short excerpt with the words highlighted, and links that open the PDF at that page. Other pages with the same words are listed too.
