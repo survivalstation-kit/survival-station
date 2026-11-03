@@ -75,7 +75,7 @@ It then offers to copy the newest app pages and tools (seconds, no internet) and
 | Android, no computer | Before a disaster, install the APKs from `apps/android/`. In Kiwix, open the `.zim` files from `library/` (through a USB-C adapter, or copy them to the phone). In PocketPal, load a `.gguf` model from `models/`. |
 | iPhone, no computer | iPhones can't run programs from USB. Before a disaster, install **Kiwix** and **PocketPal AI** from the App Store and copy the files across. You can still open the emergency cards and PDFs from the drive in the Files app. |
 
-The browser opens `http://localhost:8080` and the library runs on port `8090`. If the AI won't start, the emergency cards still open from `portal/index.html`. The map, though, needs the start program running.
+The browser opens `http://localhost:8080` and the library runs on port `8090`. On Windows, maps over 2 GB come from a small map server on port `8092` (`tools/win/pmtiles.exe`), because the AI server can't send files that big there. If the AI won't start, the emergency cards still open from `portal/index.html`. The map, though, needs the start program running. On the map, **Go to…** (top left) jumps to each map on the kit.
 
 **Choosing a model** (the start window asks, and picks Qwen3-4B after 10 seconds):
 
@@ -109,6 +109,7 @@ portal/        web pages: home, AI chat, map, emergency cards (one per language)
   survival-data/  docs/
 engine/<os>/   llama-server (AI) for win, mac-arm64, mac-x64, linux-x64, linux-arm64
 kiwix/<os>/    kiwix-serve (library)
+tools/win/     pmtiles.exe: map server for maps over 2 GB on Windows (only on kits with such a map)
 models/        .gguf AI models
 library/       .zim offline archives
 apps/android/  Kiwix, PocketPal AI, Organic Maps APKs

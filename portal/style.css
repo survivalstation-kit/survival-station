@@ -108,6 +108,7 @@ body.map-page { display: flex; flex-direction: column; height: 100vh; height: 10
 #map { flex: 1; min-height: 0; }
 .map-panel { background: var(--surface); border-top: 1px solid var(--line); padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); font-size: 15px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; }
 .map-panel.warn { color: var(--warn); }
+.map-goto { font: inherit; font-size: 15px; padding: 6px 8px; border-radius: 4px; border: 1px solid #999; background: #fff; color: #222; box-shadow: 0 0 0 2px rgba(0,0,0,.1); }
 .map-panel .coords { font-family: var(--mono); font-size: 20px; font-weight: 700; user-select: all; }
 .map-panel .muted { flex-basis: 100%; font-size: 14px; }
 .map-panel .muted + .coords + .muted { flex-basis: auto; }

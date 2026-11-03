@@ -55,7 +55,7 @@ The person may be stressed, injured, cold, or caring for someone else. Always an
     'chat.stop.words': 'a an and are as at be by can do does for from get have how i if in into is it me my of on or should so that the their there this to was what when where which who why will with you your',
 
     'map.title': 'Offline map', 'map.tap': 'Tap the map to get coordinates.',
-    'map.copy': 'Copy', 'map.copied': 'Copied',
+    'map.copy': 'Copy', 'map.copied': 'Copied', 'map.goto': 'Go to…', 'map.world': 'World',
     'map.none': 'No maps on this drive yet. Run setup\\build-drive.ps1 (it adds a world map; add -Map brazil for streets).',
     'map.needserver': 'The map needs the start program running (START-WINDOWS.bat / START-MAC.command / START-LINUX.sh). Opening it as a file does not work.',
     'map.share': 'Tell rescuers these coordinates (latitude, longitude):',
@@ -115,7 +115,7 @@ A pessoa pode estar assustada, ferida, com frio ou cuidando de alguém. Responda
     'chat.stop.words': 'a o as os um uma uns umas e é de do da dos das em no na nos nas por para pra com sem que se como quando onde qual quais quem porque por que eu meu minha me mim você voce seu sua isso isto esse essa este esta ao aos à às ou mais muito pode posso devo deve fazer faço tem ter está estou foi ser são não sim já',
 
     'map.title': 'Mapa offline', 'map.tap': 'Toque no mapa para ver as coordenadas.',
-    'map.copy': 'Copiar', 'map.copied': 'Copiado',
+    'map.copy': 'Copiar', 'map.copied': 'Copiado', 'map.goto': 'Ir para…', 'map.world': 'Mundo',
     'map.none': 'Ainda não há mapas neste pendrive. Rode setup\\build-drive.ps1 (ele inclui um mapa-múndi; adicione -Map brazil para ver as ruas).',
     'map.needserver': 'O mapa precisa do programa de início rodando (START-WINDOWS.bat / START-MAC.command / START-LINUX.sh). Abrir como arquivo não funciona.',
     'map.share': 'Informe estas coordenadas ao resgate (latitude, longitude):',

@@ -626,7 +626,17 @@ function Write-Indexes {
 
   $maps = Join-Path $Target 'portal\maps'
   New-Item -ItemType Directory -Force $maps | Out-Null
-  $list = @(Get-ChildItem $maps -Filter *.pmtiles -File | ForEach-Object { @{ name = $_.BaseName; file = $_.Name; size = $_.Length } })
+  # zooms and bounds from each header, so the map page can show a map over 2 GB through the map server
+  # (Windows llama-server can't send files that big) without reading the file itself
+  $list = @(Get-ChildItem $maps -Filter *.pmtiles -File | ForEach-Object {
+    $e = @{ name = $_.BaseName; file = $_.Name; size = $_.Length }
+    $h = Read-Head $_.FullName 127
+    if ($h.Length -ge 118 -and [Text.Encoding]::ASCII.GetString($h, 0, 7) -eq 'PMTiles') {
+      $e.minzoom = [int]$h[100]; $e.maxzoom = [int]$h[101]
+      $e.bounds = @(102, 106, 110, 114 | ForEach-Object { [BitConverter]::ToInt32($h, $_) / 1e7 })
+    }
+    $e
+  })
   Write-Json $list (Join-Path $maps 'index.json')
   Write-Host "   maps: $(($list | ForEach-Object { $_.name }) -join ', ')"
 }
@@ -641,6 +651,26 @@ function Get-PmtilesTool {
   Download $asset.browser_download_url $zip
   Expand-Any $zip (Join-Path $Tmp 'pmtiles')
   return $exe
+}
+
+function Read-Head($file, $n) {   # the first $n bytes of a file (a header), even while it is being written
+  $fs = [IO.File]::Open($file, 'Open', 'Read', 'ReadWrite')
+  try { $b = New-Object byte[] $n; [void]$fs.Read($b, 0, $n); , $b } finally { $fs.Close() }
+}
+
+# Windows llama-server can't send files over 2 GB (404), so START-WINDOWS.bat serves big maps as tiles
+# with the same pmtiles tool ("pmtiles serve", on port 8092). Only kits with such a map get it (56 MB).
+$BigMap = 2GB - 1MB
+$MapServer = 'tools\win\pmtiles.exe'
+function Test-NeedsMapServer {
+  [bool](Get-ChildItem (Join-Path $Target 'portal\maps') -Filter *.pmtiles -File -ErrorAction SilentlyContinue | Where-Object Length -ge $BigMap)
+}
+function Install-MapServer {
+  $dst = Join-Path $Target $MapServer
+  if ((Test-Path $dst) -or -not (Test-NeedsMapServer)) { return }
+  New-Item -ItemType Directory -Force (Split-Path $dst) | Out-Null
+  Copy-Item -Force (Get-PmtilesTool) $dst
+  Write-Host '   map server for big maps on Windows: tools\win\pmtiles.exe'
 }
 
 function Invoke-Pmtiles([string[]]$argList) {
@@ -872,10 +902,6 @@ if ($Verify) {
     Write-Host "   $tag $text" -ForegroundColor (@{ ok = 'Green'; bad = 'Red'; wait = 'Yellow'; info = 'Gray' }[$state])
     $script:found += @{ State = $state; Fix = $fix }
   }
-  function Read-Head($file, $n) {
-    $fs = [IO.File]::Open($file, 'Open', 'Read', 'ReadWrite')
-    try { $b = New-Object byte[] $n; [void]$fs.Read($b, 0, $n); , $b } finally { $fs.Close() }
-  }
   $recent = (Get-Date).AddMinutes(-3)   # a .part written this recently is still downloading
   $busy = @(Get-ChildItem $Target -Recurse -File -Filter *.part -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -gt $recent }).Count -gt 0
   if (-not (Test-Path (Join-Path $Target 'START-WINDOWS.bat'))) { throw "No Survival Station kit in $Target. Build it first." }
@@ -946,6 +972,9 @@ if ($Verify) {
     elseif ($f.Length -lt [BitConverter]::ToUInt64($h, 56) + [BitConverter]::ToUInt64($h, 64)) { Report bad "Map $($f.BaseName): incomplete" $fix }
     else { Report ok ("Map {0} ({1}, zoom 0-{2})" -f $f.BaseName, (Fmt-Size $f.Length), $h[101]) }
     if (-not $preset -and $script:found[-1].State -eq 'bad') { Report info "   (your own area: delete it and add it again in the builder window)" }
+  }
+  if ((Test-NeedsMapServer) -and -not (Test-Path (Join-Path $Target $MapServer))) {
+    Report bad 'Map server for maps over 2 GB missing (without it Windows shows only the world map)' @{ Kind = 'run' }
   }
 
   if (Test-Path (Join-Path $Target 'portal\survival-data\index.html')) { Report ok 'Survival-Data' }
@@ -1221,6 +1250,7 @@ if ($WantApps) {
 }
 
 Step 'Indexes'
+Install-MapServer
 Write-Indexes
 
 Remove-Item -Recurse -Force $Tmp -ErrorAction SilentlyContinue

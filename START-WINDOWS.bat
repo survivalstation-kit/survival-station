@@ -7,6 +7,7 @@ cd /d "%~dp0"
 
 set PORT=8080
 set LIBPORT=8090
+set MAPPORT=8092
 
 rem (messages are English / Portugues, without accents so any console code page shows them)
 rem version from portal\version.js, the one place it is set
@@ -27,6 +28,9 @@ for %%z in (library\*.zim) do set ZIMS=!ZIMS! "%%~nxz"
 if defined ZIMS (
   if exist "kiwix\win\kiwix-serve.exe" start "Library server" /min /d "%~dp0library" "%~dp0kiwix\win\kiwix-serve.exe" --port %LIBPORT% !ZIMS!
 ) else echo  No library files in library\  /  Nenhum arquivo na biblioteca.
+
+rem ---- map server for maps over 2 GB (the AI server can't send files that big on Windows)
+if exist "tools\win\pmtiles.exe" start "Map server" /min /d "%~dp0portal\maps" "%~dp0tools\win\pmtiles.exe" serve . --port=%MAPPORT% --cors=* --quiet
 
 if not exist "engine\win\llama-server.exe" goto noai
 
@@ -92,4 +96,5 @@ echo  Deixe esta janela aberta. Aperte qualquer tecla para DESLIGAR.
 pause >nul
 taskkill /f /im llama-server.exe >nul 2>&1
 taskkill /f /im kiwix-serve.exe >nul 2>&1
+taskkill /f /im pmtiles.exe >nul 2>&1
 endlocal
