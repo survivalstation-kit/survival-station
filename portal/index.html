@@ -14,6 +14,7 @@
     <a href="chat.html" data-i18n="nav.chat">Ask AI</a>
     <a href="map.html" data-i18n="nav.map">Map</a>
     <a href="cards.html" data-cards data-i18n="nav.cards">Emergency</a>
+    <a href="search.html" data-i18n="nav.search">Search</a>
     <a href="help.html" data-i18n="nav.help">Help</a>
   </nav>
   <select class="lang-select" aria-label="Language / Idioma"></select>
@@ -23,6 +24,10 @@
 <main class="wrap">
   <h1 data-i18n="home.title">Offline help, no internet needed</h1>
   <p class="lede" data-i18n="home.lede"></p>
+  <form class="search-form" action="search.html">
+    <input type="search" name="q" data-i18n-ph="home.search.ph" autocomplete="off">
+    <button class="btn" type="submit" data-i18n="search.go">Search</button>
+  </form>
   <div class="status">
     <span class="pill" id="st-ai" data-i18n="st.ai.checking"></span>
     <span class="pill" id="st-lib" data-i18n="st.lib.checking"></span>

@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Search</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="search">
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html">Survival <span>Station</span></a>
+  <nav class="links">
+    <a href="index.html" data-i18n="nav.home">Home</a>
+    <a href="chat.html" data-i18n="nav.chat">Ask AI</a>
+    <a href="map.html" data-i18n="nav.map">Map</a>
+    <a href="cards.html" data-cards data-i18n="nav.cards">Emergency</a>
+    <a href="search.html" aria-current="page" data-i18n="nav.search">Search</a>
+    <a href="help.html" data-i18n="nav.help">Help</a>
+  </nav>
+  <select class="lang-select" aria-label="Language / Idioma"></select>
+  <button class="theme-btn" type="button" data-i18n="theme">Theme</button>
+</div></header>
+
+<main class="wrap">
+  <h1 data-i18n="search.title">Search the whole kit</h1>
+  <form class="search-form" action="search.html">
+    <input type="search" name="q" id="q" data-i18n-ph="search.ph" autocomplete="off" autofocus>
+    <button class="btn" type="submit" data-i18n="search.go">Search</button>
+  </form>
+  <p class="muted" data-i18n="search.hint"></p>
+  <div id="results"></div>
+</main>
+
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+<script>
+(async () => {
+  const { t, dict } = SURVIVAL;
+  const results = document.getElementById('results');
+  const box = document.getElementById('q');
+  const q = (new URLSearchParams(location.search).get('q') || '').trim();
+  box.value = q;
+  document.title = t('nav.search');
+  if (!q) return;
+  if (!SURVIVAL.served) { results.append(note(t('search.file'))); return; }
+
+  // accent- and case-insensitive words, so "agua" finds "água"
+  const fold = s => s.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '');
+  const words = [...new Set(fold(q).split(/[^\p{L}\p{N}]+/u).filter(w => w.length > 1))];
+  if (!words.length) return;
+
+  // score = how many of the words the text contains; 0 = no match
+  const score = text => { const f = fold(text); return words.filter(w => f.includes(w)).length; };
+
+  function note(text) { const p = document.createElement('p'); p.className = 'muted'; p.textContent = text; return p; }
+
+  // text with the search words wrapped in <mark>, built from text nodes (never as HTML)
+  function marked(text) {
+    const f = fold(text), out = document.createDocumentFragment();
+    const hits = [];
+    for (const w of words) for (let i = f.indexOf(w); i >= 0; i = f.indexOf(w, i + w.length)) hits.push([i, i + w.length]);
+    hits.sort((a, b) => a[0] - b[0]);
+    let at = 0;
+    for (const [s, e] of hits) {
+      if (s < at) continue;
+      out.append(text.slice(at, s));
+      const m = document.createElement('mark'); m.textContent = text.slice(s, e); out.append(m);
+      at = e;
+    }
+    out.append(text.slice(at));
+    return out;
+  }
+
+  // about 200 characters around the first match (folding keeps lengths for Latin text)
+  function snippet(text) {
+    const f = fold(text);
+    const i = Math.min(...words.map(w => f.indexOf(w)).filter(i => i >= 0));
+    if (!isFinite(i) || text.length <= 200) return text.slice(0, 200);
+    const s = Math.max(0, i - 60);
+    return (s ? '…' : '') + text.slice(s, s + 200).trim() + '…';
+  }
+
+  function group(title, items, more) {
+    const sec = document.createElement('section'); sec.className = 'card';
+    const h = document.createElement('h2'); h.textContent = title; sec.append(h);
+    const ul = document.createElement('ul'); ul.className = 'hits';
+    for (const it of items) {
+      const li = document.createElement('li');
+      const a = document.createElement('a'); a.href = it.href; a.append(marked(it.title));
+      if (it.newTab) { a.target = '_blank'; a.rel = 'noopener'; }
+      li.append(a);
+      if (it.where) { const w = document.createElement('span'); w.className = 'where'; w.textContent = it.where; li.append(w); }
+      if (it.text) { const p = document.createElement('div'); p.className = 'snip'; p.append(marked(snippet(it.text))); li.append(p); }
+      ul.append(li);
+    }
+    sec.append(ul);
+    if (more) sec.append(more);
+    results.append(sec);
+  }
+
+  const best = (list, n) => list.filter(x => x.score > 0)
+    .sort((a, b) => b.score - a.score).filter((x, _, all) => x.score === all[0].score || x.score >= Math.min(2, words.length))
+    .slice(0, n);
+
+  async function page(url) {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(res.status);
+    return new DOMParser().parseFromString(await res.text(), 'text/html');
+  }
+
+  // 1. the kit's own pages: emergency cards, radio, help (each section on its own)
+  const pages = [[dict._cards, t('nav.cards')], ['radio.html', t('tile.radio.t')], ['help.html', t('nav.help')]];
+  const sections = [];
+  await Promise.all(pages.map(async ([url, name]) => {
+    try {
+      const doc = await page(url);
+      const scope = doc.querySelector(`article[data-for="${SURVIVAL.lang}"]`) || doc;
+      for (const s of scope.querySelectorAll('section[id]')) {
+        const h = s.querySelector('h2')?.textContent.trim() || name;
+        const text = s.textContent.replace(/\s+/g, ' ').replace(h, '').trim();
+        sections.push({ title: h, where: name, href: `${url}#${s.id}`, text, score: score(h) * 2 + score(text) });
+      }
+    } catch { }
+  }));
+  const pageHits = best(sections, 8);
+  if (pageHits.length) group(t('search.pages'), pageHits);
+
+  // 2. Survival Data guides: titles and section names from its index page
+  try {
+    const doc = await page('survival-data/index.html');
+    // its sections end up nested (unclosed tags), so take the heading of each link's own section
+    const guides = [...doc.querySelectorAll('section a[href]')].map(a => {
+      const sec = a.closest('section')?.querySelector(':scope > h2')?.textContent.trim() || '';
+      return {
+        title: a.textContent.trim(), where: sec, newTab: true,
+        href: 'survival-data/' + a.getAttribute('href'),
+        score: score(a.textContent) * 2 + score(sec),
+      };
+    });
+    const seen = new Set();   // its index lists some guides twice
+    const sdHits = best(guides.filter(g => !seen.has(g.href) && seen.add(g.href)), 10);
+    if (sdHits.length) group(t('search.sd'), sdHits);
+  } catch { }
+
+  // 3. your own documents (portal/docs)
+  try {
+    const files = await (await fetch('docs/index.json', { cache: 'no-store' })).json();
+    const docHits = best(files.map(f => ({
+      title: f.path, newTab: true, score: score(f.path.replace(/[-_.\/]+/g, ' ')),
+      href: 'docs/' + f.path.split('/').map(encodeURIComponent).join('/'),
+    })), 10);
+    if (docHits.length) group(t('search.docs'), docHits);
+  } catch { }
+
+  // 4. full text of every library book, in the reader's language first (kiwix needs one language per search)
+  const langs = [dict._kiwix, ...Object.values(I18N).map(d => d._kiwix).filter(k => k !== dict._kiwix)];
+  let libUp = false;
+  for (const lang of langs) {
+    try {
+      const url = `${SURVIVAL.library}/search?format=xml&pageLength=10&books.filter.lang=${lang}&pattern=${encodeURIComponent(q)}`;
+      const res = await fetch(url);
+      libUp = true;
+      if (!res.ok) continue;
+      const xml = new DOMParser().parseFromString(await res.text(), 'application/xml');
+      const hits = [...xml.querySelectorAll('item')].map(it => {
+        const desc = new DOMParser().parseFromString(it.querySelector('description')?.textContent || '', 'text/html');
+        return {
+          title: it.querySelector('title')?.textContent.trim() || '',
+          where: it.querySelector('book > title')?.textContent.trim(),
+          text: desc.body.textContent.replace(/^\.+|\.+$/g, '').replace(/\s+/g, ' ').trim(),
+          href: SURVIVAL.library + it.querySelector('link')?.textContent.trim(), newTab: true,
+        };
+      // Wikipedia's category pages are only lists of links
+      }).filter(h => h.title && !/^(category|categoria):|_categories_partials/i.test(h.title + ' ' + h.href));
+      if (!hits.length) continue;
+      const name = Object.values(I18N).find(d => d._kiwix === lang)?._name || lang;
+      const more = document.createElement('p');
+      const a = document.createElement('a');
+      a.href = `${SURVIVAL.library}/search?books.filter.lang=${lang}&pattern=${encodeURIComponent(q)}`;
+      a.target = '_blank'; a.rel = 'noopener'; a.textContent = t('search.more');
+      more.append(a);
+      group(`${t('search.lib')} (${name})`, hits, more);
+    } catch { }
+  }
+  if (!libUp) results.append(note(t('search.libdown')));
+
+  if (!results.children.length) results.append(note(t('search.none')));
+
+  // 5. or ask the AI
+  const ask = document.createElement('p');
+  const a = document.createElement('a'); a.className = 'btn ghost'; a.href = 'chat.html?q=' + encodeURIComponent(q);
+  a.textContent = t('search.ai').replace('{q}', q);
+  ask.append(a); results.append(ask);
+})();
+</script>
+</body>
+</html>

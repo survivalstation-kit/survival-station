@@ -14,6 +14,7 @@
     <a href="chat.html" aria-current="page" data-i18n="nav.chat">Ask AI</a>
     <a href="map.html" data-i18n="nav.map">Map</a>
     <a href="cards.html" data-cards data-i18n="nav.cards">Emergency</a>
+    <a href="search.html" data-i18n="nav.search">Search</a>
     <a href="help.html" data-i18n="nav.help">Help</a>
   </nav>
   <select class="lang-select" aria-label="Language / Idioma"></select>
@@ -52,6 +53,9 @@ try { history = JSON.parse(SURVIVAL.store(CHAT_KEY) || '[]'); } catch { history 
 const save = () => SURVIVAL.store(CHAT_KEY, JSON.stringify(history.slice(-40)));
 useLib.checked = SURVIVAL.store('uselib') !== '0';
 useLib.onchange = () => SURVIVAL.store('uselib', useLib.checked ? '1' : '0');
+// a question handed over from the search page: filled in, not sent, so it can be edited first
+const handed = new URLSearchParams(location.search).get('q');
+if (handed) input.value = handed;
 
 // ---------------------------------------------------------------- library lookup (RAG)
 // kiwix-serve full-text search -> fetch the best articles -> keep the paragraphs that match the question

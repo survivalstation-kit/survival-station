@@ -12,6 +12,18 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.4.0 (2026-11-02)
+
+- **Search the whole kit.** A search box on the home page and a **Search** link on every page. One search covers:
+  - the emergency cards, radio and help pages, section by section;
+  - the Survival Data guide titles and their sections;
+  - your own documents;
+  - the full text of every library book, in each language.
+
+  It ignores accents ("agua" finds "água"), highlights the words found, and offers to pass the question to the AI. It doesn't look inside PDFs.
+- The radio card's "Much more in Survival Data" now links straight to the one radio guide there (*Radio Monitoring*) and to the library's articles on amateur radio in emergencies. The Radio page has the same links.
+- A link like `chat.html?q=…` fills in the question on the AI page without sending it.
+
 ## 1.3.0 (2026-11-02)
 
 - **New Radio page** (home tile 📡, English and Português), made to be printed and kept with the radios:

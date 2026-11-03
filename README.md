@@ -10,6 +10,7 @@ An offline survival kit that runs from a USB drive. Plug it into a computer, dou
 - **[Survival-Data](https://github.com/PR0M3TH3AN/Survival-Data)**: preparedness, radio and emergency medical reference.
 - **Emergency cards**: CPR, bleeding, burns, water purification, signals and radio. They are plain HTML pages, so they open even if nothing else starts, and they print well. The Portuguese version adds Brazil-specific cards: snakebites, leptospirosis, landslides, and the local emergency numbers.
 - **Languages**: English and Português (Brasil). The interface, AI answers, emergency cards, library search and map labels all switch together. The phone or computer's language is picked automatically, and you can change it from the menu at the top.
+- **Search**: one box searches the emergency cards and kit pages, Survival Data guide titles, your documents and the full text of the library.
 - **Radio page**: emergency frequencies, how to call for help, and how to set up a Baofeng UV-5R or TIDRADIO TD-H3 PLUS, with a CHIRP channel file (`portal/radio/survival-channels.csv`).
 - **Phone access**: phones on the same hotspot or Wi-Fi open the computer's address in a browser.
 - **Android apps** to install ahead of time: Kiwix, PocketPal AI (runs the AI on the phone) and Organic Maps.
