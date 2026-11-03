@@ -12,6 +12,15 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.16.0 (2026-11-02)
+
+- **Starting the kit closes one that is still running.** An earlier start that was never shut down, or one started from another copy of the kit, kept its ports and ran a second AI. Now `START-WINDOWS.bat` (through `setup/stop-old-kit.ps1`) and `START-MAC.command` / `START-LINUX.sh` first close the old one, and say so in the start window:
+  - its AI, library, map, speech and secure (Caddy) servers;
+  - the My kit helper;
+  - its old start window.
+- Only the kit's own programs are closed. The map tool is closed only while serving maps, so a build that is cutting a map keeps running; Caddy only with the kit's settings.
+- Tested: a second start closed all of the first start's programs and its window, then came up by itself.
+
 ## 1.15.0 (2026-11-02)
 
 - **The 🎤 works on phones too: the kit has a secure address**, `https://<address>:8443/`.

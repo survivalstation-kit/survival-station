@@ -20,6 +20,9 @@ echo                         IA offline + biblioteca
 echo  ==============================================
 echo.
 
+rem ---- close a Survival Station that is still running (an earlier start never shut down, or another copy)
+if exist "setup\stop-old-kit.ps1" "%SYS%\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "%~dp0setup\stop-old-kit.ps1"
+
 rem ---- library server (all .zim files in library\)
 rem kiwix-serve names each book after the path it was given, so run it inside library\ with bare
 rem file names - "library\x.zim" would produce broken article links. It answers under /library, so the

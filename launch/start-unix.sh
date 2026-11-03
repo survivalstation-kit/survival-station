@@ -37,6 +37,18 @@ runnable_dir() {   # $1 = folder on drive, $2 = program name -> prints folder to
   return 1
 }
 
+# ---- close a Survival Station that is still running (an earlier start never shut down, or another copy):
+# its servers, and its old launcher; the map tool only while serving, so a build cutting a map keeps running
+OLD=$( { pgrep -f 'llama-server .*--path' ; pgrep -f 'kiwix-serve .*--urlRootLocation' ; pgrep -x kiwix-serve ; pgrep -f 'pmtiles serve' ;
+         pgrep -f 'whisper-server .*--port 8093' ; pgrep -f 'caddy run --config .*survival-Caddyfile' ; pgrep -f 'launch/start-unix.sh' ; } 2>/dev/null |
+       grep -vx "$$" | sort -u)
+if [ -n "$OLD" ]; then
+  kill $OLD 2>/dev/null; sleep 1
+  echo " An earlier Survival Station was still running: closed it."
+  echo " Um Survival Station anterior ainda estava rodando: foi fechado."
+  echo
+fi
+
 PIDS=()
 cleanup() { echo; echo " Shutting down..."; kill "${PIDS[@]}" 2>/dev/null; exit 0; }
 trap cleanup INT TERM
