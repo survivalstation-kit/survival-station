@@ -12,6 +12,20 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.9.0 (2026-11-02)
+
+- **The AI can look at photos.**
+  - New model **Gemma 3 4B** (Standard and Full tiers, or tick it in the builder window): 2.3 GB plus an 812 MB vision part in `models/mmproj/`. The start menu marks it `[photos / fotos]` and loads the vision part with it.
+  - With it running, a **📷** button appears in the chat: take or pick a photo, optionally add a question, and send. The photo is shrunk to about 900 px first, which is much faster. A small copy stays in the chat history.
+  - Every photo answer carries a warning: never eat a wild plant or mushroom because of a photo, and treat every snake bite as an emergency. The AI is told to say how sure it is.
+  - Tested: a death cap photo → "Do not eat these mushrooms… can cause severe illness or death" (though it named the wrong species). Answers took 19–24 seconds on this computer.
+- **Voice.**
+  - **🔊 Listen** under each answer, and a *Read answers aloud* option, use the device's own voices on every computer and phone.
+  - **🎤 Speak** on the computer running the kit records the question, turns it into text with whisper.cpp (the new **Voice** extra: ~200 MB, Windows and Linux) and sends it. Tested: "How do I purify water with bleach after a flood?" was transcribed exactly in about 4 seconds.
+  - On phones, 🎤 explains how to dictate with the keyboard instead, because browsers only allow the microphone on the computer itself.
+- The AI is told to put the "get emergency help" line first only when the question describes life-threatening signs. Gemma had been adding it to every answer.
+- Builder catalogue version 4: the builder window refreshes it to show the new model and the Voice extra.
+
 ## 1.8.0 (2026-11-02)
 
 - **New Tools page** (home tile 🛠️, English and Português). Everything works without the AI or internet:

@@ -102,6 +102,18 @@ body.chat-page { display: flex; flex-direction: column; height: 100vh; height: 1
 .msg .status-line:empty { display: none; }
 .msg .tools ol.sources { margin: 2px 0 6px; padding-left: 22px; }
 .uselib { display: flex; align-items: center; gap: 6px; max-width: 760px; margin: 6px auto 0; padding: 0 16px; font-size: 14px; color: var(--muted); }
+.composer .options { display: flex; flex-wrap: wrap; max-width: 760px; margin: 0 auto; }
+.composer .options .uselib { margin-left: 0; margin-right: 0; }
+.composer .btn.icon { padding: 10px 12px; font-size: 18px; line-height: 1; }
+.composer .btn.icon.rec { background: var(--bad); color: #fff; border-color: var(--bad); }
+.composer .pending { max-width: 760px; margin: 0 auto 8px; padding: 0 16px; display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); }
+.composer .pending[hidden], .voice-note[hidden] { display: none; }
+.composer .pending img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; }
+.composer .pending .btn { padding: 4px 10px; }
+.voice-note { max-width: 760px; margin: 6px auto 0; padding: 0 16px; font-size: 14px; }
+.msg img.photo { display: block; max-width: 200px; max-height: 200px; border-radius: 10px; margin: 4px 0 6px; }
+.msg .photo-warn { color: var(--warn); font-size: 14px; margin: 4px 0 6px; }
+.btn.small { padding: 4px 10px; font-size: 14px; font-weight: 500; margin: 4px 0; }
 
 /* ---- map */
 body.map-page { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }

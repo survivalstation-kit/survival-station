@@ -54,6 +54,18 @@ else
   echo " Library server not started (no .zim files, or no kiwix build for $OS)."
 fi
 
+# ---- voice: speech to text for the chat (whisper.cpp builds exist for Linux, not Mac), this computer only
+WMODELS=("$ROOT"/models/whisper/*.bin)
+WDIR="$ROOT/tools/$OS/whisper"
+if [ ${#WMODELS[@]} -gt 0 ] && [ -f "$WDIR/whisper-server" ]; then
+  chmod +x "$WDIR/whisper-server" 2>/dev/null
+  if ! [ -x "$WDIR/whisper-server" ]; then   # drive mounted noexec: run a copy
+    rm -rf "${TMPDIR:-/tmp}/survival-whisper" && cp -R "$WDIR" "${TMPDIR:-/tmp}/survival-whisper" && WDIR="${TMPDIR:-/tmp}/survival-whisper" && chmod +x "$WDIR/whisper-server"
+  fi
+  LD_LIBRARY_PATH="$WDIR:$LD_LIBRARY_PATH" "$WDIR/whisper-server" -m "${WMODELS[0]}" --host 127.0.0.1 --port 8093 >"${TMPDIR:-/tmp}/survival-voice.log" 2>&1 &
+  PIDS+=($!)
+fi
+
 # ---- AI server
 MODELS=("$ROOT"/models/*.gguf)
 if [ ${#MODELS[@]} -eq 0 ] || ! ENGINE=$(runnable_dir "$ROOT/engine/$OS" llama-server); then
@@ -66,7 +78,8 @@ fi
 DEF=1
 for i in "${!MODELS[@]}"; do
   name=$(basename "${MODELS[$i]}" .gguf)
-  echo "   $((i + 1)). $name"
+  # a model with a vision part in models/mmproj/ can look at photos
+  if [ -f "$ROOT/models/mmproj/$(basename "${MODELS[$i]}")" ]; then echo "   $((i + 1)). $name   [photos / fotos]"; else echo "   $((i + 1)). $name"; fi
   case "$name" in *Qwen3-4B*) DEF=$((i + 1)) ;; esac
 done
 PICK=$DEF
@@ -81,7 +94,10 @@ MODEL="${MODELS[$((PICK - 1))]}"
 echo " Starting AI with $(basename "$MODEL") ..."
 
 export LD_LIBRARY_PATH="$ENGINE:$LD_LIBRARY_PATH" DYLD_LIBRARY_PATH="$ENGINE:$DYLD_LIBRARY_PATH"
-"$ENGINE/llama-server" -m "$MODEL" --host 0.0.0.0 --port "$PORT" --path "$ROOT/portal" -c 8192 \
+VISION=()
+MM="$ROOT/models/mmproj/$(basename "$MODEL")"
+[ -f "$MM" ] && VISION=(--mmproj "$MM")
+"$ENGINE/llama-server" -m "$MODEL" "${VISION[@]}" --host 0.0.0.0 --port "$PORT" --path "$ROOT/portal" -c 8192 \
   >"${TMPDIR:-/tmp}/survival-ai.log" 2>&1 &
 AI_PID=$!
 PIDS+=($AI_PID)

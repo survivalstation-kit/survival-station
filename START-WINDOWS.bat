@@ -29,6 +29,12 @@ if defined ZIMS (
   if exist "kiwix\win\kiwix-serve.exe" start "Library server" /min /d "%~dp0library" "%~dp0kiwix\win\kiwix-serve.exe" --port %LIBPORT% !ZIMS!
 ) else echo  No library files in library\  /  Nenhum arquivo na biblioteca.
 
+rem ---- voice: speech to text for the chat (whisper.cpp), for this computer only (browsers allow the
+rem      microphone only on localhost; phones dictate with their own keyboard)
+set "WMODEL="
+for %%w in (models\whisper\*.bin) do set "WMODEL=%%w"
+if defined WMODEL if exist "tools\win\whisper\whisper-server.exe" start "Voice server" /min "%~dp0tools\win\whisper\whisper-server.exe" -m "%~dp0!WMODEL!" --host 127.0.0.1 --port 8093
+
 rem ---- map server for maps over 2 GB (the AI server can't send files that big on Windows)
 if exist "tools\win\pmtiles.exe" start "Map server" /min /d "%~dp0portal\maps" "%~dp0tools\win\pmtiles.exe" serve . --port=%MAPPORT% --cors=* --quiet
 
@@ -40,7 +46,8 @@ set def=1
 for %%f in (models\*.gguf) do (
   set /a n+=1
   set "model!n!=%%f"
-  echo    !n!. %%~nf
+  rem a model with a vision part in models\mmproj\ can look at photos
+  if exist "models\mmproj\%%~nxf" (echo    !n!. %%~nf   [photos / fotos]) else echo    !n!. %%~nf
   echo %%~nf | findstr /i "Qwen3-4B" >nul && set def=!n!
 )
 if %n%==0 goto noai
@@ -56,8 +63,14 @@ set "MODEL=!model%pick%!"
 echo.
 echo  Starting AI / Iniciando a IA: !MODEL!
 
-rem ---- AI server (also serves the portal web pages)
-start "AI server" /min "engine\win\llama-server.exe" -m "!MODEL!" --host 0.0.0.0 --port %PORT% --path portal -c 8192
+rem ---- AI server (also serves the portal web pages); with its vision part when the model has one
+set "MMFILE="
+for %%m in ("!MODEL!") do if exist "models\mmproj\%%~nxm" set "MMFILE=models\mmproj\%%~nxm"
+if defined MMFILE (
+  start "AI server" /min "engine\win\llama-server.exe" -m "!MODEL!" --mmproj "!MMFILE!" --host 0.0.0.0 --port %PORT% --path portal -c 8192
+) else (
+  start "AI server" /min "engine\win\llama-server.exe" -m "!MODEL!" --host 0.0.0.0 --port %PORT% --path portal -c 8192
+)
 
 echo  Loading, can take a minute...  /  Carregando, pode levar um minuto...
 for /l %%i in (1,1,180) do (
@@ -97,4 +110,5 @@ pause >nul
 taskkill /f /im llama-server.exe >nul 2>&1
 taskkill /f /im kiwix-serve.exe >nul 2>&1
 taskkill /f /im pmtiles.exe >nul 2>&1
+taskkill /f /im whisper-server.exe >nul 2>&1
 endlocal

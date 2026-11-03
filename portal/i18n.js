@@ -47,6 +47,15 @@ const I18N = {
     'chat.sources': 'From the offline library:', 'chat.searchlib': '🔎 Search the library for this',
     'chat.err': '⚠️ Could not reach the AI ({e}). Is the start window still open? Meanwhile, use the emergency cards or the library.',
     'chat.stopped': '(stopped)',
+    'chat.photo.add': 'Add a photo', 'chat.photo.ready': 'Photo ready: add a question, or just press Send', 'chat.photo.default': 'What is in this photo?',
+    'chat.photo.looking': 'Looking at the photo… (often 20–60 seconds)',
+    'chat.photo.warn': '⚠ Answers about photos can be wrong. Never eat a wild plant or mushroom because of a photo, and treat any snake bite as an emergency.',
+    'chat.photo.system': 'The user sent a photo. Describe what you actually see. When identifying a plant, mushroom, snake, insect or other animal, say how sure you are and what you would need to be sure. Never say a wild plant or mushroom is safe to eat based on a photo. Treat any snake bite as a medical emergency. If the photo shows an injury or a medicine label, give the safe first steps and say when to get medical help. If nothing in it is urgent, just answer the question, without emergency steps.',
+    'chat.speak': 'Read answers aloud', 'chat.listen': '🔊 Listen', 'chat.listen.stop': '⏹ Stop reading',
+    'chat.mic': 'Speak your question', 'chat.mic.listening': 'Listening… press ⏹ when you finish (1 minute at most).', 'chat.mic.working': 'Turning your words into text…',
+    'chat.mic.nothing': 'Nothing was heard. Speak closer to the microphone and try again.', 'chat.mic.error': 'Speech to text didn\'t work. Is the kit\'s voice part installed and running?',
+    'chat.mic.denied': 'The browser wasn\'t allowed to use the microphone. Allow it in the address bar and try again.',
+    'chat.mic.phone': 'On a phone: tap the microphone on your keyboard to dictate your question. It works offline on most phones; turn on offline speech in the keyboard settings ahead of time.',
     'chat.quick': [
       'Someone is bleeding heavily from the leg',
       'How do I make water safe to drink?',
@@ -59,7 +68,7 @@ const I18N = {
 The person may be stressed, injured, cold, or caring for someone else. Always answer in English.
 - Lead with the most important action in one short line, then numbered steps.
 - Be concrete: quantities, times, distances. Use only common household items when possible.
-- Life-threatening signs (not breathing, heavy bleeding, chest pain, stroke signs, unconsciousness): say so first and tell them to get emergency help by any means (phone, SMS, radio, neighbours).
+- Only when the question describes life-threatening signs (not breathing, heavy bleeding, chest pain, stroke signs, unconsciousness): say so first and tell them to get emergency help by any means (phone, SMS, radio, neighbours). Don't add this to other answers.
 - If you are unsure, say so plainly and give the safest option. Never invent drug doses.
 - Keep answers short unless asked for detail. Ask one clarifying question only if it really changes the advice.`,
     'chat.withsources': `Excerpts from the offline library are below. Use them when they are relevant and cite them like [1] or [2]. If they don't cover the question, say so briefly and answer carefully from general knowledge.`,
@@ -123,6 +132,15 @@ The person may be stressed, injured, cold, or caring for someone else. Always an
     'chat.sources': 'Da biblioteca offline:', 'chat.searchlib': '🔎 Buscar isto na biblioteca',
     'chat.err': '⚠️ Não foi possível falar com a IA ({e}). A janela de início ainda está aberta? Enquanto isso, use os cartões de emergência ou a biblioteca.',
     'chat.stopped': '(interrompido)',
+    'chat.photo.add': 'Adicionar uma foto', 'chat.photo.ready': 'Foto pronta: escreva uma pergunta, ou só aperte Enviar', 'chat.photo.default': 'O que tem nesta foto?',
+    'chat.photo.looking': 'Olhando a foto… (muitas vezes 20 a 60 segundos)',
+    'chat.photo.warn': '⚠ Respostas sobre fotos podem estar erradas. Nunca coma uma planta ou cogumelo do mato por causa de uma foto, e trate qualquer picada de cobra como emergência.',
+    'chat.photo.system': 'O usuário enviou uma foto. Descreva o que você realmente vê. Ao identificar uma planta, cogumelo, cobra, inseto ou outro animal, diga o quanto tem certeza e o que seria preciso para ter certeza. Nunca diga que uma planta ou cogumelo do mato é seguro para comer com base numa foto. Trate qualquer picada de cobra como emergência médica. Se a foto mostrar um ferimento ou a bula de um remédio, dê os primeiros passos seguros e diga quando procurar atendimento médico. Se nada nela for urgente, só responda à pergunta, sem passos de emergência.',
+    'chat.speak': 'Ler as respostas em voz alta', 'chat.listen': '🔊 Ouvir', 'chat.listen.stop': '⏹ Parar a leitura',
+    'chat.mic': 'Falar a pergunta', 'chat.mic.listening': 'Ouvindo… aperte ⏹ quando terminar (no máximo 1 minuto).', 'chat.mic.working': 'Transformando sua fala em texto…',
+    'chat.mic.nothing': 'Nada foi ouvido. Fale mais perto do microfone e tente de novo.', 'chat.mic.error': 'A conversão de fala em texto não funcionou. A parte de voz do kit está instalada e rodando?',
+    'chat.mic.denied': 'O navegador não teve permissão para usar o microfone. Permita na barra de endereço e tente de novo.',
+    'chat.mic.phone': 'No celular: toque no microfone do teclado para ditar a pergunta. Funciona offline na maioria dos celulares; ative o reconhecimento de voz offline nas configurações do teclado antes.',
     'chat.quick': [
       'Uma pessoa está sangrando muito na perna',
       'Como deixar a água própria para beber?',
@@ -135,7 +153,7 @@ The person may be stressed, injured, cold, or caring for someone else. Always an
 A pessoa pode estar assustada, ferida, com frio ou cuidando de alguém. Responda sempre em português do Brasil.
 - Comece pela ação mais importante em uma linha curta, depois passos numerados.
 - Seja concreto: quantidades, tempos, distâncias. Use itens comuns de casa quando possível.
-- Sinais de risco de vida (não respira, sangramento forte, dor no peito, sinais de AVC, inconsciência): diga isso primeiro e oriente a buscar socorro por qualquer meio (SAMU 192, Bombeiros 193, SMS, rádio, vizinhos).
+- Só quando a pergunta descrever sinais de risco de vida (não respira, sangramento forte, dor no peito, sinais de AVC, inconsciência): diga isso primeiro e oriente a buscar socorro por qualquer meio (SAMU 192, Bombeiros 193, SMS, rádio, vizinhos). Não acrescente isso a outras respostas.
 - Se não tiver certeza, diga claramente e dê a opção mais segura. Nunca invente doses de remédios.
 - Respostas curtas, a não ser que peçam detalhes. Faça no máximo uma pergunta, só se mudar a orientação.`,
     'chat.withsources': `Abaixo há trechos da biblioteca offline. Use-os quando forem relevantes e cite como [1] ou [2]. Se não cobrirem a pergunta, diga isso brevemente e responda com cuidado a partir do conhecimento geral.`,

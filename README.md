@@ -86,6 +86,9 @@ The browser opens `http://localhost:8080` and the library runs on port `8090`. O
 | **Qwen3-4B** (default) | 2.3 GB | Most computers. A good balance, and good Portuguese. |
 | **Llama-3.2-1B** | 0.8 GB | Old or slow computers, or less than 8 GB of RAM. Fastest, but gives simpler answers, so check anything important against the emergency cards. |
 | **Qwen3-8B** (Standard and up) | 4.7 GB | Fast computers with 8 GB or more of RAM. Gives the best answers. |
+| **Gemma 3 4B** (Standard and up), shown as `[photos / fotos]` | 3.1 GB | **Looks at photos**: plants, animals, injuries, labels. Choose it when you need that; 20–60 seconds a photo on a laptop CPU. Its vision part is `models/mmproj/`, loaded automatically. |
+
+**Voice:** answers can be read aloud on any device (the device's own voices). Speaking questions works on the computer running the kit, on Windows and Linux: the kit's speech-to-text (whisper.cpp, ~200 MB, `tools/<system>/whisper` + `models/whisper/`) runs on port 8093 for that computer only. Browsers allow the microphone only on `localhost`, so on phones use the keyboard's own dictation. There's no whisper.cpp build for Mac.
 
 **Library lookup:** the "Look it up in the library" box under the chat is on by default. It searches the library in your language first, then in your other languages, reads the top 3 articles and gives their key paragraphs to the AI. Answers get slower: on a laptop CPU, the AI needs extra time to read the excerpts before it starts writing. Untick the box when you need a fast answer.
 

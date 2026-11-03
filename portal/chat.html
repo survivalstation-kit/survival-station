@@ -31,12 +31,20 @@
 
 <div class="chips" id="chips"></div>
 <div class="composer">
+  <div class="pending" id="pending" hidden><img id="pending-img" alt=""><span data-i18n="chat.photo.ready"></span><button type="button" class="btn ghost" id="pending-x" aria-label="✕">✕</button></div>
   <form id="form">
     <button class="btn ghost" type="button" id="clear" data-i18n="chat.new">New</button>
+    <button class="btn ghost icon" type="button" id="photo" hidden data-i18n-title="chat.photo.add">📷</button>
+    <button class="btn ghost icon" type="button" id="mic" hidden data-i18n-title="chat.mic">🎤</button>
+    <input type="file" id="photo-file" accept="image/*" hidden>
     <textarea id="input" rows="1" data-i18n-ph="chat.placeholder" autocomplete="off"></textarea>
     <button class="btn" id="send" type="submit" data-i18n="chat.send">Send</button>
   </form>
-  <label class="uselib"><input type="checkbox" id="uselib" checked> <span data-i18n="chat.uselib"></span></label>
+  <div class="options">
+    <label class="uselib"><input type="checkbox" id="uselib" checked> <span data-i18n="chat.uselib"></span></label>
+    <label class="uselib" id="speak-opt" hidden><input type="checkbox" id="speak"> <span data-i18n="chat.speak"></span></label>
+  </div>
+  <p class="muted voice-note" id="voice-note" hidden></p>
 </div>
 
 <script src="i18n.js"></script>
@@ -137,15 +145,23 @@ function addMsg(role, text, extra = {}) {
   const status = document.createElement('div'); status.className = 'status-line';
   const body = document.createElement('div'); body.className = 'body'; body.textContent = text;
   const tools = document.createElement('div'); tools.className = 'tools';
-  div.append(who, status, body, tools);
+  div.append(who, status);
+  if (extra.thumb) { const img = document.createElement('img'); img.className = 'photo'; img.src = extra.thumb; img.alt = ''; div.append(img); }
+  div.append(body, tools);
   log.append(div);
-  if (role === 'assistant') renderTools(tools, extra.sources || [], extra.question);
+  if (role === 'assistant') renderTools(tools, extra.sources || [], extra.question, extra.photo);
   log.scrollTop = log.scrollHeight;
   return { body, status, tools };
 }
 
-function renderTools(tools, sources, question) {
+function renderTools(tools, sources, question, photo) {
   tools.replaceChildren();
+  if (photo) { const w = document.createElement('div'); w.className = 'photo-warn'; w.textContent = t('chat.photo.warn'); tools.append(w); }
+  if (canSpeak()) {   // read this answer aloud (the device's own voices, offline)
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'btn ghost small'; b.textContent = t('chat.listen');
+    b.onclick = () => speak(tools.parentElement.querySelector('.body').textContent, b);
+    tools.append(b);
+  }
   if (sources.length) {
     const h = document.createElement('div'); h.textContent = t('chat.sources');
     const ol = document.createElement('ol'); ol.className = 'sources';
@@ -169,7 +185,8 @@ function renderTools(tools, sources, question) {
 function render() {
   for (let i = 0; i < history.length; i++) {
     const m = history[i];
-    addMsg(m.role, m.content, { sources: m.sources, question: m.role === 'assistant' ? history[i - 1]?.content : null });
+    addMsg(m.role, m.content, { sources: m.sources, question: m.role === 'assistant' ? history[i - 1]?.content : null,
+      thumb: m.thumb, photo: m.role === 'assistant' && history[i - 1]?.thumb });
   }
   $('chips').replaceChildren(...(history.length ? [] : t('chat.quick').map(q => {
     const b = document.createElement('button'); b.type = 'button'; b.textContent = q;
@@ -181,18 +198,20 @@ function render() {
 const stripThink = s => s.replace(/<think>[\s\S]*?(<\/think>|$)/g, '');
 
 async function ask() {
-  const q = input.value.trim();
+  const photo = pendingPhoto;
+  const q = input.value.trim() || (photo ? t('chat.photo.default') : '');
   if (!q || busy) return;
   input.value = ''; autosize();
+  setPhoto(null);
   $('chips').replaceChildren();
-  addMsg('user', q);
-  history.push({ role: 'user', content: q });
-  const { body, status, tools } = addMsg('assistant', '');
+  addMsg('user', q, { thumb: photo?.thumb });
+  history.push({ role: 'user', content: q, ...(photo ? { thumb: photo.thumb } : {}) });
+  const { body, status, tools } = addMsg('assistant', '', { photo: !!photo });
   sendBtn.textContent = t('chat.stop');
   busy = new AbortController();
   let answer = '', sources = [];
   try {
-    if (useLib.checked) {
+    if (useLib.checked && !(photo && q === t('chat.photo.default'))) {   // a photo with no question: nothing to look up yet
       status.textContent = t('chat.searching');
       const hits = await findArticles(q, busy.signal);
       if (hits.length) {
@@ -201,19 +220,23 @@ async function ask() {
         sources = read.filter(Boolean).slice(0, MAX_SOURCES);
       }
     }
-    status.textContent = t('chat.thinking');
-    renderTools(tools, sources, q);
+    status.textContent = t(photo ? 'chat.photo.looking' : 'chat.thinking');
+    renderTools(tools, sources, q, !!photo);
 
     let system = t('chat.system');
+    if (photo) system += '\n\n' + t('chat.photo.system');
     if (sources.length) {
       system += '\n\n' + t('chat.withsources') + '\n\n'
         + sources.map((s, i) => `[${i + 1}] ${s.title}\n${s.text}`).join('\n\n');
     }
+    // earlier turns as text only; the photo goes with this question
+    const turns = history.slice(-10).map(({ role, content }) => ({ role, content }));
+    if (photo) turns[turns.length - 1].content = [{ type: 'text', text: q }, { type: 'image_url', image_url: { url: photo.url } }];
     const res = await fetch(SURVIVAL.ai + '/v1/chat/completions', {
       method: 'POST', signal: busy.signal,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        messages: [{ role: 'system', content: system }, ...history.slice(-10).map(({ role, content }) => ({ role, content }))],
+        messages: [{ role: 'system', content: system }, ...turns],
         stream: true, temperature: 0.4,
         chat_template_kwargs: { enable_thinking: false },   // Qwen3: answer directly, much faster on CPUs
       }),
@@ -248,7 +271,123 @@ async function ask() {
     busy = null;
     sendBtn.textContent = t('chat.send');
     input.focus();
+    if ($('speak').checked && canSpeak() && answer !== t('chat.stopped')) speak(answer, tools.querySelector('button'));
   }
+}
+
+// ---------------------------------------------------------------- photos (models that can see: Gemma 3)
+// llama-server's /props lists what the loaded model can take; the 📷 button only shows when it can see
+let pendingPhoto = null;   // { url: the photo to send, thumb: a small copy kept in the chat history }
+function setPhoto(p) {
+  pendingPhoto = p;
+  $('pending').hidden = !p;
+  if (p) $('pending-img').src = p.thumb;
+}
+// a phone photo is several MB; the model looks at about 900 px anyway, and a smaller one is much faster
+function shrink(file, max, quality) {
+  return new Promise((ok, fail) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const s = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement('canvas'); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url); ok(c.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); fail(new Error('image')); };
+    img.src = url;
+  });
+}
+$('photo').onclick = () => $('photo-file').click();
+$('photo-file').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = '';
+  if (!f) return;
+  try { setPhoto({ url: await shrink(f, 896, 0.85), thumb: await shrink(f, 200, 0.7) }); input.focus(); } catch { }
+};
+$('pending-x').onclick = () => setPhoto(null);
+fetch(SURVIVAL.ai + '/props').then(r => r.json()).then(p => { if (p?.modalities?.vision) $('photo').hidden = false; }).catch(() => {});
+
+// ---------------------------------------------------------------- voice
+// Listening: the device's own voices (speechSynthesis), offline on Windows, Mac, iPhone and Android.
+const canSpeak = () => 'speechSynthesis' in window;
+let speaking = null;
+function speak(text, button) {
+  const synth = speechSynthesis;
+  if (speaking) { const was = speaking; synth.cancel(); speaking = null; was.textContent = t('chat.listen'); if (was === button) return; }
+  const u = new SpeechSynthesisUtterance(text.replace(/\[\d+\]/g, ''));   // without the [1] source marks
+  u.lang = SURVIVAL.lang;
+  const voices = synth.getVoices(), base = SURVIVAL.lang.slice(0, 2);
+  u.voice = voices.find(v => v.lang === SURVIVAL.lang) || voices.find(v => v.lang.startsWith(base)) || null;
+  u.onend = u.onerror = () => { if (speaking === button) { speaking = null; if (button) button.textContent = t('chat.listen'); } };
+  speaking = button || {};
+  if (button) button.textContent = t('chat.listen.stop');
+  synth.speak(u);
+}
+if (canSpeak()) {
+  $('speak-opt').hidden = false;
+  $('speak').checked = SURVIVAL.store('speak') === '1';
+  $('speak').onchange = () => SURVIVAL.store('speak', $('speak').checked ? '1' : '0');
+}
+
+// Speaking: recorded here and turned into text by the kit's whisper server (port 8093, Windows and Linux).
+// Browsers only allow the microphone on secure pages, which is the computer itself (localhost); on a
+// phone over the hotspot the keyboard's own microphone does the same, offline on most phones.
+const WHISPER = `${location.protocol}//${SURVIVAL.host}:8093`;
+const note = msg => { const n = $('voice-note'); n.textContent = msg; n.hidden = !msg; };
+let recorder = null;
+if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+  $('mic').hidden = false;
+  $('mic').onclick = () => note(t('chat.mic.phone'));
+} else fetch(WHISPER + '/').then(r => { if (r.ok) $('mic').hidden = false; }).catch(() => {});
+// 16 kHz mono 16-bit WAV, what whisper reads without any converter
+async function toWav(blob) {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const audio = await ctx.decodeAudioData(await blob.arrayBuffer());
+  ctx.close?.();
+  const off = new OfflineAudioContext(1, Math.max(1, Math.ceil(audio.duration * 16000)), 16000);
+  const src = off.createBufferSource(); src.buffer = audio; src.connect(off.destination); src.start();
+  const pcm = (await off.startRendering()).getChannelData(0);
+  const buf = new ArrayBuffer(44 + pcm.length * 2), v = new DataView(buf);
+  const str = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  str(0, 'RIFF'); v.setUint32(4, 36 + pcm.length * 2, true); str(8, 'WAVE'); str(12, 'fmt ');
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, 16000, true);
+  v.setUint32(28, 32000, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); str(36, 'data'); v.setUint32(40, pcm.length * 2, true);
+  pcm.forEach((s, i) => v.setInt16(44 + i * 2, Math.max(-1, Math.min(1, s)) * 0x7fff, true));
+  return new Blob([buf], { type: 'audio/wav' });
+}
+async function transcribe(blob) {
+  note(t('chat.mic.working'));
+  try {
+    const form = new FormData();
+    form.append('file', await toWav(blob), 'speech.wav');
+    form.append('language', SURVIVAL.lang.slice(0, 2));
+    form.append('response_format', 'json');
+    const res = await fetch(WHISPER + '/inference', { method: 'POST', body: form });
+    const text = ((await res.json()).text || '').replace(/\[[^\]]*\]|\([^)]*\)/g, '').trim();   // drop "[BLANK_AUDIO]", "(music)"
+    note('');
+    if (!text) { note(t('chat.mic.nothing')); return; }
+    input.value = (input.value ? input.value + ' ' : '') + text; autosize();
+    if (!busy) ask();   // hands-free: send what was said
+  } catch { note(t('chat.mic.error')); }
+}
+if (window.isSecureContext && navigator.mediaDevices?.getUserMedia) {
+  $('mic').onclick = async () => {
+    if (recorder) { recorder.stop(); return; }
+    let stream;
+    try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch { note(t('chat.mic.denied')); return; }
+    const chunks = [];
+    recorder = new MediaRecorder(stream);
+    recorder.ondataavailable = e => chunks.push(e.data);
+    recorder.onstop = () => {
+      stream.getTracks().forEach(tr => tr.stop());
+      clearTimeout(recorder.limit); recorder = null;
+      $('mic').classList.remove('rec'); $('mic').textContent = '🎤';
+      transcribe(new Blob(chunks, { type: chunks[0]?.type || 'audio/webm' }));
+    };
+    recorder.limit = setTimeout(() => recorder?.stop(), 60000);   // a minute at most
+    recorder.start();
+    $('mic').classList.add('rec'); $('mic').textContent = '⏹';
+    note(t('chat.mic.listening'));
+  };
 }
 
 function autosize() { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 180) + 'px'; }

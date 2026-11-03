@@ -143,7 +143,12 @@ $Models = @(
      Url = 'https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf' }
   @{ Id = 'qwen3-8b'; Tier = 'Standard'; Name = 'Qwen3-8B (smarter, needs 8 GB+ RAM)'; File = 'Qwen_Qwen3-8B-Q4_K_M.gguf'
      Url = 'https://huggingface.co/bartowski/Qwen_Qwen3-8B-GGUF/resolve/main/Qwen_Qwen3-8B-Q4_K_M.gguf' }
+  # Mmproj: the vision part, saved as models\mmproj\<File>; the start files load it with the model (--mmproj)
+  @{ Id = 'gemma3-4b-vision'; Tier = 'Standard'; Name = 'Gemma 3 4B (looks at photos)'; File = 'gemma-3-4b-it-Q4_K_M.gguf'
+     Url = 'https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q4_K_M.gguf'
+     Mmproj = 'https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/resolve/main/mmproj-model-f16.gguf' }
 )
+function Get-MmprojPath($m) { Join-Path $Target "models\mmproj\$($m.File)" }
 
 # Kiwix ZIM archives: folder on download.kiwix.org/zim/ + file prefix (newest date is picked automatically)
 # NotIn = skip in that tier because a bigger edition replaces it; Opt = only with its switch (-Gutenberg)
@@ -269,6 +274,7 @@ if ($Update -and $Target) {
   $ItemSet += @($MapPresets.Keys | Where-Object { Test-Path (Join-Path $Target "portal\maps\$_.pmtiles") })
   if (Test-Path (Join-Path $Target 'portal\survival-data\index.html')) { $ItemSet += 'survival-data' }
   if (Test-Path (Join-Path $Target 'apps\android')) { $ItemSet += 'apps' }
+  if (Test-Path (Join-Path $Target 'models\whisper')) { $ItemSet += 'voice' }
   if (-not (Test-Path (Join-Path $Target 'START-WINDOWS.bat'))) { throw "No Survival Station kit in $Target to update. Build it first." }
   $ItemSet += 'none'   # never empty, so only these are fetched
 }
@@ -315,6 +321,44 @@ function In-Tier($item) {
 function Wanted($item, $id) { if ($ItemSet) { $ItemSet -contains $id } else { In-Tier $item } }
 $WantSD = -not $ItemSet -or $ItemSet -contains 'survival-data'
 $WantApps = -not $ItemSet -or $ItemSet -contains 'apps'
+$WantVoice = -not $ItemSet -or $ItemSet -contains 'voice'
+# Voice: whisper.cpp's server turns speech into text for the chat (Windows and Linux builds; none for Mac).
+# Multilingual "small" model, 5-bit: about 4 seconds for a short question on a laptop CPU.
+$WhisperModel = 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small-q5_1.bin'
+$WhisperModelFile = 'models\whisper\ggml-small-q5_1.bin'
+$WhisperBuilds = [ordered]@{ 'whisper-bin-x64.zip' = 'win'; 'whisper-bin-ubuntu-x64.tar.gz' = 'linux-x64'; 'whisper-bin-ubuntu-arm64.tar.gz' = 'linux-arm64' }
+function Test-Voice {   # the speech model and every system's server are on the kit
+  (Test-Path (Join-Path $Target $WhisperModelFile)) -and
+    -not @($WhisperBuilds.Values | Where-Object { -not (Get-ChildItem (Join-Path $Target "tools\$_\whisper") -Filter 'whisper-server*' -ErrorAction SilentlyContinue) })
+}
+function Install-Voice {
+  Download $WhisperModel (Join-Path $Target $WhisperModelFile)
+  $missing = @($WhisperBuilds.Keys | Where-Object { -not (Get-ChildItem (Join-Path $Target "tools\$($WhisperBuilds[$_])\whisper") -Filter 'whisper-server*' -ErrorAction SilentlyContinue) })
+  if (-not $missing) { Write-Host '   ok (already have the voice programs)'; return }
+  # the tagged releases (v1.9.x) carry no files: the ready-made programs are on the numbered builds
+  $rel = Invoke-RestMethod 'https://api.github.com/repos/ggml-org/whisper.cpp/releases?per_page=15' |
+    Where-Object { $_.assets.name -contains 'whisper-bin-x64.zip' } | Select-Object -First 1
+  if (-not $rel) { throw 'No whisper.cpp build with ready-made programs found on GitHub' }
+  foreach ($name in $missing) {
+    $asset = $rel.assets | Where-Object { $_.name -eq $name } | Select-Object -First 1
+    if (-not $asset) { Write-Host "   (no $name in whisper.cpp $($rel.tag_name); voice won't work on that system)" -ForegroundColor Yellow; continue }
+    $arch = Join-Path $Tmp $name
+    Download $asset.browser_download_url $arch
+    $x = Join-Path $Tmp "whisper-$($WhisperBuilds[$name])"
+    if (Test-Path $x) { Remove-Item -Recurse -Force $x }
+    Expand-Any $arch $x
+    $server = Get-ChildItem $x -Recurse -File | Where-Object { $_.Name -in 'whisper-server.exe', 'whisper-server' } | Select-Object -First 1
+    if (-not $server) { Write-Host "   (no whisper-server in $name)" -ForegroundColor Yellow; continue }
+    $dst = Join-Path $Target "tools\$($WhisperBuilds[$name])\whisper"
+    if (Test-Path $dst) { Remove-Item -Recurse -Force $dst }
+    New-Item -ItemType Directory -Force $dst | Out-Null
+    # the server and the libraries beside it, not the ~40 other example programs
+    Get-ChildItem $server.DirectoryName -File | Where-Object { $_.Name -eq $server.Name -or $_.Name -match '\.(dll|so)(\.[\d.]+)?$|\.dylib$' } |
+      Copy-Item -Destination $dst
+    Remove-Item -Recurse -Force $x, $arch
+  }
+  Set-Content (Join-Path $Target 'tools\whisper-VERSION') $rel.tag_name
+}
 $BaseSize = 800MB   # always installed: AI and library programs for 5 systems, map viewer, world map
 
 function Norm-Path($p) { $p.TrimEnd('\').ToLower() }
@@ -785,6 +829,7 @@ function Write-Choices {
   }
   if ($WantSD) { $rows += , @('Extra    ', 'Extra    ', 'Survival-Data'); $ids += 'survival-data' }
   if ($WantApps) { $rows += , @('Extra    ', 'Extra    ', 'Android apps / apps Android'); $ids += 'apps' }
+  if ($WantVoice) { $rows += , @('Extra    ', 'Extra    ', 'Voice / voz (speech to text)'); $ids += 'voice' }
   $drive = $Target.TrimEnd('\')
   $when = (Get-Date).ToString('yyyy-MM-dd HH:mm')
   $en = ($rows | ForEach-Object { "   $($_[0])  $($_[2])" }) -join "`r`n"
@@ -1291,7 +1336,10 @@ if ($Catalog) {
          -WorkingDirectory $Tmp -RedirectStandardError $log -RedirectStandardOutput "$log.out" -NoNewWindow -PassThru }
   }
   $list = @()
-  foreach ($m in $Models) { $list += [ordered]@{ id = $m.Id; group = 'model'; name = $m.Name; tier = $m.Tier; file = "models/$($m.File)"; size = Get-RemoteSize $m.Url } }
+  foreach ($m in $Models) {
+    $size = (Get-RemoteSize $m.Url) + $(if ($m.Mmproj) { Get-RemoteSize $m.Mmproj } else { 0 })
+    $list += [ordered]@{ id = $m.Id; group = 'model'; name = $m.Name; tier = $m.Tier; file = "models/$($m.File)"; size = $size }
+  }
   foreach ($z in $Zims) {
     $f = Find-Zim $z
     if (-not $f) { continue }
@@ -1300,6 +1348,7 @@ if ($Catalog) {
   }
   $apps = @(Get-AppList)
   $list += [ordered]@{ id = 'survival-data'; group = 'extra'; name = 'Survival-Data: preparedness, radio, medical PDFs'; file = 'portal/survival-data/index.html'; size = 1500MB }
+  $list += [ordered]@{ id = 'voice'; group = 'extra'; name = 'Voice: speak questions to the AI (Windows, Linux)'; file = ($WhisperModelFile -replace '\\', '/'); size = (Get-RemoteSize $WhisperModel) + 20MB }
   $list += [ordered]@{ id = 'apps'; group = 'extra'; name = 'Android apps: Kiwix, PocketPal AI, Organic Maps'; file = 'apps/android/Kiwix.apk'; size = [int64]($apps | ForEach-Object { $_.Size } | Measure-Object -Sum).Sum }
   $world = 0
   foreach ($r in $runs) {
@@ -1316,7 +1365,7 @@ if ($Catalog) {
   $sdPushed = try { "$((Invoke-RestMethod 'https://api.github.com/repos/PR0M3TH3AN/Survival-Data').pushed_at)" } catch { '' }
   # which items include others (the window greys those out instead of letting both be ticked)
   foreach ($i in $list) { $i.contains = @($Contains[$i.id] | Where-Object { $_ }) }
-  Write-Json ([ordered]@{ version = 3; retired = $Retired; created = (Get-Date).ToString('s'); planet = $planet; pmtiles = $pm; engine = $engine; sdPushed = $sdPushed; base = $BaseSize - 190MB + $world; items = $list }) $Catalog
+  Write-Json ([ordered]@{ version = 4; retired = $Retired; created = (Get-Date).ToString('s'); planet = $planet; pmtiles = $pm; engine = $engine; sdPushed = $sdPushed; base = $BaseSize - 190MB + $world; items = $list }) $Catalog
   Write-Host "   $($list.Count) items -> $Catalog"
   exit
 }
@@ -1369,6 +1418,13 @@ if ($Verify) {
     if ($magic -ne 'GGUF') { Report bad "AI model $($f.Name): damaged (not a GGUF file)" $(if ($fix) { $fix + @{ Delete = $f.FullName } }) }
     elseif ($remote -gt 0 -and $f.Length -ne $remote) { Report bad ("AI model {0}: incomplete ({1} of {2})" -f $f.Name, (Fmt-Size $f.Length), (Fmt-Size $remote)) $fix }
     else { Report ok ("AI model {0} ({1}{2})" -f $f.Name, (Fmt-Size $f.Length), $(if (-not $known) { ', your own model: size not checked' } elseif (-not $remote) { ', size not checked: offline' })) }
+    if ($known.Mmproj) {   # its vision part
+      $mm = Get-MmprojPath $known
+      $mmRemote = Get-RemoteSize $known.Mmproj
+      if (-not (Test-Path $mm)) { Report bad "AI model $($f.Name): photo reading part missing" $fix }
+      elseif ($mmRemote -gt 0 -and (Get-Item $mm).Length -ne $mmRemote) { Report bad "AI model $($f.Name): photo reading part incomplete" $fix }
+      else { Report ok "AI model $($f.Name): photo reading part" }
+    }
   }
 
   # library: a complete ZIM ends exactly 16 bytes (its MD5) after the checksum position in its header
@@ -1413,6 +1469,9 @@ if ($Verify) {
   elseif (Test-Path (Join-Path $Target 'portal\survival-data')) { Report bad 'Survival-Data: incomplete' @{ Kind = 'item'; Id = 'survival-data'; Delete = (Join-Path $Target 'portal\survival-data') } }
   else { Report info 'Survival-Data not on this kit (tick it in the builder window to add it)' }
   if (-not (Test-Path (Join-Path $Target 'apps\android'))) { Report info 'Android apps not on this kit' }
+  if (Test-Voice) { Report ok 'Voice (speech to text) for Windows and Linux' }
+  elseif (Test-Path (Join-Path $Target 'models\whisper')) { Report bad 'Voice: part of it is missing' @{ Kind = 'item'; Id = 'voice' } }
+  else { Report info 'Voice (speech to text) not on this kit (tick it in the builder window to add it)' }
 
   # chosen in BUILD-CHOICES.txt but never started (a stopped build): repair fetches them too
   $ch = Read-Choices
@@ -1427,6 +1486,7 @@ if ($Verify) {
                elseif ($MapPresets.Contains($id)) { (Test-Path (Join-Path $Target "portal\maps\$id.pmtiles")) -or $parts -contains "$id.pmtiles" }
                elseif ($id -eq 'survival-data') { Test-Path (Join-Path $Target 'portal\survival-data\index.html') }
                elseif ($id -eq 'apps') { Test-Path (Join-Path $Target 'apps\android') }
+               elseif ($id -eq 'voice') { Test-Voice }
                else { $true }
       if (-not $there) { $notYet += $id }
     }
@@ -1505,7 +1565,11 @@ foreach ($z in ($Zims | Where-Object { Wanted $_ $_.Prefix })) {
   if (-not $f) { Write-Host "   (not found on mirror, skipping) $($z.Prefix)" -ForegroundColor Yellow; continue }
   $zimList += @{ File = $f.File; Url = $f.Url; Size = (Get-RemoteSize $f.Url); Prefix = $z.Prefix; Name = $z.Name }
 }
-$modelList = @($Models | Where-Object { Wanted $_ $_.Id } | ForEach-Object { $_.Size = Get-RemoteSize $_.Url; $_ })
+$modelList = @($Models | Where-Object { Wanted $_ $_.Id } | ForEach-Object {
+  $_.MainSize = Get-RemoteSize $_.Url
+  $_.MmSize = if ($_.Mmproj) { Get-RemoteSize $_.Mmproj } else { 0 }
+  $_.Size = $_.MainSize + $_.MmSize
+  $_ })
 
 # never two items where one includes the other (Canada + Canada south, complete Wikipedia + Wikipedia medicine...)
 $chosen = @($zimList | ForEach-Object { $_.Prefix }) + @($MapList | ForEach-Object { $_.Name })
@@ -1531,8 +1595,9 @@ foreach ($m in $MapList) {
 $total = if (Test-Path (Join-Path $Target 'engine\VERSION')) { 0 } else { $BaseSize }
 if ($WantSD -and -not (Test-Path (Join-Path $Target 'portal\survival-data\index.html'))) { $total += 1500MB }
 if ($WantApps -and -not (Test-Path (Join-Path $Target 'apps\android'))) { $total += 550MB }
+if ($WantVoice -and -not (Test-Voice)) { $total += 210MB }
 # files already on the target at the same size are skipped by Download, so they cost nothing
-foreach ($m in $modelList) { $m.Have = Test-Same (Join-Path $Target "models\$($m.File)") $m.Size }
+foreach ($m in $modelList) { $m.Have = (Test-Same (Join-Path $Target "models\$($m.File)") $m.MainSize) -and (-not $m.Mmproj -or (Test-Same (Get-MmprojPath $m) $m.MmSize)) }
 foreach ($z in $zimList) { $z.Have = Test-Same (Join-Path $Target "library\$($z.File)") $z.Size }
 foreach ($i in ($zimList + $modelList + $MapList)) { if (-not $i.Have) { $total += $i.Size } }
 foreach ($m in $modelList) { "{0,8:N2} GB  AI model  {1} {2}" -f ($m.Size / 1GB), $m.Name, $(if ($m.Have) { '(already have)' }) }
@@ -1588,7 +1653,10 @@ foreach ($build in $KiwixBuilds.Keys) {
 }
 
 Step 'AI models'
-foreach ($m in $modelList) { Download $m.Url (Join-Path $Target "models\$($m.File)") }
+foreach ($m in $modelList) {
+  Download $m.Url (Join-Path $Target "models\$($m.File)")
+  if ($m.Mmproj) { Download $m.Mmproj (Get-MmprojPath $m) }
+}
 
 Step 'Offline library (Kiwix ZIM files)'
 $libDir = Join-Path $Target 'library'
@@ -1683,6 +1751,11 @@ if ((Test-Path (Join-Path $sdDest 'index.html')) -and -not (Test-PdfIndex)) {
 if (-not (Test-Places)) {
   Step 'Place names for the map search (GeoNames)'
   Build-Places
+}
+
+if ($WantVoice) {
+  Step 'Voice: speech to text (whisper.cpp) for Windows and Linux'
+  Install-Voice
 }
 
 if ($WantApps) {

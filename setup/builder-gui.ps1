@@ -747,7 +747,7 @@ $form.Add_Shown({ Safe {
   if ($Kit) { Select-Kit $Kit }
   if (Test-Path $CacheFile) { Load-Catalog }
   # version 2 lists which items include others (and has the country maps cut along borders); 3 lists retired items
-  if (-not $script:catalog -or $script:catalog.version -lt 3 -or ((Get-Date) - [datetime]$script:catalog.created).TotalDays -gt 7) { Refresh-Catalog }
+  if (-not $script:catalog -or $script:catalog.version -lt 4 -or ((Get-Date) - [datetime]$script:catalog.created).TotalDays -gt 7) { Refresh-Catalog }
   if ($Action) { Run-Action }
 } })
 
