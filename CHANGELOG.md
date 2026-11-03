@@ -12,6 +12,14 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.11.0 (2026-11-02)
+
+- **QR code for phones** on the home page ("Use it on a phone"): point a phone camera at it to open the kit, with nothing to type.
+  - On the computer it shows the computer's network address. The start files write the addresses to `portal/kit-address.json` each time the kit starts, the one with a gateway (a phone hotspot) first; the others are listed as fallbacks.
+  - On a connected phone it shows the address that phone uses, so it can be passed on.
+  - Tested: the code reads back as `http://192.168.50.220:8080/`.
+- The QR library (qrcode-generator 1.4.4, 57 KB) is downloaded with the map viewer. **Verify / repair** adds it to existing kits.
+
 ## 1.10.0 (2026-11-02)
 
 - **CPR rhythm** at the top of the Tools page:

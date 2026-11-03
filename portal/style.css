@@ -131,6 +131,12 @@ body.map-page { display: flex; flex-direction: column; height: 100vh; height: 10
 .tools .buttons { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
 .tools h3 { margin: 16px 0 6px; }
 .flash { position: fixed; inset: 0; z-index: 100; background: #000; display: flex; align-items: flex-end; justify-content: center; cursor: pointer; }
+.qr { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.qr[hidden] { display: none; }
+.qr #qr-code { width: 180px; height: 180px; background: #fff; padding: 6px; border-radius: 10px; flex: none; }
+.qr #qr-code svg { width: 100%; height: 100%; display: block; }
+.qr > div:last-child { flex: 1; min-width: 200px; }
+.qr-url { font-family: var(--mono); font-size: 20px; font-weight: 700; overflow-wrap: anywhere; }
 .cpr { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin: 10px 0; }
 .cpr-beat { width: 130px; height: 130px; border-radius: 50%; background: var(--surface-2); border: 4px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 46px; font-weight: 800; flex: none; }
 .cpr-beat.beat { animation: cprbeat .5s ease-out; }

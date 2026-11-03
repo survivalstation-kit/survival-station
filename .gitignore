@@ -3,6 +3,8 @@ logs/
 # downloads in progress, if the project folder is ever used as a build target
 .download/
 *.part
+# written by the start files each time the kit starts (this computer's network addresses)
+portal/kit-address.json
 # local editor and tool settings
 .claude/
 __pycache__/

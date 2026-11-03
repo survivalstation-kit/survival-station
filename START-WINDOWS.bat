@@ -82,6 +82,8 @@ echo  A IA nao iniciou. Tente um modelo menor, ou veja a janela "AI server".
 goto end
 
 :ready
+rem ---- this computer's network addresses for the home page's QR code (ones with a gateway, e.g. a phone hotspot, first)
+"%SYS%\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -Command "$c = @(Get-NetIPConfiguration -ErrorAction SilentlyContinue | Where-Object { $_.IPv4Address }); $ips = @($c | Sort-Object { -not $_.IPv4DefaultGateway } | ForEach-Object { $_.IPv4Address.IPAddress } | Where-Object { $_ -notlike '127.*' -and $_ -notlike '169.254.*' } | Select-Object -Unique); [IO.File]::WriteAllText('portal\kit-address.json', (ConvertTo-Json -Compress -InputObject @{ port = %PORT%; ips = $ips }))" >nul 2>&1
 rem ---- kit helper for the portal's "My kit" page (this computer only; stops when the AI stops)
 if exist "setup\kit-control.ps1" start "" /min "%SYS%\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "%~dp0setup\kit-control.ps1" -Root "%~dp0."
 start "" http://localhost:%PORT%/

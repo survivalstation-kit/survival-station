@@ -69,6 +69,10 @@
 
   <h2 data-i18n="home.phone">Use it on a phone</h2>
   <div class="box">
+    <div class="qr" id="qr" hidden>
+      <div id="qr-code"></div>
+      <div><p data-i18n="home.qr"></p><p class="qr-url" id="qr-url"></p><p class="muted" id="qr-more"></p></div>
+    </div>
     <ol>
       <li data-i18n-html="home.phone.1"></li>
       <li data-i18n-html="home.phone.2"></li>
@@ -113,6 +117,25 @@
       $('docs').replaceChildren(ul);
     }
   } catch { /* opened as a file, or no index yet: keep the hint */ }
+
+  // QR code of the kit's address, for phones on the same hotspot or Wi-Fi. On the computer itself the page
+  // is on localhost, so the start file writes the network addresses to kit-address.json; on a phone, the
+  // address it already uses (so one phone can pass it to the next).
+  if (SURVIVAL.served) try {
+    let url = location.origin + '/', more = [];
+    if (/^(localhost|127\.)/.test(location.hostname)) {
+      const a = await (await fetch('kit-address.json', { cache: 'no-store' })).json();
+      const urls = (a.ips || []).map(ip => `http://${ip}:${a.port || location.port}/`);
+      if (!urls.length) throw new Error('no network');
+      [url, ...more] = urls;
+    }
+    await new Promise((ok, fail) => { const s = document.createElement('script'); s.src = 'vendor/qrcode.js'; s.onload = ok; s.onerror = fail; document.head.append(s); });
+    const q = qrcode(0, 'M'); q.addData(url); q.make();
+    $('qr-code').innerHTML = q.createSvgTag({ cellSize: 6, margin: 2, scalable: true });
+    $('qr-url').textContent = url;
+    if (more.length) $('qr-more').textContent = t('home.qr.more') + ' ' + more.join('  ');
+    $('qr').hidden = false;
+  } catch { /* no network, or an older kit without the QR library: the steps below still say how */ }
 })();
 </script>
 </body>

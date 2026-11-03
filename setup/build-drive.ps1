@@ -292,6 +292,7 @@ $Viewer = @{   # map viewer libraries, pinned
   'maplibre-gl.css' = 'https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.css'
   'pmtiles.js'      = 'https://cdn.jsdelivr.net/npm/pmtiles@4.5.0/dist/pmtiles.js'
   'basemaps.js'     = 'https://cdn.jsdelivr.net/npm/@protomaps/basemaps@5.7.2/dist/basemaps.js'
+  'qrcode.js'       = 'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js'   # QR code of the kit's address for phones
 }
 
 # llama.cpp asset suffix -> engine folder on the drive

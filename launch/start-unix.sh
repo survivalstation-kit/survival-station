@@ -109,6 +109,14 @@ for _ in $(seq 180); do
   sleep 1
 done
 
+# this computer's network addresses for the home page's QR code
+if [ "$(uname -s)" = Darwin ]; then
+  IPS=$(for ifc in en0 en1 bridge100; do ipconfig getifaddr "$ifc" 2>/dev/null; done)
+else
+  IPS=$(hostname -I 2>/dev/null | tr ' ' '\n' | grep -v ':' | grep -v '^127\.')
+fi
+{ printf '{"port":%s,"ips":[' "$PORT"; first=1; for ip in $IPS; do [ $first = 1 ] || printf ','; printf '"%s"' "$ip"; first=0; done; printf ']}'; } >"$ROOT/portal/kit-address.json" 2>/dev/null
+
 open_url "http://localhost:$PORT/"
 echo
 echo " READY / PRONTO:  http://localhost:$PORT/"
