@@ -108,7 +108,7 @@ async function findArticles(question, signal) {
 const SKIP_SECTIONS = /refer|ligaç|ver_também|see_also|external|notes|notas|bibliograf|leitura|further/i;
 
 async function readArticle(hit, words, signal) {
-  const res = await fetch(SURVIVAL.library + hit.link, { signal });
+  const res = await fetch(SURVIVAL.libHost + hit.link, { signal });   // the link already starts /library/
   if (!res.ok || !(res.headers.get('content-type') || '').includes('html')) return null;
   const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
   doc.querySelectorAll('script, style, table, sup, figure, nav, .reference, .navbox, .mw-editsection, .infobox').forEach(e => e.remove());
@@ -168,7 +168,7 @@ function renderTools(tools, sources, question, photo) {
     for (const s of sources) {
       const li = document.createElement('li');
       const a = document.createElement('a');
-      a.href = SURVIVAL.library + s.link; a.target = '_blank'; a.rel = 'noopener';
+      a.href = SURVIVAL.libHost + s.link; a.target = '_blank'; a.rel = 'noopener';
       a.textContent = s.title + (s.book ? ` — ${s.book}` : '');
       li.append(a); ol.append(li);
     }
@@ -332,12 +332,22 @@ if (canSpeak()) {
 // Speaking: recorded here and turned into text by the kit's whisper server (port 8093, Windows and Linux).
 // Browsers only allow the microphone on secure pages, which is the computer itself (localhost); on a
 // phone over the hotspot the keyboard's own microphone does the same, offline on most phones.
-const WHISPER = `${location.protocol}//${SURVIVAL.host}:8093`;
+const WHISPER = SURVIVAL.voice;
 const note = msg => { const n = $('voice-note'); n.textContent = msg; n.hidden = !msg; };
 let recorder = null;
 if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+  // a phone on the plain address: offer the kit's secure address (Voice extra), else the keyboard's microphone
   $('mic').hidden = false;
-  $('mic').onclick = () => note(t('chat.mic.phone'));
+  $('mic').onclick = async () => {
+    let a = {};
+    try { a = await (await fetch('kit-address.json', { cache: 'no-store' })).json(); } catch { }
+    if (!a.https) { note(t('chat.mic.phone')); return; }
+    const url = `https://${location.hostname}:${a.https}/chat.html`;
+    const n = $('voice-note'), link = document.createElement('a');
+    link.href = url; link.textContent = url;
+    n.replaceChildren(t('chat.mic.https1') + ' ', link, ' ' + t('chat.mic.https2'));
+    n.hidden = false;
+  };
 } else fetch(WHISPER + '/').then(r => { if (r.ok) $('mic').hidden = false; }).catch(() => {});
 // 16 kHz mono 16-bit WAV, what whisper reads without any converter
 async function toWav(blob) {

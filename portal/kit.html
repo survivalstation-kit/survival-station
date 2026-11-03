@@ -261,7 +261,7 @@
       const x = new DOMParser().parseFromString(await (await timed(`${SURVIVAL.library}/search?format=xml&pageLength=3&books.filter.lang=${SURVIVAL.dict._kiwix}&pattern=water%20agua`)).text(), 'application/xml');
       const link = x.querySelector('item > link')?.textContent;
       if (!link) return [false, L('no results for "water"', 'nenhum resultado para "água"')];
-      const a = await timed(SURVIVAL.library + link);
+      const a = await timed(SURVIVAL.libHost + link);
       return [a.ok, x.querySelector('item > title')?.textContent];
     }, L('the library server isn\'t running', 'o servidor da biblioteca não está rodando')],
     [L('Map', 'Mapa'), async () => {
@@ -271,7 +271,7 @@
         let ok;
         if (m.size >= 2147483648 - 1048576) {   // big maps come from the map server on Windows (see map.html)
           const direct = await timed('maps/' + encodeURIComponent(m.file), { headers: { Range: 'bytes=0-126' } }).then(r => r.status === 206).catch(() => false);
-          ok = direct || await timed(`${location.protocol}//${host}:8092/${encodeURIComponent(m.name)}/0/0/0.mvt`).then(r => r.ok).catch(() => false);
+          ok = direct || await timed(`${SURVIVAL.tiles}/${encodeURIComponent(m.name)}/0/0/0.mvt`).then(r => r.ok).catch(() => false);
         } else ok = await timed('maps/' + encodeURIComponent(m.file), { headers: { Range: 'bytes=0-126' } }).then(r => r.status === 206).catch(() => false);
         out.push((ok ? '✓ ' : '✗ ') + m.name);
         if (!ok && m.size >= 2147483648 - 1048576) out.big = true;
@@ -298,8 +298,8 @@
       return mine.length ? [true, mine[0].name] : [null, L('no voice for this language on this device: add one in its settings', 'nenhuma voz neste idioma no aparelho: adicione uma nas configurações')];
     }],
     [L('Speak questions (voice)', 'Falar as perguntas (voz)'), async () => {
-      if (!onThisComputer) return [null, L('on phones, dictate with the keyboard microphone', 'no celular, dite pelo microfone do teclado')];
-      const ok = await timed(`${location.protocol}//${host}:8093/`).then(r => r.ok).catch(() => false);
+      if (!onThisComputer && !SURVIVAL.secure) return [null, L('on phones: open the kit\'s https address, or dictate with the keyboard microphone', 'no celular: abra o endereço https do kit, ou dite pelo microfone do teclado')];
+      const ok = await timed(SURVIVAL.voice + '/').then(r => r.ok).catch(() => false);
       return ok ? [true, L('speech server running', 'servidor de voz rodando')] : [null, L('not installed: tick Voice in MAKE-USB.bat', 'não instalada: marque Voz no MAKE-USB.bat')];
     }],
     [L('Phones can connect', 'Celulares conseguem conectar'), async () => {

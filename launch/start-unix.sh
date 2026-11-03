@@ -47,7 +47,8 @@ ZIMS=("$ROOT"/library/*.zim)
 if [ ${#ZIMS[@]} -gt 0 ] && KIWIX=$(runnable_dir "$ROOT/kiwix/$OS" kiwix-serve); then
   # kiwix-serve names each book after the path it was given: run it inside library/ with bare
   # file names, otherwise article links break
-  (cd "$ROOT/library" && exec "$KIWIX/kiwix-serve" --port "$LIBPORT" "${ZIMS[@]##*/}") >"${TMPDIR:-/tmp}/survival-kiwix.log" 2>&1 &
+  # under /library, so the secure address (Caddy, below) can pass /library on to it
+  (cd "$ROOT/library" && exec "$KIWIX/kiwix-serve" --port "$LIBPORT" --urlRootLocation /library "${ZIMS[@]##*/}") >"${TMPDIR:-/tmp}/survival-kiwix.log" 2>&1 &
   PIDS+=($!)
   echo " Library: ${#ZIMS[@]} archive(s) on port $LIBPORT"
 else
@@ -123,7 +124,46 @@ if [ "$(uname -s)" = Darwin ]; then
 else
   IPS=$(hostname -I 2>/dev/null | tr ' ' '\n' | grep -v ':' | grep -v '^127\.')
 fi
-{ printf '{"port":%s,"ips":[' "$PORT"; first=1; for ip in $IPS; do [ $first = 1 ] || printf ','; printf '"%s"' "$ip"; first=0; done; printf ']}'; } >"$ROOT/portal/kit-address.json" 2>/dev/null
+# secure address https://...:8443 (Caddy, with the Voice extra on Linux) so phones may use the microphone;
+# same settings as setup/network.ps1 on Windows
+HTTPSPORT=
+CADDY="$ROOT/tools/$OS/caddy/caddy"
+if [ -f "$CADDY" ] && [ -f "$ROOT/tools/$OS/whisper/whisper-server" ]; then
+  chmod +x "$CADDY" 2>/dev/null
+  if ! [ -x "$CADDY" ]; then cp "$CADDY" "${TMPDIR:-/tmp}/survival-caddy" && CADDY="${TMPDIR:-/tmp}/survival-caddy" && chmod +x "$CADDY"; fi
+  HTTPSPORT=8443
+  SNI=$(echo $IPS | awk '{print $1}'); [ -n "$SNI" ] || SNI=localhost
+  SITES="https://localhost:$HTTPSPORT"; for ip in $IPS; do SITES="$SITES, https://$ip:$HTTPSPORT"; done
+  CADDYFILE="${TMPDIR:-/tmp}/survival-Caddyfile"
+  cat >"$CADDYFILE" <<EOF
+{
+	admin off
+	local_certs
+	skip_install_trust
+	auto_https disable_redirects
+	default_sni $SNI
+	storage file_system "$ROOT/tools/caddy-data"
+}
+$SITES {
+	tls internal
+	handle /library* {
+		reverse_proxy 127.0.0.1:$LIBPORT
+	}
+	handle_path /tiles/* {
+		reverse_proxy 127.0.0.1:8092
+	}
+	handle_path /voice/* {
+		reverse_proxy 127.0.0.1:8093
+	}
+	handle {
+		reverse_proxy 127.0.0.1:$PORT
+	}
+}
+EOF
+  "$CADDY" run --config "$CADDYFILE" --adapter caddyfile >"${TMPDIR:-/tmp}/survival-caddy.log" 2>&1 &
+  PIDS+=($!)
+fi
+{ printf '{"port":%s,"ips":[' "$PORT"; first=1; for ip in $IPS; do [ $first = 1 ] || printf ','; printf '"%s"' "$ip"; first=0; done; printf ']'; [ -n "$HTTPSPORT" ] && printf ',"https":%s' "$HTTPSPORT"; printf '}'; } >"$ROOT/portal/kit-address.json" 2>/dev/null
 
 open_url "http://localhost:$PORT/"
 echo
@@ -134,6 +174,12 @@ if [ "$(uname -s)" = Darwin ]; then
   for ifc in en0 en1 bridge100; do ip=$(ipconfig getifaddr "$ifc" 2>/dev/null) && echo "    http://$ip:$PORT/"; done
 else
   for ip in $(hostname -I 2>/dev/null); do case "$ip" in *:*) ;; *) echo "    http://$ip:$PORT/" ;; esac; done
+fi
+if [ -n "$HTTPSPORT" ]; then
+  echo
+  echo " Microphone on phones / Microfone no celular:"
+  for ip in $IPS; do echo "    https://$ip:$HTTPSPORT/"; done
+  echo " The phone warns once that it is \"not private\": choose Advanced / Show details, then continue."
 fi
 echo
 echo " Leave this window open. Press Ctrl+C to SHUT DOWN."

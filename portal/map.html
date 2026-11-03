@@ -57,7 +57,7 @@
   const headers = await Promise.all(archives.map(a => a.getHeader().catch(() => null)));
   // A map whose file won't load (on Windows the AI server can't send files over 2 GB) comes as tiles
   // from the kit's map server instead, using the zooms and bounds the builder wrote in index.json
-  const tileServer = `${location.protocol}//${location.hostname}:8092/`;
+  const tileServer = SURVIVAL.tiles + '/';
   const viaServer = maps.map((m, i) => !headers[i] && Array.isArray(m.bounds));
   const bounds = maps.map((m, i) => headers[i] ? [headers[i].minLon, headers[i].minLat, headers[i].maxLon, headers[i].maxLat]
     : viaServer[i] ? m.bounds : null);

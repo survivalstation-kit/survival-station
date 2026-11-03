@@ -12,6 +12,19 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.15.0 (2026-11-02)
+
+- **The 🎤 works on phones too: the kit has a secure address**, `https://<address>:8443/`.
+  - Browsers only allow the microphone on https (or on the computer itself), so the Voice extra now also brings **Caddy**, a small web server that serves the whole kit over https. Its own certificate authority stays on the kit (`tools/caddy-data`).
+  - Behind it, Caddy passes `/library` to the library, `/tiles` to the big-map server, `/voice` to speech to text (which still listens on the computer only), and the rest to the AI server.
+  - Phones show a one-time "not private" warning for the kit's own certificate: choose Advanced / Show details and continue.
+  - The start window lists the secure addresses. The home page shows the address next to the QR code, and tapping 🎤 on the plain address offers a link to it.
+  - Plain `http://…:8080` works as before.
+- **The library now answers under `/library/`** (`http://<address>:8090/library/`), so it can sit behind the secure address. The pages and start files were changed together; restart the kit after updating.
+- `setup/network.ps1` writes the kit's addresses and Caddy's settings when the kit starts. Phones connecting by IP send no server name, so Caddy is told which certificate to show.
+- Tested through the secure address: pages, a streamed AI answer, library search and articles, a big-map tile, the self-test, and 🎤 with speech to text ("How do I purify water with bleach after a flood?", transcribed exactly).
+- The Voice extra grows to about 400 MB (Caddy is ~50 MB per system). Kits that already have Voice get Caddy through **Verify / repair**.
+
 ## 1.14.0 (2026-11-02)
 
 - **Family emergency plan** (home tile 👪, English and Português):

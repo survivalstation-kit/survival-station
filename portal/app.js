@@ -4,7 +4,13 @@ const SURVIVAL = (() => {
   const served = location.protocol.startsWith('http');
   const host = served ? location.hostname : 'localhost';
   const ai = served ? location.origin : 'http://localhost:8080';
-  const library = `http://${host}:8090`;
+  // Plain http: each server on its own port. Secure mode (https on 8443, so phones may use the microphone):
+  // one address, and the kit's Caddy passes /library, /tiles and /voice on (a secure page can't call plain http).
+  const secure = location.protocol === 'https:';
+  const libHost = secure ? location.origin : `http://${host}:8090`;   // the library's own links start /library/...
+  const library = libHost + '/library';
+  const tiles = secure ? location.origin + '/tiles' : `http://${host}:8092`;   // maps over 2 GB (map server)
+  const voice = secure ? location.origin + '/voice' : `http://${host}:8093`;   // speech to text
 
   async function up(url, ms = 2500) {
     try {
@@ -129,5 +135,5 @@ const SURVIVAL = (() => {
   initTheme();
   applyI18n();
   showVersion();
-  return { served, host, ai, library, up, store, lang, dict, t, isDark, lowPower, setLowPower };
+  return { served, host, ai, secure, libHost, library, tiles, voice, up, store, lang, dict, t, isDark, lowPower, setLowPower };
 })();

@@ -328,12 +328,36 @@ $WantVoice = -not $ItemSet -or $ItemSet -contains 'voice'
 $WhisperModel = 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small-q5_1.bin'
 $WhisperModelFile = 'models\whisper\ggml-small-q5_1.bin'
 $WhisperBuilds = [ordered]@{ 'whisper-bin-x64.zip' = 'win'; 'whisper-bin-ubuntu-x64.tar.gz' = 'linux-x64'; 'whisper-bin-ubuntu-arm64.tar.gz' = 'linux-arm64' }
-function Test-Voice {   # the speech model and every system's server are on the kit
+# Caddy gives the kit a secure address (https on 8443) so phones may use the microphone; same systems as whisper
+$CaddyBuilds = [ordered]@{ 'windows_amd64.zip' = 'win'; 'linux_amd64.tar.gz' = 'linux-x64'; 'linux_arm64.tar.gz' = 'linux-arm64' }
+function Test-Voice {   # the speech model, and every system's speech server and Caddy, are on the kit
   (Test-Path (Join-Path $Target $WhisperModelFile)) -and
-    -not @($WhisperBuilds.Values | Where-Object { -not (Get-ChildItem (Join-Path $Target "tools\$_\whisper") -Filter 'whisper-server*' -ErrorAction SilentlyContinue) })
+    -not @($WhisperBuilds.Values | Where-Object { -not (Get-ChildItem (Join-Path $Target "tools\$_\whisper") -Filter 'whisper-server*' -ErrorAction SilentlyContinue) }) -and
+    -not @($CaddyBuilds.Values | Where-Object { -not (Get-ChildItem (Join-Path $Target "tools\$_\caddy") -Filter 'caddy*' -ErrorAction SilentlyContinue) })
+}
+function Install-Caddy {
+  $missing = @($CaddyBuilds.Keys | Where-Object { -not (Get-ChildItem (Join-Path $Target "tools\$($CaddyBuilds[$_])\caddy") -Filter 'caddy*' -ErrorAction SilentlyContinue) })
+  if (-not $missing) { Write-Host '   ok (already have the secure server)'; return }
+  $rel = Invoke-RestMethod 'https://api.github.com/repos/caddyserver/caddy/releases/latest'
+  foreach ($suffix in $missing) {
+    $asset = $rel.assets | Where-Object { $_.name -like "caddy_*_$suffix" } | Select-Object -First 1
+    if (-not $asset) { Write-Host "   (no Caddy $suffix in $($rel.tag_name))" -ForegroundColor Yellow; continue }
+    $arch = Join-Path $Tmp $asset.name
+    Download $asset.browser_download_url $arch
+    $x = Join-Path $Tmp "caddy-$($CaddyBuilds[$suffix])"
+    if (Test-Path $x) { Remove-Item -Recurse -Force $x }
+    Expand-Any $arch $x
+    $exe = Get-ChildItem $x -Recurse -File | Where-Object { $_.Name -in 'caddy.exe', 'caddy' } | Select-Object -First 1
+    $dst = Join-Path $Target "tools\$($CaddyBuilds[$suffix])\caddy"
+    New-Item -ItemType Directory -Force $dst | Out-Null
+    if ($exe) { Copy-Item $exe.FullName $dst -Force }
+    Remove-Item -Recurse -Force $x, $arch
+  }
+  Set-Content (Join-Path $Target 'tools\caddy-VERSION') $rel.tag_name
 }
 function Install-Voice {
   Download $WhisperModel (Join-Path $Target $WhisperModelFile)
+  Install-Caddy
   $missing = @($WhisperBuilds.Keys | Where-Object { -not (Get-ChildItem (Join-Path $Target "tools\$($WhisperBuilds[$_])\whisper") -Filter 'whisper-server*' -ErrorAction SilentlyContinue) })
   if (-not $missing) { Write-Host '   ok (already have the voice programs)'; return }
   # the tagged releases (v1.9.x) carry no files: the ready-made programs are on the numbered builds
@@ -1350,7 +1374,7 @@ if ($Catalog) {
   }
   $apps = @(Get-AppList)
   $list += [ordered]@{ id = 'survival-data'; group = 'extra'; name = 'Survival-Data: preparedness, radio, medical PDFs'; file = 'portal/survival-data/index.html'; size = 1500MB }
-  $list += [ordered]@{ id = 'voice'; group = 'extra'; name = 'Voice: speak questions to the AI (Windows, Linux)'; file = ($WhisperModelFile -replace '\\', '/'); size = (Get-RemoteSize $WhisperModel) + 20MB }
+  $list += [ordered]@{ id = 'voice'; group = 'extra'; name = 'Voice: speak questions to the AI, also on phones (Windows, Linux)'; file = ($WhisperModelFile -replace '\\', '/'); size = (Get-RemoteSize $WhisperModel) + 210MB }   # + speech servers (~20 MB) and Caddy (~50 MB) per system
   $list += [ordered]@{ id = 'apps'; group = 'extra'; name = 'Android apps: Kiwix, PocketPal AI, Organic Maps'; file = 'apps/android/Kiwix.apk'; size = [int64]($apps | ForEach-Object { $_.Size } | Measure-Object -Sum).Sum }
   $world = 0
   foreach ($r in $runs) {
@@ -1597,7 +1621,7 @@ foreach ($m in $MapList) {
 $total = if (Test-Path (Join-Path $Target 'engine\VERSION')) { 0 } else { $BaseSize }
 if ($WantSD -and -not (Test-Path (Join-Path $Target 'portal\survival-data\index.html'))) { $total += 1500MB }
 if ($WantApps -and -not (Test-Path (Join-Path $Target 'apps\android'))) { $total += 550MB }
-if ($WantVoice -and -not (Test-Voice)) { $total += 210MB }
+if ($WantVoice -and -not (Test-Voice)) { $total += 400MB }
 # files already on the target at the same size are skipped by Download, so they cost nothing
 foreach ($m in $modelList) { $m.Have = (Test-Same (Join-Path $Target "models\$($m.File)") $m.MainSize) -and (-not $m.Mmproj -or (Test-Same (Get-MmprojPath $m) $m.MmSize)) }
 foreach ($z in $zimList) { $z.Have = Test-Same (Join-Path $Target "library\$($z.File)") $z.Size }

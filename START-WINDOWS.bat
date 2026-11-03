@@ -22,15 +22,16 @@ echo.
 
 rem ---- library server (all .zim files in library\)
 rem kiwix-serve names each book after the path it was given, so run it inside library\ with bare
-rem file names - "library\x.zim" would produce broken article links
+rem file names - "library\x.zim" would produce broken article links. It answers under /library, so the
+rem secure address (Caddy, see below) can pass /library on to it.
 set ZIMS=
 for %%z in (library\*.zim) do set ZIMS=!ZIMS! "%%~nxz"
 if defined ZIMS (
-  if exist "kiwix\win\kiwix-serve.exe" start "Library server" /min /d "%~dp0library" "%~dp0kiwix\win\kiwix-serve.exe" --port %LIBPORT% !ZIMS!
+  if exist "kiwix\win\kiwix-serve.exe" start "Library server" /min /d "%~dp0library" "%~dp0kiwix\win\kiwix-serve.exe" --port %LIBPORT% --urlRootLocation /library !ZIMS!
 ) else echo  No library files in library\  /  Nenhum arquivo na biblioteca.
 
-rem ---- voice: speech to text for the chat (whisper.cpp), for this computer only (browsers allow the
-rem      microphone only on localhost; phones dictate with their own keyboard)
+rem ---- voice: speech to text for the chat (whisper.cpp). It listens on this computer only: phones reach it
+rem      through the secure address (browsers allow the microphone only on https or on localhost)
 set "WMODEL="
 for %%w in (models\whisper\*.bin) do set "WMODEL=%%w"
 if defined WMODEL if exist "tools\win\whisper\whisper-server.exe" start "Voice server" /min "%~dp0tools\win\whisper\whisper-server.exe" -m "%~dp0!WMODEL!" --host 127.0.0.1 --port 8093
@@ -93,8 +94,11 @@ echo  A IA nao iniciou. Tente um modelo menor, ou veja a janela "AI server".
 goto end
 
 :ready
-rem ---- this computer's network addresses for the home page's QR code (ones with a gateway, e.g. a phone hotspot, first)
-"%SYS%\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -Command "$c = @(Get-NetIPConfiguration -ErrorAction SilentlyContinue | Where-Object { $_.IPv4Address }); $ips = @($c | Sort-Object { -not $_.IPv4DefaultGateway } | ForEach-Object { $_.IPv4Address.IPAddress } | Where-Object { $_ -notlike '127.*' -and $_ -notlike '169.254.*' } | Select-Object -Unique); [IO.File]::WriteAllText('portal\kit-address.json', (ConvertTo-Json -Compress -InputObject @{ port = %PORT%; ips = $ips }))" >nul 2>&1
+rem ---- this computer's network addresses (for the home page's QR code) and, with the Voice extra, the
+rem      secure address https://...:8443 (Caddy), so phones may use the microphone
+set HTTPSPORT=8443
+"%SYS%\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "%~dp0setup\network.ps1" -Kit "%~dp0." -Port %PORT% -LibPort %LIBPORT% -MapPort %MAPPORT% -HttpsPort %HTTPSPORT% >nul 2>&1
+if exist "tools\win\caddy\caddy.exe" if exist "%TEMP%\survival-Caddyfile" start "Secure server" /min "%~dp0tools\win\caddy\caddy.exe" run --config "%TEMP%\survival-Caddyfile" --adapter caddyfile
 rem ---- kit helper for the portal's "My kit" page (this computer only; stops when the AI stops)
 if exist "setup\kit-control.ps1" start "" /min "%SYS%\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "%~dp0setup\kit-control.ps1" -Root "%~dp0."
 start "" http://localhost:%PORT%/
@@ -106,13 +110,24 @@ for /f "tokens=2 delims=:" %%a in ('ipconfig ^| findstr /c:"IPv4"') do (
   set ip=%%a
   echo     http://!ip: =!:%PORT%/
 )
+if exist "tools\win\caddy\caddy.exe" (
+  echo.
+  echo  Microphone on phones: the same address with https and port %HTTPSPORT%, e.g.
+  echo  Microfone no celular: o mesmo endereco com https e porta %HTTPSPORT%, por exemplo
+  for /f "tokens=2 delims=:" %%a in ('ipconfig ^| findstr /c:"IPv4"') do (
+    set ip=%%a
+    echo     https://!ip: =!:%HTTPSPORT%/
+  )
+  echo  The phone warns once that it is "not private": choose Advanced / Show details, then continue.
+  echo  O celular avisa uma vez que "nao e particular": escolha Avancado / Mostrar detalhes e continue.
+)
 echo  Firewall question? Click Allow.  /  Pergunta do firewall? Clique em Permitir.
 goto end
 
 :noai
 echo  No AI found - opening the offline pages only.  /  IA nao encontrada - abrindo so as paginas.
 echo  (Run setup\build-drive.ps1 with internet  /  Rode setup\build-drive.ps1 com internet)
-if defined ZIMS echo  Library / Biblioteca: http://localhost:%LIBPORT%/
+if defined ZIMS echo  Library / Biblioteca: http://localhost:%LIBPORT%/library/
 start "" "%~dp0portal\index.html"
 
 :end
@@ -124,4 +139,5 @@ taskkill /f /im llama-server.exe >nul 2>&1
 taskkill /f /im kiwix-serve.exe >nul 2>&1
 taskkill /f /im pmtiles.exe >nul 2>&1
 taskkill /f /im whisper-server.exe >nul 2>&1
+taskkill /f /im caddy.exe >nul 2>&1
 endlocal

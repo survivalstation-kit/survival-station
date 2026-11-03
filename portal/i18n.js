@@ -37,6 +37,7 @@ const I18N = {
     'home.phone': 'Use it on a phone',
     'home.qr': 'Phones on the same hotspot or Wi-Fi: open the camera and point it at this code, or type the address:',
     'home.qr.more': 'If that one doesn\'t open, try:',
+    'home.qr.https': 'To speak questions with the phone\'s microphone, open {u} instead. The phone warns once that the connection is "not private": that\'s expected for the kit\'s own certificate. Choose Advanced / Show details and continue.',
     'home.phone.1': "Turn on the phone's <b>Hotspot</b> (works with no signal or data) and join it from this computer — or put both on any shared Wi-Fi router.",
     'home.phone.2': 'On the phone, open the browser and go to the address shown in the start window (<code>http://192.168.x.x:8080</code>).',
     'home.phone.3': 'Android without a computer: install the apps in <code>apps/android/</code> (Kiwix, PocketPal AI, Organic Maps) <i>before</i> disaster strikes.',
@@ -62,6 +63,8 @@ const I18N = {
     'chat.mic': 'Speak your question', 'chat.mic.listening': 'Listening… press ⏹ when you finish (1 minute at most).', 'chat.mic.working': 'Turning your words into text…',
     'chat.mic.nothing': 'Nothing was heard. Speak closer to the microphone and try again.', 'chat.mic.error': 'Speech to text didn\'t work. Is the kit\'s voice part installed and running?',
     'chat.mic.denied': 'The browser wasn\'t allowed to use the microphone. Allow it in the address bar and try again.',
+    'chat.mic.https1': 'Phones may only use the microphone on the kit\'s secure address. Open',
+    'chat.mic.https2': '— the phone warns once that it is "not private" (the kit\'s own certificate): choose Advanced / Show details and continue. Or tap the microphone on your keyboard to dictate.',
     'chat.mic.phone': 'On a phone: tap the microphone on your keyboard to dictate your question. It works offline on most phones; turn on offline speech in the keyboard settings ahead of time.',
     'chat.quick': [
       'Someone is bleeding heavily from the leg',
@@ -129,6 +132,7 @@ The person may be stressed, injured, cold, or caring for someone else. Always an
     'home.phone': 'Usar no celular',
     'home.qr': 'Celulares no mesmo roteador ou Wi-Fi: abra a câmera e aponte para este código, ou digite o endereço:',
     'home.qr.more': 'Se esse não abrir, tente:',
+    'home.qr.https': 'Para falar as perguntas pelo microfone do celular, abra {u}. O celular avisa uma vez que a conexão "não é particular": é normal com o certificado próprio do kit. Escolha Avançado / Mostrar detalhes e continue.',
     'home.phone.1': 'Ligue o <b>Roteador Wi-Fi / Hotspot</b> do celular (funciona sem sinal e sem dados) e conecte este computador a ele — ou ponha os dois no mesmo roteador Wi-Fi.',
     'home.phone.2': 'No celular, abra o navegador e acesse o endereço mostrado na janela de início (<code>http://192.168.x.x:8080</code>).',
     'home.phone.3': 'Android sem computador: instale os apps de <code>apps/android/</code> (Kiwix, PocketPal AI, Organic Maps) <i>antes</i> de uma emergência.',
@@ -154,6 +158,8 @@ The person may be stressed, injured, cold, or caring for someone else. Always an
     'chat.mic': 'Falar a pergunta', 'chat.mic.listening': 'Ouvindo… aperte ⏹ quando terminar (no máximo 1 minuto).', 'chat.mic.working': 'Transformando sua fala em texto…',
     'chat.mic.nothing': 'Nada foi ouvido. Fale mais perto do microfone e tente de novo.', 'chat.mic.error': 'A conversão de fala em texto não funcionou. A parte de voz do kit está instalada e rodando?',
     'chat.mic.denied': 'O navegador não teve permissão para usar o microfone. Permita na barra de endereço e tente de novo.',
+    'chat.mic.https1': 'O celular só pode usar o microfone no endereço seguro do kit. Abra',
+    'chat.mic.https2': '— o celular avisa uma vez que "não é particular" (o certificado próprio do kit): escolha Avançado / Mostrar detalhes e continue. Ou toque no microfone do teclado para ditar.',
     'chat.mic.phone': 'No celular: toque no microfone do teclado para ditar a pergunta. Funciona offline na maioria dos celulares; ative o reconhecimento de voz offline nas configurações do teclado antes.',
     'chat.quick': [
       'Uma pessoa está sangrando muito na perna',

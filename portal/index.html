@@ -158,12 +158,17 @@
   // is on localhost, so the start file writes the network addresses to kit-address.json; on a phone, the
   // address it already uses (so one phone can pass it to the next).
   if (SURVIVAL.served) try {
-    let url = location.origin + '/', more = [];
+    let url = location.origin + '/', more = [], a = {};
+    try { a = await (await fetch('kit-address.json', { cache: 'no-store' })).json(); } catch { }
     if (/^(localhost|127\.)/.test(location.hostname)) {
-      const a = await (await fetch('kit-address.json', { cache: 'no-store' })).json();
       const urls = (a.ips || []).map(ip => `http://${ip}:${a.port || location.port}/`);
       if (!urls.length) throw new Error('no network');
       [url, ...more] = urls;
+    }
+    // the secure address (Voice extra): what phones need for the microphone
+    if (a.https && !SURVIVAL.secure) {
+      const host = /^(localhost|127\.)/.test(location.hostname) ? (a.ips || [])[0] : location.hostname;
+      if (host) { const p = document.createElement('p'); p.className = 'muted'; p.textContent = t('home.qr.https').replace('{u}', `https://${host}:${a.https}/`); $('qr-more').after(p); }
     }
     await new Promise((ok, fail) => { const s = document.createElement('script'); s.src = 'vendor/qrcode.js'; s.onload = ok; s.onerror = fail; document.head.append(s); });
     const q = qrcode(0, 'M'); q.addData(url); q.make();

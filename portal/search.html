@@ -307,7 +307,7 @@
           title: it.querySelector('title')?.textContent.trim() || '',
           where: it.querySelector('book > title')?.textContent.trim(),
           text: desc.body.textContent.replace(/^\.+|\.+$/g, '').replace(/\s+/g, ' ').trim(),
-          href: SURVIVAL.library + it.querySelector('link')?.textContent.trim(), newTab: true,
+          href: SURVIVAL.libHost + it.querySelector('link')?.textContent.trim(), newTab: true,
         };
       // Wikipedia's category pages are only lists of links
       }).filter(h => h.title && !/^(category|categoria):|_categories_partials/i.test(h.title + ' ' + h.href));
