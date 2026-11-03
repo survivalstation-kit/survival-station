@@ -12,6 +12,15 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.17.0 (2026-11-02)
+
+- **Copy kit estimates how long the copy will take**, from the real speed of both drives.
+  - It reads the kit's biggest file for 2 seconds (past Windows' cache, so it's the drive's real speed) and writes a test file to the destination for 3 seconds (then deletes it).
+  - The slower drive sets the pace; copying within one drive counts at half speed; every file adds a little time, since sticks are slow with many small files.
+  - It shows in the window, for example "Time: about 49 min (reads 68 MB/s, writes 1,511 MB/s; the kit's drive is the slower one)", in the confirmation, and on the command line. Each pair of drives is measured once.
+- **While copying**, the copy window shows the percentage, size copied, current speed and time left, also in its title bar, and how long it took at the end. robocopy's file list goes to the log.
+- Tested: copying the 186.9 GB D: kit to this computer is estimated at about 49 minutes. An 8 GB test copy showed live progress and finished correctly.
+
 ## 1.16.0 (2026-11-02)
 
 - **Starting the kit closes one that is still running.** An earlier start that was never shut down, or one started from another copy of the kit, kept its ports and ran a second AI. Now `START-WINDOWS.bat` (through `setup/stop-old-kit.ps1`) and `START-MAC.command` / `START-LINUX.sh` first close the old one, and say so in the start window:

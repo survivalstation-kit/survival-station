@@ -32,16 +32,68 @@ function Get-CopyPlan($from, $to) {
   if (Test-Path $to) {
     foreach ($f in (Get-ChildItem -LiteralPath $to -Recurse -File -ErrorAction SilentlyContinue)) { $have[$f.FullName.Substring($to.Length)] = $f.Length }
   }
-  $plan = @{ Total = 0.0; Need = 0.0; Largest = 0.0; Files = 0 }
+  $plan = @{ Total = 0.0; Need = 0.0; Largest = 0.0; LargestFile = ''; Files = 0; NeedFiles = 0 }
   foreach ($f in (Get-ChildItem -LiteralPath $from -Recurse -File -ErrorAction SilentlyContinue)) {
     $rel = $f.FullName.Substring($from.Length)
     if (Skip-Rel $rel) { continue }
     $plan.Files++
     $plan.Total += $f.Length
-    if ($have[$rel] -ne $f.Length) { $plan.Need += $f.Length }
-    if ($f.Length -gt $plan.Largest) { $plan.Largest = $f.Length }
+    if ($have[$rel] -ne $f.Length) { $plan.Need += $f.Length; $plan.NeedFiles++ }
+    if ($f.Length -gt $plan.Largest) { $plan.Largest = $f.Length; $plan.LargestFile = $f.FullName }
   }
   $plan
+}
+
+# ---------------------------------------------------------------- how long it will take
+# Real speeds of the two drives: reading the kit's biggest file past Windows' cache (a cached file would read
+# at memory speed) and writing a test file straight to the destination. A few seconds each.
+function Test-ReadSpeed([string]$file) {   # MB/s
+  if (-not $file) { return 0.0 }
+  $buf = New-Object byte[] (8MB)
+  $noCache = [IO.FileOptions]0x20000000   # FILE_FLAG_NO_BUFFERING
+  try { $fs = New-Object IO.FileStream($file, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::ReadWrite, 4096, $noCache) }
+  catch { $fs = New-Object IO.FileStream($file, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::ReadWrite) }
+  $sw = [Diagnostics.Stopwatch]::StartNew(); $n = 0.0
+  try { while ($sw.Elapsed.TotalSeconds -lt 2 -and $n -lt 2GB) { $r = $fs.Read($buf, 0, $buf.Length); if ($r -le 0) { break }; $n += $r } } finally { $fs.Close() }
+  $n / 1MB / [math]::Max(0.001, $sw.Elapsed.TotalSeconds)
+}
+function Test-WriteSpeed([string]$dir) {   # MB/s
+  while ($dir -and -not (Test-Path -LiteralPath $dir)) { $dir = Split-Path $dir }   # a folder not made yet: its drive
+  if (-not $dir) { return 0.0 }
+  $f = Join-Path $dir 'survival-speed-test.tmp'
+  $buf = New-Object byte[] (8MB); (New-Object Random).NextBytes($buf)
+  try {
+    $fs = New-Object IO.FileStream($f, [IO.FileMode]::Create, [IO.FileAccess]::Write, [IO.FileShare]::None, 4096, [IO.FileOptions]::WriteThrough)
+    $sw = [Diagnostics.Stopwatch]::StartNew(); $n = 0.0
+    try { while ($sw.Elapsed.TotalSeconds -lt 3 -and $n -lt 1GB) { $fs.Write($buf, 0, $buf.Length); $n += $buf.Length }; $fs.Flush($true) } finally { $fs.Close(); $sw.Stop() }
+    $n / 1MB / [math]::Max(0.001, $sw.Elapsed.TotalSeconds)
+  } catch { 0.0 } finally { Remove-Item -LiteralPath $f -Force -ErrorAction SilentlyContinue }
+}
+# seconds: the slower drive sets the pace; copying within one drive shares it between reading and writing;
+# every file costs a little extra (a kit has thousands of small ones: place names, search index)
+function Get-CopySeconds($plan, [double]$readMBs, [double]$writeMBs, [bool]$sameDrive) {
+  $rate = [math]::Min($readMBs, $writeMBs)
+  if ($sameDrive) { $rate = $rate / 2 }
+  if ($rate -le 0) { return -1.0 }
+  $plan.Need / 1MB / $rate + $plan.NeedFiles * 0.02
+}
+function Fmt-Time([double]$s) {
+  if ($s -lt 0) { return '?' }
+  if ($s -lt 60) { return (T 'less than a minute' 'menos de um minuto') }
+  if ($s -lt 3600) { return ('{0} min' -f [math]::Ceiling($s / 60)) }
+  '{0}h {1:00}m' -f [math]::Floor($s / 3600), [math]::Floor(($s % 3600) / 60)
+}
+function Fmt-Speed([double]$mbs) { if ($mbs -lt 10) { '{0:N1} MB/s' -f $mbs } else { '{0:N0} MB/s' -f $mbs } }
+# the estimate in words, and which drive is the slow one
+function Get-Estimate($from, $to, $plan) {
+  if ($plan.Need -le 0) { return (T 'Nothing to copy: the kit is already there.' 'Nada para copiar: o kit já está lá.') }
+  $read = Test-ReadSpeed $plan.LargestFile
+  $write = Test-WriteSpeed $to
+  $same = $from.Substring(0, 1) -eq $to.Substring(0, 1)
+  $secs = Get-CopySeconds $plan $read $write $same
+  $slow = if ($write -le $read) { T 'the destination is the slower drive' 'o destino é a unidade mais lenta' } else { T 'the kit''s drive is the slower one' 'a unidade do kit é a mais lenta' }
+  $when = if ($secs -ge 0 -and $secs -lt 60) { Fmt-Time $secs } else { (T 'about {0}' 'cerca de {0}') -f (Fmt-Time $secs) }
+  (T 'Time: {0}  (reads {1}, writes {2}; {3})' 'Tempo: {0}  (lê {1}, grava {2}; {3})') -f $when, (Fmt-Speed $read), (Fmt-Speed $write), $slow
 }
 
 function Get-Volume-Of($path) { Get-Volume -DriveLetter $path[0] -ErrorAction SilentlyContinue }
@@ -65,11 +117,31 @@ function Copy-Kit($from, $to) {
   New-Item -ItemType Directory -Force $to, $LogDir | Out-Null
   $log = Join-Path $LogDir ('copy-{0:yyyy-MM-dd_HHmmss}.log' -f (Get-Date))
   Write-Host ("`n" + (T 'Copying {0} -> {1}' 'Copiando {0} -> {1}') -f $from, $to) -ForegroundColor Cyan
+  $plan = Get-CopyPlan $from $to
+  # Progress: how much the destination drive has filled up since the start (cheap to check, unlike listing
+  # thousands of files), against what still has to be copied. robocopy writes each file to the log.
+  $drive = New-Object IO.DriveInfo ($to.Substring(0, 1))
+  $free0 = [double]$drive.AvailableFreeSpace
   # "X:\." because robocopy reads a quoted trailing backslash as an escaped quote
-  & "$env:SystemRoot\System32\robocopy.exe" "$($from.TrimEnd('\'))\." "$($to.TrimEnd('\'))\." /E /J /R:2 /W:5 /NDL `
-    /XD "$($from).download" "$($from)logs" /XF '*.part' /TEE "/LOG:$log"
-  if ($LASTEXITCODE -ge 8) {   # robocopy: 0-7 = success, 8+ = some files failed
-    Write-Host ("`n" + (T 'Some files could not be copied (see above). Run it again to retry; copied files are skipped.' 'Alguns arquivos não foram copiados (veja acima). Rode de novo; os já copiados são pulados.')) -ForegroundColor Red
+  $rcArgs = '"{0}\." "{1}\." /E /J /R:2 /W:5 /NDL /NP /XD "{2}.download" "{2}logs" /XF *.part "/LOG:{3}"' -f $from.TrimEnd('\'), $to.TrimEnd('\'), $from, $log
+  $p = Start-Process "$env:SystemRoot\System32\robocopy.exe" -ArgumentList $rcArgs -NoNewWindow -PassThru
+  $null = $p.Handle   # (keeps the exit code readable after it ends)
+  $start = Get-Date; $marks = New-Object Collections.Queue
+  while (-not $p.WaitForExit(2000)) {
+    $done = [math]::Min($plan.Need, [math]::Max(0.0, $free0 - [double]$drive.AvailableFreeSpace))
+    $marks.Enqueue(@((Get-Date), $done)); while ($marks.Count -gt 15) { [void]$marks.Dequeue() }   # last ~30 s
+    $first = $marks.Peek(); $secs = ((Get-Date) - $first[0]).TotalSeconds
+    $rate = if ($secs -gt 0) { ($done - $first[1]) / $secs } else { 0.0 }
+    $left = if ($rate -gt 0) { Fmt-Time (($plan.Need - $done) / $rate) } else { '…' }
+    $pct = if ($plan.Need -gt 0) { [int](100.0 * $done / $plan.Need) } else { 100 }
+    $line = (T '  {0}%  -  {1} of {2}  -  {3}  -  {4} left' '  {0}%  -  {1} de {2}  -  {3}  -  faltam {4}') -f $pct, (Fmt $done), (Fmt $plan.Need), (Fmt-Speed ($rate / 1MB)), $left
+    Write-Host ("`r" + $line.PadRight(78)) -NoNewline
+    $host.UI.RawUI.WindowTitle = "$pct% - Survival Station " + (T 'copy' 'cópia')
+  }
+  Write-Host ''
+  Write-Host ((T '   Took {0}.' '   Levou {0}.') -f (Fmt-Time ((Get-Date) - $start).TotalSeconds))
+  if ($p.ExitCode -ge 8) {   # robocopy: 0-7 = success, 8+ = some files failed
+    Write-Host ("`n" + (T 'Some files could not be copied (see the log). Run it again to retry; copied files are skipped.' 'Alguns arquivos não foram copiados (veja o log). Rode de novo; os já copiados são pulados.')) -ForegroundColor Red
     Write-Host "   Log: $log" -ForegroundColor Red
     exit 1
   }
@@ -97,6 +169,8 @@ if ($From -and $To) {
   "   {0} files, {1}; {2} still to copy" -f $plan.Files, (Fmt $plan.Total), (Fmt $plan.Need)
   $problem = Test-Copy $From $To $plan
   if ($problem) { Write-Host "`n$problem" -ForegroundColor Red; exit 1 }
+  Write-Host (T '   Measuring the two drives (a few seconds)...' '   Medindo as duas unidades (alguns segundos)...')
+  Write-Host ('   ' + (Get-Estimate $From $To $plan))
   if (-not $Yes -and (Read-Host ("`n" + (T 'Copy? [y/N]' 'Copiar? [s/N]'))) -notmatch '^[ys]') { exit }
   Copy-Kit $From $To
   exit
@@ -140,14 +214,16 @@ $bottom = New-Ctl TableLayoutPanel @{ Dock = 'Fill'; ColumnCount = 1; Padding = 
 [void]$bottom.ColumnStyles.Add((New-Object Windows.Forms.ColumnStyle 'Percent', 100))
 $lblSize = New-Ctl Label @{ AutoSize = $true; Font = New-Object Drawing.Font('Segoe UI', 12, [Drawing.FontStyle]::Bold) }
 $lblFit = New-Ctl Label @{ AutoSize = $true; MaximumSize = New-Object Drawing.Size(800, 0) }
+$lblTime = New-Ctl Label @{ AutoSize = $true; MaximumSize = New-Object Drawing.Size(900, 0) }
 $bar = New-Ctl ProgressBar @{ Dock = 'Fill'; Height = 18 }
 $buttons = New-Ctl FlowLayoutPanel @{ Dock = 'Fill'; AutoSize = $true; FlowDirection = 'RightToLeft' }
 $btnCopy = New-Ctl Button @{ Text = (T 'Copy' 'Copiar'); AutoSize = $true; Font = New-Object Drawing.Font('Segoe UI', 11, [Drawing.FontStyle]::Bold) }
 $buttons.Controls.Add($btnCopy)
-foreach ($c in $lblSize, $lblFit, $bar, $buttons) { [void]$bottom.Controls.Add($c) }
+foreach ($c in $lblSize, $lblFit, $lblTime, $bar, $buttons) { [void]$bottom.Controls.Add($c) }
 $form.Controls.AddRange(@($bottom, $rowTo, $rowFrom, $intro))
 
 $script:froms = @(); $script:tos = @(); $script:plan = $null
+$script:estimates = @{}   # "from|to|bytes to copy" -> the time estimate, so switching back doesn't measure again
 $script:toFolder = Join-Path $env:SystemDrive 'Survival'
 
 function Load-Lists([string]$keepFrom, [string]$keepTo) {
@@ -188,7 +264,7 @@ function Update-Plan {
   $from = Selected-From; $to = Selected-To
   $btnFormat.Enabled = $to -and -not $to.Folder
   $script:plan = $null; $script:problem = $null
-  if (-not $from -or -not $to) { $lblSize.Text = ''; $lblFit.Text = ''; $bar.Value = 0; $btnCopy.Enabled = $false; return }
+  if (-not $from -or -not $to) { $lblSize.Text = ''; $lblFit.Text = ''; $lblTime.Text = ''; $bar.Value = 0; $btnCopy.Enabled = $false; return }
   $form.UseWaitCursor = $true; $lblSize.Text = T 'Checking...' 'Conferindo...'; [Windows.Forms.Application]::DoEvents()
   try { $script:plan = Get-CopyPlan $from $to.Root } finally { $form.UseWaitCursor = $false }
   $script:problem = Test-Copy $from $to.Root $script:plan
@@ -198,6 +274,17 @@ function Update-Plan {
   if ($script:problem) { $lblFit.Text = '✗ ' + $script:problem; $lblFit.ForeColor = [Drawing.Color]::Firebrick }
   else { $lblFit.Text = (T '✓ Fits: {0} free, {1} left over' '✓ Cabe: {0} livres, sobram {1}') -f (Fmt $free), (Fmt ($free - $script:plan.Need)); $lblFit.ForeColor = [Drawing.Color]::SeaGreen }
   $btnCopy.Enabled = -not $script:problem
+  # how long: a few seconds measuring both drives, once per pair
+  $lblTime.Text = ''
+  if (-not $script:problem) {
+    $key = '{0}|{1}|{2}' -f $from, $to.Root, $script:plan.Need
+    if (-not $script:estimates.ContainsKey($key)) {
+      $lblTime.Text = T '⏱ Measuring the two drives to estimate the time...' '⏱ Medindo as duas unidades para estimar o tempo...'
+      $form.UseWaitCursor = $true; [Windows.Forms.Application]::DoEvents()
+      try { $script:estimates[$key] = Get-Estimate $from $to.Root $script:plan } finally { $form.UseWaitCursor = $false }
+    }
+    $lblTime.Text = '⏱ ' + $script:estimates[$key]
+  }
 }
 
 function Pick-Folder($desc, $start) {
@@ -228,7 +315,7 @@ function Start-Copy {
   $from = Selected-From; $to = Selected-To
   Update-Plan
   if ($script:problem -or -not $script:plan) { return }
-  $msg = (T "Copy {0} from {1} to {2} ?`n`nIt runs in a new window. If it stops, click Copy again: files already copied are skipped." "Copiar {0} de {1} para {2} ?`n`nRoda em outra janela. Se parar, clique em Copiar de novo: os arquivos já copiados são pulados.") -f (Fmt $script:plan.Need), $from, $to.Root
+  $msg = (T "Copy {0} from {1} to {2} ?`n`n{3}`n`nIt runs in a new window that shows the progress and time left. If it stops, click Copy again: files already copied are skipped." "Copiar {0} de {1} para {2} ?`n`n{3}`n`nRoda em outra janela, que mostra o andamento e o tempo que falta. Se parar, clique em Copiar de novo: os arquivos já copiados são pulados.") -f (Fmt $script:plan.Need), $from, $to.Root, ($lblTime.Text -replace '^⏱ ', '')
   if ([Windows.Forms.MessageBox]::Show($msg, 'Survival Station', 'YesNo', 'Question') -ne 'Yes') { return }
   # "X:\." keeps a trailing backslash from escaping the closing quote
   Start-Process $PS -ArgumentList ('-NoProfile -ExecutionPolicy Bypass -NoExit -File "{0}" -From "{1}." -To "{2}." -Yes' -f $PSCommandPath, $from, $to.Root)

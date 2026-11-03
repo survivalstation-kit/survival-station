@@ -63,7 +63,7 @@ The script shows sizes and asks before it downloads. You can run it again at any
 
 It then offers to copy the newest app pages and tools (seconds, no internet) and to download again anything missing or incomplete. It's safe while a build is running: files still downloading are shown as in progress and left alone.
 
-**Sharing without internet:** every kit includes **`COPY-KIT.bat`**. It copies the kit to another USB drive or into a folder on a computer, checks the space first, and can format the other drive as exFAT. It can resume, and it needs no internet and not even this project folder. Command line: `setup\copy-kit.ps1 -From E:\ -To F:\`. The builder window has a **Copy kit…** button, and the kit also carries `MAKE-USB.bat`, so a stick can update itself later.
+**Sharing without internet:** every kit includes **`COPY-KIT.bat`**. It copies the kit to another USB drive or into a folder on a computer, checks the space first, and can format the other drive as exFAT. It can resume, and it needs no internet and not even this project folder. Before copying it measures both drives (a few seconds) and estimates how long the copy will take; while copying it shows the percentage, speed and time left. Command line: `setup\copy-kit.ps1 -From E:\ -To F:\`. The builder window has a **Copy kit…** button, and the kit also carries `MAKE-USB.bat`, so a stick can update itself later.
 
 3. **Test it before you need it:** run `START-WINDOWS.bat` from the drive. Ask the AI something, open the library and the map, then try it all from your phone.
 
