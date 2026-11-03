@@ -329,7 +329,17 @@ function Get-AppFiles {   # relative paths of every app file in the project (not
       Where-Object { $_ -notmatch '^portal\\(maps|vendor|survival-data)\\' }
   }
 }
+# Survival-Data's index.html hides its lists in CSS, but its click handler reads the inline style,
+# so the first click on a heading hid an already hidden list and nothing seemed to happen
+function Repair-SurvivalDataPage {
+  $page = Join-Path $Target 'portal\survival-data\index.html'
+  if (-not (Test-Path $page)) { return }
+  $html = [IO.File]::ReadAllText($page)
+  $fixed = $html.Replace('ul.style.display === "none" ?', 'getComputedStyle(ul).display === "none" ?')
+  if ($fixed -ne $html) { [IO.File]::WriteAllText($page, $fixed, (New-Object Text.UTF8Encoding $true)) }
+}
 function Copy-AppFiles {
+  Repair-SurvivalDataPage
   if ((Norm-Path $Root) -eq (Norm-Path $Target)) { Write-Host '   (this builder runs from the kit itself: app files are already in place)'; return }
   foreach ($f in $AppRootFiles) { Copy-Item -Force (Join-Path $Root $f) $Target }
   foreach ($d in 'portal', 'launch', 'setup') { Copy-Item -Recurse -Force (Join-Path $Root $d) $Target }
@@ -1202,6 +1212,7 @@ elseif ($WantSD) {
   if (Test-Path $sdDest) { Remove-Item -Recurse -Force $sdDest }
   Move-Item (Get-ChildItem $x -Directory | Select-Object -First 1).FullName $sdDest
   Set-Content $sdStamp "$($repo.pushed_at)"
+  Repair-SurvivalDataPage
 }
 
 if ($WantApps) {

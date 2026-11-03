@@ -12,6 +12,10 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.1.2 (2026-11-02)
+
+- **Fixed: the Survival-Data page didn't open its sections.** Its lists start hidden, but the first click on a heading "hid" them again, so nothing seemed to happen until a second click. The builder now patches that page on every build, and **Verify / repair** patches kits that already have it.
+
 ## 1.1.1 (2026-11-02)
 
 - **Test drive speed** shows one decimal on slow drives (1.5 MB/s instead of 2 MB/s).
