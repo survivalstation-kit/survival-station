@@ -12,6 +12,10 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.2.1 (2026-11-02)
+
+- **Pages refresh themselves after an update.** The AI server sends the pages with no caching rules, so after an update a browser could keep showing its saved copy of the old pages: the old version tag, and a map page that didn't know about the 1.2.0 map server. Each page now checks the kit's version and, if it changed, loads the page, scripts and styles fresh and reloads once. Browsers still holding pages from before 1.2.1 need one **Ctrl+F5** (Ctrl+Shift+R; on a phone, reload the page).
+
 ## 1.2.0 (2026-11-02)
 
 - **Fixed: on Windows, street maps over 2 GB didn't show, only the world map.** The AI server, which also sends the portal pages, can't send files over 2 GB on Windows. Tested: 1.9 GB works; 2.1 GB and 4.1 GB return "not found". That covers USA, Canada, Canada south of 60 and Brazil. Kits with such a map now carry a small map server (`tools\win\pmtiles.exe`, the same tool that cuts the maps), and `START-WINDOWS.bat` starts it on port 8092. The map page uses it only for maps it can't load directly, so Mac and Linux work as before. **Verify / repair** adds it to kits that already have a big map. Phones on the hotspot use it too; click **Allow** if the firewall asks again.

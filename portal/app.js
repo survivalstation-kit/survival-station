@@ -95,8 +95,24 @@ const SURVIVAL = (() => {
       tag.textContent = 'v' + v.version;
       tag.title = `Survival Station ${v.version} (${v.date})`;
       brand.after(tag);
+      if (served) refreshIfUpdated(v.version);
     };
     document.head.append(s);
+  }
+
+  // The AI server sends no caching rules, so after an update a browser can keep showing its saved copy
+  // of the old pages (old version tag, old map page). Compare with the kit's version.js and, if it
+  // changed, fetch this page and its scripts and styles fresh, then reload once.
+  async function refreshIfUpdated(have) {
+    try {
+      const text = await (await fetch('version.js', { cache: 'no-store' })).text();
+      const now = (text.match(/version:\s*'([^']+)'/) || [])[1];
+      if (!now || now === have || sessionStorage.getItem('refreshed-for') === now) return;
+      sessionStorage.setItem('refreshed-for', now);   // never loops, even if a copy stays stale
+      const urls = [location.href, ...[...document.querySelectorAll('script[src], link[rel=stylesheet]')].map(e => e.src || e.href)];
+      await Promise.all(urls.map(u => fetch(u, { cache: 'reload' }).catch(() => {})));
+      location.reload();
+    } catch { }
   }
 
   initTheme();
