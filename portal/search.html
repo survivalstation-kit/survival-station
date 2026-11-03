@@ -71,10 +71,16 @@
     return out;
   }
 
-  // about 200 characters around the first match (folding keeps lengths for Latin text)
+  // about 200 characters around the spot where the most search words are close together
+  // (folding keeps lengths for Latin text)
   function snippet(text) {
     const f = fold(text);
-    const i = Math.min(...words.map(w => f.indexOf(w)).filter(i => i >= 0));
+    let i = Infinity, most = 0;
+    for (const w of words) for (let at = f.indexOf(w); at >= 0; at = f.indexOf(w, at + w.length)) {
+      const near = f.slice(Math.max(0, at - 100), at + 100);
+      const n = words.filter(x => near.includes(x)).length;
+      if (n > most || (n === most && at < i)) { most = n; i = at; }
+    }
     if (!isFinite(i) || text.length <= 200) return text.slice(0, 200);
     const s = Math.max(0, i - 60);
     return (s ? '…' : '') + text.slice(s, s + 200).trim() + '…';
@@ -91,6 +97,7 @@
       li.append(a);
       if (it.where) { const w = document.createElement('span'); w.className = 'where'; w.textContent = it.where; li.append(w); }
       if (it.text) { const p = document.createElement('div'); p.className = 'snip'; p.append(marked(snippet(it.text))); li.append(p); }
+      if (it.extra) li.append(it.extra);
       ul.append(li);
     }
     sec.append(ul);
@@ -115,6 +122,7 @@
     try {
       const doc = await page(url);
       const scope = doc.querySelector(`article[data-for="${SURVIVAL.lang}"]`) || doc;
+      scope.querySelectorAll('th, td, li, p, h3').forEach(e => e.append(' '));   // "Boil" + "Rolling boil" -> two words
       for (const s of scope.querySelectorAll('section[id]')) {
         const h = s.querySelector('h2')?.textContent.trim() || name;
         const text = s.textContent.replace(/\s+/g, ' ').replace(h, '').trim();
@@ -141,6 +149,78 @@
     const sdHits = best(guides.filter(g => !seen.has(g.href) && seen.add(g.href)), 10);
     if (sdHits.length) group(t('search.sd'), sdHits);
   } catch { }
+
+  // 2b. inside the Survival Data PDFs: the builder's word index (setup\build-drive.ps1, Build-PdfIndex)
+  //     -> the pages with the most search words -> just those pages' text, by Range request
+  try {
+    const base = 'survival-data/search-index/';
+    const docs = await (await fetch(base + 'docs.json')).json();
+    const shardKey = w => [...w.slice(0, 2)].map(c => /[a-z0-9]/.test(c) ? c : '_').join('');   // as in the builder
+    const shards = {};
+    const pagesWith = async w => {   // the word, or longer words starting with it ("purif" finds "purifying")
+      const k = shardKey(w);
+      shards[k] = shards[k] || fetch(base + 'w/' + k + '.json').then(r => r.ok ? r.json() : {}).catch(() => ({}));
+      const shard = await shards[k], found = new Set();
+      for (const tok in shard) {
+        if (tok !== w && !(w.length >= 4 && tok.startsWith(w) && tok.length <= w.length + 4)) continue;
+        const list = shard[tok];
+        for (let i = 0; i < list.length; i += 2) found.add(list[i] * 100000 + list[i + 1]);
+      }
+      return found;
+    };
+    const sets = await Promise.all(words.filter(w => w.length >= 3).map(pagesWith));
+    const hits = new Map();   // doc*100000+page -> how many search words it has
+    sets.forEach(s => s.forEach(k => hits.set(k, (hits.get(k) || 0) + 1)));
+    const most = Math.max(0, ...hits.values());
+    if (most) {
+      // Survival Data keeps some guides in two sections: same title and size = the same PDF, shown once
+      const same = new Map(), keep = docs.map((doc, d) => {
+        const key = doc.t + '|' + doc.o[doc.o.length - 1];
+        if (same.has(key)) return false;
+        same.set(key, d); return true;
+      });
+      const byDoc = new Map();
+      for (const [k, n] of hits) if (n === most) {
+        const d = Math.floor(k / 100000);
+        if (!keep[d]) continue;
+        if (!byDoc.has(d)) byDoc.set(d, []);
+        byDoc.get(d).push(k % 100000);
+      }
+      // guides with the search words in their title first, then the ones with the most matching pages
+      const ranked = [...byDoc].map(([d, pages]) => ({ d, pages: pages.sort((a, b) => a - b), rank: score(docs[d].t) * 1000 + pages.length }))
+        .sort((a, b) => b.rank - a.rank).slice(0, 10);
+      const items = await Promise.all(ranked.map(async ({ d, pages }) => {
+        const doc = docs[d], pdf = 'survival-data/' + doc.f.split('/').map(encodeURIComponent).join('/');
+        // one page's text; a table of contents (dot leaders) matches everything, so prefer a later page
+        const pageText = async p => {
+          try {
+            const res = await fetch(`${base}text/${d}.txt`, { headers: { Range: `bytes=${doc.o[p - 1]}-${doc.o[p] - 1}` } });
+            return res.status === 206 ? await res.text() : '';
+          } catch { return ''; }
+        };
+        const contents = s => (s.match(/(\.\s?){6,}/g) || []).length >= 3;
+        let page = pages[0], text = await pageText(page);
+        for (const p of pages.slice(1, 3)) {
+          if (!contents(text)) break;
+          const next = await pageText(p);
+          if (next) { page = p; text = next; }
+        }
+        const others = pages.filter(p => p !== page);
+        let extra;
+        if (others.length) {   // the other pages, as links straight to them
+          extra = document.createElement('div'); extra.className = 'pages';
+          extra.append(t('search.alsopages') + ' ');
+          others.slice(0, 11).forEach(p => {
+            const a = document.createElement('a'); a.href = `${pdf}#page=${p}`; a.target = '_blank'; a.rel = 'noopener'; a.textContent = p;
+            extra.append(a, ' ');
+          });
+          if (others.length > 11) extra.append('…');
+        }
+        return { title: doc.t, where: `${doc.s} · ${t('search.page').replace('{n}', page)}`, href: `${pdf}#page=${page}`, newTab: true, text, extra };
+      }));
+      group(t('search.inpdf'), items);
+    }
+  } catch { /* no index on this kit yet: Verify / repair builds it */ }
 
   // 3. your own documents (portal/docs)
   try {

@@ -12,6 +12,17 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.5.0 (2026-11-02)
+
+- **Search looks inside the Survival-Data PDFs.** Results show the guide, the page, a short excerpt with the words highlighted, and links that open the PDF at that page. Other pages with the same words are listed too.
+  - Tested on the current Survival-Data: "tourniquet" finds Emergency War Surgery and the First Aid manuals, and "snake bite" finds the snakebite section of the US Army survival manual.
+  - A table of contents gives way to the page with the actual text. Guides that Survival-Data keeps in two sections show once.
+  - 19 of its 243 PDFs are scans (pictures of pages) with no text, so they can only be found by title.
+- **How:** the builder reads the text of every PDF once, with Poppler's pdftotext, and writes a word index to `portal/survival-data/search-index/` (about 100 MB, 66 seconds in testing). The search page loads only the parts of the index for the words searched, and fetches only the matching page's text. Poppler (42 MB) is downloaded on first use and kept in `%TEMP%\survival-station-tools`, so it isn't put on the drive.
+  - New builds create the index after Survival-Data.
+  - **Verify / repair** creates it on kits that already have Survival-Data.
+  - When Survival-Data is updated, the index is rebuilt.
+
 ## 1.4.0 (2026-11-02)
 
 - **Search the whole kit.** A search box on the home page and a **Search** link on every page. One search covers:

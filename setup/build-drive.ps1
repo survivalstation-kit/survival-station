@@ -338,6 +338,189 @@ function Repair-SurvivalDataPage {
   $fixed = $html.Replace('ul.style.display === "none" ?', 'getComputedStyle(ul).display === "none" ?')
   if ($fixed -ne $html) { [IO.File]::WriteAllText($page, $fixed, (New-Object Text.UTF8Encoding $true)) }
 }
+# ---------------------------------------------------------------- search inside the Survival-Data PDFs
+# The portal's search page can't read PDFs, so the builder extracts their text once (Poppler's pdftotext)
+# into portal\survival-data\search-index\:
+#   docs.json      [{f: file, t: title, s: section, o: [byte offset where each page starts, ..., end]}]
+#   text\<n>.txt   the text of PDF n, one page per line (the page fetches just one page with a Range request)
+#   w\<ab>.json    word -> [doc, page, doc, page, ...] for every word starting with "ab", accents and case folded
+# Scanned PDFs have no text and are left out. Raise $PdfIndexVersion when the format changes.
+$PdfIndexVersion = '1'
+if (-not ('PdfIndexBuilder' -as [type])) {
+  Add-Type -TypeDefinition @'
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Text;
+
+public class PdfIndexBuilder {
+  static readonly HashSet<string> Stop = new HashSet<string>(
+    ("the and for are but not you all any can had her was one our out has have this that with from they will would there their what about " +
+     "which when your into than then them these some could other more also only its may been were his him she who how should each such those " +
+     "very most must over same both just where while upon").Split(' '));
+  readonly Dictionary<string, List<int>> post = new Dictionary<string, List<int>>();
+  static readonly UTF8Encoding Utf8 = new UTF8Encoding(false);
+
+  static string Fold(string s) {
+    string d = s.ToLowerInvariant().Normalize(NormalizationForm.FormD);
+    var sb = new StringBuilder(d.Length);
+    foreach (char c in d) if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark) sb.Append(c);
+    return sb.ToString();
+  }
+
+  static string ShardKey(string token) {   // must match shardKey() in portal/search.html
+    var sb = new StringBuilder(2);
+    for (int i = 0; i < 2 && i < token.Length; i++) { char c = token[i]; sb.Append((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') ? c : '_'); }
+    return sb.ToString();
+  }
+
+  // Writes the PDF's pages (whitespace collapsed, one page per line) to textPath and indexes their words.
+  // Returns the byte offset where each page starts plus the end, or null when there is no text (a scan).
+  public long[] AddDoc(int doc, string[] pages, string textPath) {
+    int n = pages.Length;
+    if (n > 1 && pages[n - 1].Trim().Length == 0) n--;   // pdftotext ends with a page break
+    var clean = new string[n];
+    int letters = 0;
+    for (int p = 0; p < n; p++) { clean[p] = CollapseSpace(pages[p]); letters += clean[p].Length; }
+    if (letters < 200) return null;
+    var offs = new long[n + 1];
+    long at = 0;
+    using (var w = new StreamWriter(textPath, false, Utf8)) {
+      for (int p = 0; p < n; p++) {
+        offs[p] = at;
+        string line = clean[p] + "\n";
+        w.Write(line); at += Utf8.GetByteCount(line);
+        var seen = new HashSet<string>();
+        foreach (string tok in Tokens(Fold(clean[p]))) {
+          if (!seen.Add(tok)) continue;
+          List<int> list;
+          if (!post.TryGetValue(tok, out list)) { list = new List<int>(); post[tok] = list; }
+          list.Add(doc); list.Add(p + 1);
+        }
+      }
+    }
+    offs[n] = at;
+    return offs;
+  }
+
+  static string CollapseSpace(string s) {
+    var sb = new StringBuilder(s.Length); bool sp = false;
+    foreach (char c in s) {
+      if (char.IsWhiteSpace(c) || char.IsControl(c)) { sp = sb.Length > 0; continue; }
+      if (sp) { sb.Append(' '); sp = false; }
+      sb.Append(c);
+    }
+    return sb.ToString();
+  }
+
+  static IEnumerable<string> Tokens(string folded) {
+    int i = 0, len = folded.Length;
+    while (i < len) {
+      while (i < len && !char.IsLetterOrDigit(folded[i])) i++;
+      int s = i;
+      while (i < len && char.IsLetterOrDigit(folded[i])) i++;
+      int l = i - s;
+      if (l >= 3 && l <= 30) { string t = folded.Substring(s, l); if (!Stop.Contains(t)) yield return t; }
+    }
+  }
+
+  public int WriteShards(string dir) {
+    Directory.CreateDirectory(dir);
+    var shards = new Dictionary<string, List<string>>();
+    foreach (var kv in post) {
+      string key = ShardKey(kv.Key);
+      List<string> l;
+      if (!shards.TryGetValue(key, out l)) { l = new List<string>(); shards[key] = l; }
+      l.Add(kv.Key);
+    }
+    foreach (var sh in shards) {
+      var sb = new StringBuilder("{");
+      bool first = true;
+      foreach (string tok in sh.Value) {
+        if (!first) sb.Append(','); first = false;
+        sb.Append('"').Append(tok).Append("\":[").Append(string.Join(",", post[tok])).Append(']');
+      }
+      sb.Append('}');
+      File.WriteAllText(Path.Combine(dir, sh.Key + ".json"), sb.ToString(), Utf8);
+    }
+    return shards.Count;
+  }
+}
+'@
+}
+
+# pdftotext from Poppler for Windows (~42 MB download), kept in %TEMP% for the next build
+function Get-PdfTextTool {
+  $dir = Join-Path $env:TEMP 'survival-station-tools\poppler'
+  $exe = Get-ChildItem $dir -Recurse -Filter pdftotext.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+  if ($exe) { return $exe.FullName }
+  $rel = Invoke-RestMethod 'https://api.github.com/repos/oschwartz10612/poppler-windows/releases/latest'
+  $asset = $rel.assets | Where-Object { $_.name -like '*.zip' } | Select-Object -First 1
+  $zip = Join-Path $env:TEMP "survival-station-tools\$($asset.name)"
+  New-Item -ItemType Directory -Force (Split-Path $zip) | Out-Null
+  Write-Host ("   downloading the PDF text tool (Poppler, {0:N0} MB)" -f ($asset.size / 1MB))
+  & curl.exe -sSL --fail --retry 3 -o $zip $asset.browser_download_url
+  if ($LASTEXITCODE -ne 0) { throw "Could not download the PDF text tool (curl code $LASTEXITCODE)" }
+  Expand-Any $zip $dir
+  Remove-Item $zip -Force
+  (Get-ChildItem $dir -Recurse -Filter pdftotext.exe | Select-Object -First 1).FullName
+}
+
+function Test-PdfIndex {   # $true when the kit's Survival-Data has a finished index of the current format
+  $v = Join-Path $Target 'portal\survival-data\search-index\version.txt'
+  (Test-Path $v) -and "$(Get-Content $v -ErrorAction SilentlyContinue)".Trim() -eq $PdfIndexVersion
+}
+
+function Build-PdfIndex {
+  $sd = Join-Path $Target 'portal\survival-data'
+  if (-not (Test-Path (Join-Path $sd 'index.html'))) { return }
+  if (Test-PdfIndex) { Write-Host '   ok (already built)'; return }
+  $exe = Get-PdfTextTool
+  # titles as Survival-Data's own page shows them
+  $titles = @{}
+  foreach ($m in [regex]::Matches([IO.File]::ReadAllText((Join-Path $sd 'index.html')), '<a href="([^"]+\.pdf)"[^>]*>([^<]+)</a>')) {
+    $titles[[Net.WebUtility]::HtmlDecode([uri]::UnescapeDataString($m.Groups[1].Value))] = [Net.WebUtility]::HtmlDecode($m.Groups[2].Value).Trim()
+  }
+  # built on this computer's disk, then copied over in one go (a half-built index never lands on the kit)
+  $work = Join-Path $env:TEMP 'survival-station-pdfindex'
+  if (Test-Path $work) { Remove-Item -Recurse -Force $work }
+  New-Item -ItemType Directory -Force (Join-Path $work 'text') | Out-Null
+  $b = New-Object PdfIndexBuilder
+  $pdfs = @(Get-ChildItem $sd -Recurse -Filter *.pdf | Where-Object { $_.FullName -notlike "*\search-index\*" } | Sort-Object FullName)
+  $docs = New-Object Collections.ArrayList
+  $scans = 0; $i = 0
+  $tmp = Join-Path $work 'page.txt'
+  foreach ($f in $pdfs) {
+    $i++
+    if ($i % 25 -eq 0) { Write-Host ("   reading the PDFs: {0} of {1}" -f $i, $pdfs.Count) }
+    if (Test-Path $tmp) { Remove-Item $tmp -Force }
+    $ErrorActionPreference = 'Continue'   # a damaged PDF writes to stderr
+    & $exe -enc UTF-8 -q $f.FullName $tmp 2>$null
+    $ErrorActionPreference = 'Stop'
+    if (-not (Test-Path $tmp)) { $scans++; continue }
+    $n = $docs.Count
+    $offs = $b.AddDoc($n, ([IO.File]::ReadAllText($tmp) -split "`f"), (Join-Path $work "text\$n.txt"))
+    if (-not $offs) { $scans++; Remove-Item (Join-Path $work "text\$n.txt") -Force -ErrorAction SilentlyContinue; continue }
+    $rel = $f.FullName.Substring($sd.Length + 1).Replace('\', '/')
+    $title = if ($titles.ContainsKey($rel)) { $titles[$rel] } else { $f.BaseName -replace '[-_.]+', ' ' }
+    [void]$docs.Add([ordered]@{ f = $rel; t = $title; s = ($f.Directory.Name -replace '-', ' '); o = $offs })
+  }
+  Remove-Item $tmp -Force -ErrorAction SilentlyContinue
+  $shards = $b.WriteShards((Join-Path $work 'w'))
+  [IO.File]::WriteAllText((Join-Path $work 'docs.json'), (ConvertTo-Json -InputObject @($docs) -Depth 4 -Compress), (New-Object Text.UTF8Encoding $false))
+  $mb = (Get-ChildItem $work -Recurse -File | Measure-Object Length -Sum).Sum / 1MB
+  Write-Host ("   {0} PDFs indexed, {1} scanned ones have no text; copying the index to the drive ({2:N0} MB)..." -f $docs.Count, $scans, $mb)
+  $idx = Join-Path $sd 'search-index'
+  if (Test-Path $idx) { Remove-Item -Recurse -Force $idx }
+  & robocopy.exe $work $idx /E /R:2 /W:2 /NFL /NDL /NJH /NJS /NP | Out-Null
+  if ($LASTEXITCODE -ge 8) { throw "Copying the PDF search index to the drive failed (robocopy code $LASTEXITCODE)" }
+  $global:LASTEXITCODE = 0   # robocopy's 1 means "files copied", not an error
+  Set-Content (Join-Path $idx 'version.txt') $PdfIndexVersion   # last: marks the index finished
+  Remove-Item -Recurse -Force $work
+  Write-Host '   done'
+}
+
 function Copy-AppFiles {
   Repair-SurvivalDataPage
   if ((Norm-Path $Root) -eq (Norm-Path $Target)) { Write-Host '   (this builder runs from the kit itself: app files are already in place)'; return }
@@ -977,7 +1160,10 @@ if ($Verify) {
     Report bad 'Map server for maps over 2 GB missing (without it Windows shows only the world map)' @{ Kind = 'run' }
   }
 
-  if (Test-Path (Join-Path $Target 'portal\survival-data\index.html')) { Report ok 'Survival-Data' }
+  if (Test-Path (Join-Path $Target 'portal\survival-data\index.html')) {
+    Report ok 'Survival-Data'
+    if (-not (Test-PdfIndex)) { Report bad 'Survival-Data search index missing (the search can''t look inside the PDFs)' @{ Kind = 'run' } }
+  }
   elseif (Test-Path (Join-Path $Target 'portal\survival-data')) { Report bad 'Survival-Data: incomplete' @{ Kind = 'item'; Id = 'survival-data'; Delete = (Join-Path $Target 'portal\survival-data') } }
   else { Report info 'Survival-Data not on this kit (tick it in the builder window to add it)' }
   if (-not (Test-Path (Join-Path $Target 'apps\android'))) { Report info 'Android apps not on this kit' }
@@ -1242,6 +1428,11 @@ elseif ($WantSD) {
   Move-Item (Get-ChildItem $x -Directory | Select-Object -First 1).FullName $sdDest
   Set-Content $sdStamp "$($repo.pushed_at)"
   Repair-SurvivalDataPage
+}
+# also for kits that already had Survival-Data (a new or updated copy removed the old index with its folder)
+if ((Test-Path (Join-Path $sdDest 'index.html')) -and -not (Test-PdfIndex)) {
+  Step 'Search index for the text inside the Survival-Data PDFs'
+  Build-PdfIndex
 }
 
 if ($WantApps) {
