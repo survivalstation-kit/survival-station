@@ -119,6 +119,15 @@ body.map-page { display: flex; flex-direction: column; height: 100vh; height: 10
 .hits .pages { color: var(--muted); font-size: 14px; margin-top: 4px; }
 .hits .pages a { font-weight: 500; padding: 0 2px; }
 mark { background: #ffe08a; color: #1d1b16; border-radius: 3px; padding: 0 1px; }
+.map-tools { display: flex; flex-direction: column; gap: 6px; width: min(340px, calc(100vw - 80px)); }
+.map-search { font: inherit; font-size: 15px; padding: 8px 10px; border-radius: 4px; border: 1px solid #999; background: #fff; color: #222; box-shadow: 0 0 0 2px rgba(0,0,0,.1); }
+.map-found { list-style: none; margin: 0; padding: 0; background: #fff; color: #222; border-radius: 4px; box-shadow: 0 0 0 2px rgba(0,0,0,.1); max-height: 50vh; overflow-y: auto; }
+.map-found li { border-bottom: 1px solid #e3e0d8; }
+.map-found li.muted { padding: 8px 10px; color: #5f5a4e; font-size: 14px; }
+.map-found button { all: unset; box-sizing: border-box; display: block; width: 100%; padding: 7px 10px; cursor: pointer; font-size: 14px; }
+.map-found button:hover, .map-found button:focus { background: #f1ede4; }
+.map-found b { display: block; font-size: 15px; }
+.map-found span { color: #5f5a4e; font-size: 13px; }
 .map-goto { font: inherit; font-size: 15px; padding: 6px 8px; border-radius: 4px; border: 1px solid #999; background: #fff; color: #222; box-shadow: 0 0 0 2px rgba(0,0,0,.1); }
 .map-panel .coords { font-family: var(--mono); font-size: 20px; font-weight: 700; user-select: all; }
 .map-panel .muted { flex-basis: 100%; font-size: 14px; }

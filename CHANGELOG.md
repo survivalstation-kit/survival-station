@@ -12,6 +12,17 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.7.0 (2026-11-02)
+
+- **Place search on the map.** A box at the top left finds:
+  - towns of 500+ people worldwide, so the world map can be searched too;
+  - in countries with a street map on the kit: every town and neighbourhood, hospitals and clinics, airports, mountains, lakes and parks.
+
+  Results show the type, state, country and distance from where the map is looking, biggest and closest first. Picking one flies there, drops the marker and shows the coordinates to read out. Accents don't matter ("sao paulo"), and some big cities are found by their other names ("Lisbon").
+- **"hospital" or "airport"** (or "aeroporto") alone lists the nearest ones to where the map is looking.
+- The builder makes the list from GeoNames (free, CC BY 4.0) after the maps: 14 MB for the world list plus the country files, kept in `%TEMP%\survival-station-tools`. It goes in `portal/maps/places/`: about 30 MB for Brazil, 67 MB for USA + southern Canada. Adding a map rebuilds it, and **Verify / repair** adds it to existing kits.
+- The last point tapped or found on the map is remembered, for the coming Tools page.
+
 ## 1.6.0 (2026-11-02)
 
 - **Exact phrases in the search: put them in quotes**, for example `"praia de ipanema"` or `"rolling boil" minutes`. A result must have those words in that order, next to each other, as whole words. Accents, capitals, line breaks and punctuation between the words are ignored. Words outside the quotes still help ranking. The whole phrase is highlighted.

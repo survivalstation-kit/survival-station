@@ -521,6 +521,251 @@ function Build-PdfIndex {
   Write-Host '   done'
 }
 
+# ---------------------------------------------------------------- place names for the map's search box
+# GeoNames (free, CC BY 4.0): every town of 500+ people worldwide, plus, for each country with a street map
+# on the kit, its towns, neighbourhoods, hospitals, airports, mountains, lakes and parks inside the maps.
+# Written to portal\maps\places\: <ab>.json = places with a word starting "ab", biggest first;
+# type-hospital.json etc. = every place of that type, for "nearest hospital". version.txt names the maps
+# it was made for, so adding a map rebuilds it. Raise $PlacesVersion when the format changes.
+$PlacesVersion = '1'
+$MapCountries = @{ 'brazil' = 'BR'; 'portugal' = 'PT'; 'usa' = 'US'; 'alaska' = 'US'; 'hawaii' = 'US'; 'canada' = 'CA'; 'canada-south' = 'CA'
+  'rio-grande-do-sul' = 'BR'; 'santa-catarina' = 'BR'; 'parana' = 'BR'; 'sao-paulo' = 'BR'; 'rio-de-janeiro' = 'BR'; 'minas-gerais' = 'BR'; 'bahia' = 'BR'; 'pernambuco' = 'BR' }
+if (-not ('PlacesBuilder' -as [type])) {
+  Add-Type -TypeDefinition @'
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Text;
+
+public class PlacesBuilder {
+  // kinds kept from the country files (the world list is all towns)
+  static readonly HashSet<string> Kinds = new HashSet<string>(
+    "PPL PPLA PPLA2 PPLA3 PPLA4 PPLA5 PPLC PPLCD PPLF PPLG PPLL PPLR PPLS PPLX HSP HSPC HSPD AIRP AIRF AIRH FIRE PP MT PK LK PRK".Split(' '));
+  // kinds people look for by type ("hospital"): also written to one file per type, to list the nearest ones
+  static readonly Dictionary<string, string> Types = new Dictionary<string, string> {
+    { "HSP", "hospital" }, { "HSPC", "hospital" }, { "HSPD", "hospital" },
+    { "AIRP", "airport" }, { "AIRF", "airport" }, { "AIRH", "airport" }, { "FIRE", "fire" }, { "PP", "police" } };
+  // a word in more names than this ("lake", "saint", "north") isn't a file of its own: it would be huge.
+  // Such names are still found by their other words ("Lake Tahoe" by "tahoe").
+  const int CommonWord = 1500;
+  class Place { public string Name; public double Lat, Lon; public string Code, Admin, Cc; public long Pop; public List<string> Alt = new List<string>(); }
+  readonly Dictionary<string, Place> places = new Dictionary<string, Place>();
+  readonly Dictionary<string, string> admin1 = new Dictionary<string, string>();
+  static readonly UTF8Encoding Utf8 = new UTF8Encoding(false);
+  static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
+
+  public void LoadAdmin1(string path) {
+    foreach (string line in File.ReadLines(path, Encoding.UTF8)) {
+      string[] c = line.Split('\t');
+      if (c.Length >= 2) admin1[c[0]] = c[1];
+    }
+  }
+
+  // A GeoNames file. bboxes: minLon,minLat,maxLon,maxLat, four numbers per box; null = everywhere.
+  // filterKinds: keep only the Kinds above (country files list every farm, stream and church).
+  public int AddFile(string path, double[] bboxes, bool filterKinds) {
+    int added = 0;
+    foreach (string line in File.ReadLines(path, Encoding.UTF8)) {
+      string[] c = line.Split('\t');
+      if (c.Length < 15) continue;
+      if (filterKinds && !Kinds.Contains(c[7])) continue;
+      double lat = double.Parse(c[4], Inv), lon = double.Parse(c[5], Inv);
+      if (bboxes != null) {
+        bool inside = false;
+        for (int i = 0; i + 3 < bboxes.Length; i += 4)
+          if (lon >= bboxes[i] && lat >= bboxes[i + 1] && lon <= bboxes[i + 2] && lat <= bboxes[i + 3]) { inside = true; break; }
+        if (!inside) continue;
+      }
+      if (places.ContainsKey(c[0])) continue;
+      long pop; long.TryParse(c[14], out pop);
+      string adm; admin1.TryGetValue(c[8] + "." + c[10], out adm);
+      var p = new Place { Name = c[1], Lat = lat, Lon = lon, Code = c[7], Admin = adm ?? "", Cc = c[8], Pop = pop };
+      // other names (Lisbon / Lisboa) for bigger places only: the list is long and mostly other scripts
+      if (pop >= 50000 && c[3].Length > 0)
+        foreach (string a in c[3].Split(','))
+          if (a.Length > 1 && a.Length <= 40 && IsLatin(a) && a != c[1] && !p.Alt.Contains(a) && p.Alt.Count < 8) p.Alt.Add(a);
+      places[c[0]] = p;
+      added++;
+    }
+    return added;
+  }
+
+  // countries with at least a tenth of the world list's towns inside the boxes (for a map drawn by hand)
+  public static string[] CountriesIn(string worldList, double[] bboxes) {
+    var n = new Dictionary<string, int>(); int all = 0;
+    foreach (string line in File.ReadLines(worldList, Encoding.UTF8)) {
+      string[] c = line.Split('\t');
+      if (c.Length < 15) continue;
+      double lat = double.Parse(c[4], Inv), lon = double.Parse(c[5], Inv);
+      for (int i = 0; i + 3 < bboxes.Length; i += 4)
+        if (lon >= bboxes[i] && lat >= bboxes[i + 1] && lon <= bboxes[i + 2] && lat <= bboxes[i + 3]) {
+          int k; n.TryGetValue(c[8], out k); n[c[8]] = k + 1; all++; break;
+        }
+    }
+    var r = new List<string>();
+    foreach (var kv in n) if (kv.Value * 10 >= all) r.Add(kv.Key);
+    return r.ToArray();
+  }
+
+  static bool IsLatin(string s) { foreach (char ch in s) if (ch > 0x24F) return false; return true; }
+
+  static string Fold(string s) {
+    string d = s.ToLowerInvariant().Normalize(NormalizationForm.FormD);
+    var sb = new StringBuilder(d.Length);
+    foreach (char c in d) if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark) sb.Append(c);
+    return sb.ToString();
+  }
+  static string ShardKey(string w) {   // must match shardKey() in portal/map.html
+    var sb = new StringBuilder(2);
+    for (int i = 0; i < 2 && i < w.Length; i++) { char c = w[i]; sb.Append((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') ? c : '_'); }
+    return sb.ToString();
+  }
+  static IEnumerable<string> Words(string folded) {
+    int i = 0, len = folded.Length;
+    while (i < len) {
+      while (i < len && !char.IsLetterOrDigit(folded[i])) i++;
+      int s = i;
+      while (i < len && char.IsLetterOrDigit(folded[i])) i++;
+      if (i - s >= 2) yield return folded.Substring(s, i - s);
+    }
+  }
+  static string J(string s) {   // JSON string
+    var sb = new StringBuilder("\"");
+    foreach (char c in s) {
+      if (c == '"' || c == '\\') sb.Append('\\').Append(c);
+      else if (c < 0x20) sb.Append(' ');
+      else sb.Append(c);
+    }
+    return sb.Append('"').ToString();
+  }
+
+  // one file per first two letters of each word of each name:
+  // [[name, lat, lon, kind, state, country, population, "other name"], ...], biggest places first
+  public int Write(string dir) {
+    Directory.CreateDirectory(dir);
+    var count = new Dictionary<string, int>();
+    foreach (var p in places.Values) {
+      var seen = new HashSet<string>();
+      foreach (string w in Words(Fold(p.Name))) if (seen.Add(w)) { int n; count.TryGetValue(w, out n); count[w] = n + 1; }
+    }
+    var shown = new Dictionary<string, Dictionary<Place, string>>();   // shard -> place -> the name it is found by
+    var types = new Dictionary<string, List<Place>>();
+    foreach (var p in places.Values) {
+      string ty;
+      if (Types.TryGetValue(p.Code, out ty)) { List<Place> l; if (!types.TryGetValue(ty, out l)) { l = new List<Place>(); types[ty] = l; } l.Add(p); }
+      var names = new List<string> { p.Name }; names.AddRange(p.Alt);
+      foreach (string n in names) {
+        var ws = new List<string>(Words(Fold(n)));
+        bool rare = false;
+        foreach (string w in ws) { int c; count.TryGetValue(w, out c); if (c <= CommonWord) rare = true; }
+        foreach (string w in ws) {
+          int c; count.TryGetValue(w, out c);
+          if (rare && c > CommonWord) continue;   // found by its rarer words
+          string k = ShardKey(w);
+          Dictionary<Place, string> m;
+          if (!shown.TryGetValue(k, out m)) { m = new Dictionary<Place, string>(); shown[k] = m; }
+          if (!m.ContainsKey(p)) m[p] = n == p.Name ? "" : n;
+        }
+      }
+    }
+    foreach (var sh in shown) {
+      var list = new List<KeyValuePair<Place, string>>(sh.Value);
+      list.Sort((a, b) => b.Key.Pop.CompareTo(a.Key.Pop));
+      WriteList(Path.Combine(dir, sh.Key + ".json"), list);
+    }
+    foreach (var ty in types) {
+      var list = new List<KeyValuePair<Place, string>>();
+      foreach (var p in ty.Value) list.Add(new KeyValuePair<Place, string>(p, ""));
+      WriteList(Path.Combine(dir, "type-" + ty.Key + ".json"), list);
+    }
+    return places.Count;
+  }
+
+  static void WriteList(string path, List<KeyValuePair<Place, string>> list) {
+    var sb = new StringBuilder("[");
+    bool first = true;
+    foreach (var kv in list) {
+      var p = kv.Key;
+      if (!first) sb.Append(','); first = false;
+      sb.Append('[').Append(J(p.Name)).Append(',')
+        .Append(Math.Round(p.Lat, 5).ToString(Inv)).Append(',').Append(Math.Round(p.Lon, 5).ToString(Inv)).Append(',')
+        .Append(J(p.Code)).Append(',').Append(J(p.Admin)).Append(',').Append(J(p.Cc)).Append(',').Append(p.Pop.ToString(Inv));
+      if (kv.Value.Length > 0) sb.Append(',').Append(J(kv.Value));
+      sb.Append(']');
+    }
+    sb.Append(']');
+    File.WriteAllText(path, sb.ToString(), Utf8);
+  }
+}
+'@
+}
+
+function Get-StreetMaps {   # the kit's maps other than the world overview, with their bounds from the file header
+  foreach ($f in Get-ChildItem (Join-Path $Target 'portal\maps') -Filter *.pmtiles -File -ErrorAction SilentlyContinue) {
+    if ($f.BaseName -eq 'world') { continue }
+    $h = Read-Head $f.FullName 127
+    if ($h.Length -lt 118 -or [Text.Encoding]::ASCII.GetString($h, 0, 7) -ne 'PMTiles') { continue }
+    @{ Name = $f.BaseName; Box = [double[]]@(102, 106, 110, 114 | ForEach-Object { [BitConverter]::ToInt32($h, $_) / 1e7 }) }
+  }
+}
+function Get-PlacesStamp { "$PlacesVersion|" + ((@(Get-StreetMaps | ForEach-Object { $_.Name }) | Sort-Object) -join ',') }
+function Test-Places {
+  $v = Join-Path $Target 'portal\maps\places\version.txt'
+  (Test-Path $v) -and "$(Get-Content $v -ErrorAction SilentlyContinue)".Trim() -eq (Get-PlacesStamp)
+}
+
+# a GeoNames file, kept in %TEMP% for 30 days; returns the path of its .txt
+function Get-GeoNames($name) {
+  $dir = Join-Path $env:TEMP 'survival-station-tools\geonames'
+  $txt = Join-Path $dir "$name\$name.txt"
+  if ((Test-Path $txt) -and (Get-Item $txt).LastWriteTime -gt (Get-Date).AddDays(-30)) { return $txt }
+  New-Item -ItemType Directory -Force $dir | Out-Null
+  $zip = Join-Path $dir "$name.zip"
+  Write-Host "   downloading place names: $name"
+  & curl.exe -sSL --fail --retry 3 -o $zip "https://download.geonames.org/export/dump/$name.zip"
+  if ($LASTEXITCODE -ne 0) { throw "Could not download the place names $name.zip (curl code $LASTEXITCODE)" }
+  if (Test-Path (Join-Path $dir $name)) { Remove-Item -Recurse -Force (Join-Path $dir $name) }
+  Expand-Any $zip (Join-Path $dir $name)   # each in its own folder: every zip has a readme.txt
+  Remove-Item $zip -Force
+  (Get-Item $txt).LastWriteTime = Get-Date
+  $txt
+}
+
+function Build-Places {
+  if (Test-Places) { Write-Host '   ok (already built for these maps)'; return }
+  $dir = Join-Path $env:TEMP 'survival-station-tools\geonames'
+  New-Item -ItemType Directory -Force $dir | Out-Null
+  $admin = Join-Path $dir 'admin1CodesASCII.txt'
+  if (-not (Test-Path $admin) -or (Get-Item $admin).LastWriteTime -lt (Get-Date).AddDays(-30)) {
+    & curl.exe -sSL --fail --retry 3 -o $admin 'https://download.geonames.org/export/dump/admin1CodesASCII.txt'
+    if ($LASTEXITCODE -ne 0) { throw "Could not download the GeoNames state names (curl code $LASTEXITCODE)" }
+  }
+  $world = Get-GeoNames 'cities500'
+  $b = New-Object PlacesBuilder
+  $b.LoadAdmin1($admin)
+  [void]$b.AddFile($world, $null, $false)
+  $maps = @(Get-StreetMaps)
+  if ($maps) {
+    $boxes = [double[]]@($maps | ForEach-Object { $_.Box })
+    $countries = @($maps | ForEach-Object { if ($MapCountries.Contains($_.Name)) { $MapCountries[$_.Name] } else { [PlacesBuilder]::CountriesIn($world, $_.Box) } }) | Select-Object -Unique
+    foreach ($cc in $countries) { [void]$b.AddFile((Get-GeoNames $cc), $boxes, $true) }
+  }
+  $work = Join-Path $env:TEMP 'survival-station-places'
+  if (Test-Path $work) { Remove-Item -Recurse -Force $work }
+  $n = $b.Write($work)
+  $mb = (Get-ChildItem $work -File | Measure-Object Length -Sum).Sum / 1MB
+  Write-Host ("   {0:N0} places; copying them to the drive ({1:N0} MB)..." -f $n, $mb)
+  $dst = Join-Path $Target 'portal\maps\places'
+  if (Test-Path $dst) { Remove-Item -Recurse -Force $dst }
+  & robocopy.exe $work $dst /E /R:2 /W:2 /NFL /NDL /NJH /NJS /NP | Out-Null
+  if ($LASTEXITCODE -ge 8) { throw "Copying the place names to the drive failed (robocopy code $LASTEXITCODE)" }
+  $global:LASTEXITCODE = 0
+  Set-Content (Join-Path $dst 'version.txt') (Get-PlacesStamp)   # last: marks it finished
+  Remove-Item -Recurse -Force $work
+  Write-Host '   done'
+}
+
 function Copy-AppFiles {
   Repair-SurvivalDataPage
   if ((Norm-Path $Root) -eq (Norm-Path $Target)) { Write-Host '   (this builder runs from the kit itself: app files are already in place)'; return }
@@ -1156,6 +1401,7 @@ if ($Verify) {
     else { Report ok ("Map {0} ({1}, zoom 0-{2})" -f $f.BaseName, (Fmt-Size $f.Length), $h[101]) }
     if (-not $preset -and $script:found[-1].State -eq 'bad') { Report info "   (your own area: delete it and add it again in the builder window)" }
   }
+  if (-not (Test-Places)) { Report bad 'Place names for the map search missing, or made before a map was added' @{ Kind = 'run' } }
   if ((Test-NeedsMapServer) -and -not (Test-Path (Join-Path $Target $MapServer))) {
     Report bad 'Map server for maps over 2 GB missing (without it Windows shows only the world map)' @{ Kind = 'run' }
   }
@@ -1433,6 +1679,10 @@ elseif ($WantSD) {
 if ((Test-Path (Join-Path $sdDest 'index.html')) -and -not (Test-PdfIndex)) {
   Step 'Search index for the text inside the Survival-Data PDFs'
   Build-PdfIndex
+}
+if (-not (Test-Places)) {
+  Step 'Place names for the map search (GeoNames)'
+  Build-Places
 }
 
 if ($WantApps) {

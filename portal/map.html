@@ -70,7 +70,7 @@
       sources[id] = viaServer[i]
         ? { type: 'vector', tiles: [tileServer + encodeURIComponent(m.name) + '/{z}/{x}/{y}.mvt'],
             minzoom: m.minzoom || 0, maxzoom: m.maxzoom || 15, bounds: m.bounds, attribution: '© OpenStreetMap' }
-        : { type: 'vector', url: 'pmtiles://' + archives[i].source.getKey(), attribution: '© OpenStreetMap' };
+        : { type: 'vector', url: 'pmtiles://' + archives[i].source.getKey(), attribution: i ? '© OpenStreetMap' : '© OpenStreetMap · place search © GeoNames' };
       for (const l of basemaps.layers(id, flavor, { lang: SURVIVAL.dict._map })) {
         if (i > 0 && l.type === 'background') continue;   // keep the world map visible around a region
         layers.push({ ...l, id: `${id}-${l.id}` });
@@ -103,17 +103,117 @@
   // GPS only works on the computer itself (browsers block it on plain-http network addresses)
   if (window.isSecureContext) map.addControl(new maplibregl.GeolocateControl({ trackUserLocation: true }), 'top-right');
 
-  // "Go to": jump to each map on the kit (the page reopens where it was left, often the world view)
-  const places = maps.map((m, i) => ({ m, b: bounds[i] })).filter(p => p.b);
-  if (places.length > 1) {
+  // top left: place search, and "Go to" each map on the kit (the page reopens where it was left)
+  const ctl = document.createElement('div'); ctl.className = 'maplibregl-ctrl map-tools';
+  const search = document.createElement('input');
+  search.type = 'search'; search.className = 'map-search'; search.placeholder = t('map.search'); search.setAttribute('aria-label', t('map.search'));
+  const found = document.createElement('ul'); found.className = 'map-found'; found.hidden = true;
+  ctl.append(search, found);
+  const areas = maps.map((m, i) => ({ m, b: bounds[i] })).filter(p => p.b);
+  if (areas.length > 1) {
     const sel = document.createElement('select');
     sel.className = 'map-goto'; sel.setAttribute('aria-label', t('map.goto'));
     sel.add(new Option(t('map.goto'), ''));
-    places.forEach((p, i) => sel.add(new Option(p.m.name === 'world' ? t('map.world')
+    areas.forEach((p, i) => sel.add(new Option(p.m.name === 'world' ? t('map.world')
       : p.m.name.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), i)));
-    sel.onchange = () => { if (sel.value !== '') map.fitBounds(box(places[sel.value].b), { padding: 20 }); sel.value = ''; };
-    map.addControl({ onAdd() { const d = document.createElement('div'); d.className = 'maplibregl-ctrl'; d.append(sel); return d; }, onRemove() {} }, 'top-left');
+    sel.onchange = () => { if (sel.value !== '') map.fitBounds(box(areas[sel.value].b), { padding: 20 }); sel.value = ''; };
+    ctl.append(sel);
   }
+  map.addControl({ onAdd() { return ctl; }, onRemove() {} }, 'top-left');
+  ctl.addEventListener('mousedown', e => e.stopPropagation());   // typing and picking shouldn't pan the map
+
+  // ---- place search: the builder's GeoNames lists in maps/places (Build-Places in setup\build-drive.ps1)
+  const fold = s => s.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '');
+  const wordsOf = s => fold(s).split(/[^\p{L}\p{N}]+/u).filter(w => w.length >= 2);
+  const shardKey = w => [...w.slice(0, 2)].map(c => /[a-z0-9]/.test(c) ? c : '_').join('');   // as in the builder
+  const lists = {};
+  const load = name => lists[name] = lists[name] || fetch(`maps/places/${name}.json`).then(r => r.ok ? r.json() : null).catch(() => null);
+  // "hospital" or "aeroporto" alone (or "nearest hospital") lists the nearest of that type instead
+  const TYPES = {
+    hospital: ['hospital', 'hospitals', 'hospitais', 'clinic', 'clinics', 'clinica', 'clinicas', 'upa'],
+    airport: ['airport', 'airports', 'aeroporto', 'aeroportos', 'airfield', 'heliport', 'heliporto'],
+    fire: ['fire', 'bombeiros', 'bombeiro'], police: ['police', 'policia', 'delegacia'],
+  };
+  const NEAR = new Set(['near', 'nearest', 'closest', 'mais', 'proximo', 'proxima', 'perto', 'de', 'do', 'da', 'the', 'a', 'o']);
+  const km = (lat1, lon1, lat2, lon2) => {
+    const r = Math.PI / 180, a = Math.sin((lat2 - lat1) * r / 2) ** 2 + Math.cos(lat1 * r) * Math.cos(lat2 * r) * Math.sin((lon2 - lon1) * r / 2) ** 2;
+    return 12742 * Math.asin(Math.sqrt(a));
+  };
+  const kindOf = p => {   // p = [name, lat, lon, code, state, country, population, other name]
+    const c = p[3];
+    if (c === 'PPLX') return t('map.kind.district');
+    if (c.startsWith('PPL')) return t(p[6] >= 100000 || c === 'PPLC' || c === 'PPLA' ? 'map.kind.city' : 'map.kind.town');
+    return t({ HSP: 'map.kind.hospital', HSPC: 'map.kind.clinic', HSPD: 'map.kind.clinic', AIRP: 'map.kind.airport', AIRF: 'map.kind.airfield',
+      AIRH: 'map.kind.heliport', FIRE: 'map.kind.fire', PP: 'map.kind.police', MT: 'map.kind.mountain', PK: 'map.kind.mountain',
+      LK: 'map.kind.lake', PRK: 'map.kind.park' }[c] || 'map.kind.place');
+  };
+  const zoomFor = p => p[3].startsWith('PPL') ? (p[3] === 'PPLX' ? 15 : p[6] >= 100000 ? 11 : 13) : ['LK', 'PRK', 'MT', 'PK'].includes(p[3]) ? 12 : 16;
+
+  async function findPlaces(q) {
+    const ws = wordsOf(q), c = map.getCenter();
+    if (!ws.length) return [];
+    const dist = p => km(c.lat, c.lng, p[1], p[2]);
+    const type = Object.keys(TYPES).find(k => ws.some(w => TYPES[k].includes(w)) && ws.every(w => TYPES[k].includes(w) || NEAR.has(w)));
+    if (type) {
+      const all = await load('type-' + type);
+      if (all === null) return null;
+      return all.map(p => ({ p, d: dist(p) })).sort((a, b) => a.d - b.d).slice(0, 15);
+    }
+    // the lists for each word's first two letters (a very common word like "lake" has none of its own,
+    // so "lake tahoe" is found through "tahoe"); every typed word must start a word of the name
+    const got = await Promise.all([...new Set(ws.map(shardKey))].map(load));
+    if (got.every(l => l === null)) return null;
+    const seen = new Set(), hits = [];
+    for (const l of got) for (const p of l || []) {
+      const key = p[1] + ',' + p[2];
+      if (seen.has(key)) continue;
+      for (const name of [p[0], p[7]]) {
+        if (!name) continue;
+        const nw = wordsOf(name);
+        if (!ws.every(w => nw.some(x => x.startsWith(w)))) continue;
+        const exact = fold(name).trim() === fold(q).trim();
+        const d = dist(p);
+        // bigger and closer first; a name typed in full first of all
+        hits.push({ p, d, score: (exact ? 10 : 0) + Math.log10(p[6] + 10) - Math.log10(d + 1) * 1.2 });
+        seen.add(key);
+        break;
+      }
+    }
+    return hits.sort((a, b) => b.score - a.score).slice(0, 15);
+  }
+
+  function showFound(hits) {
+    found.replaceChildren();
+    if (hits === null) { const li = document.createElement('li'); li.className = 'muted'; li.textContent = t('map.search.missing'); found.append(li); }
+    else if (!hits.length) { const li = document.createElement('li'); li.className = 'muted'; li.textContent = t('map.search.none'); found.append(li); }
+    else for (const { p, d } of hits) {
+      const li = document.createElement('li');
+      const b = document.createElement('button'); b.type = 'button';
+      const name = document.createElement('b'); name.textContent = p[0];
+      const info = document.createElement('span');
+      info.textContent = [p[7] && p[7] !== p[0] ? `(${p[7]})` : '', kindOf(p), p[4], p[5], d < 20000 ? `${d < 10 ? d.toFixed(1) : Math.round(d)} km` : ''].filter(Boolean).join(' · ');
+      b.append(name, info);
+      b.onclick = () => {
+        found.hidden = true;
+        map.flyTo({ center: [p[2], p[1]], zoom: zoomFor(p) });
+        showPoint({ lat: p[1], lng: p[2] }, p[0]);
+      };
+      li.append(b); found.append(li);
+    }
+    found.hidden = false;
+  }
+  let timer, asked = 0;
+  search.addEventListener('input', () => {
+    clearTimeout(timer);
+    const q = search.value.trim();
+    if (q.length < 2) { found.hidden = true; return; }
+    timer = setTimeout(async () => {
+      const mine = ++asked, hits = await findPlaces(q);
+      if (mine === asked) showFound(hits);   // only the latest typing counts
+    }, 250);
+  });
+  search.addEventListener('keydown', e => { if (e.key === 'Enter') found.querySelector('button')?.click(); if (e.key === 'Escape') found.hidden = true; });
+  search.addEventListener('focus', () => { if (found.children.length && search.value.trim().length >= 2) found.hidden = false; });
 
   map.on('moveend', () => SURVIVAL.store('map-view', JSON.stringify({ center: map.getCenter().toArray(), zoom: map.getZoom() })));
   document.addEventListener('themechange', e => map.setStyle(style(e.detail === 'dark')));
@@ -124,13 +224,15 @@
     return `${d}°${m}'${s}"${v >= 0 ? pos : neg}`;
   };
   let marker = null;
-  map.on('click', e => {
-    const { lat, lng } = e.lngLat;
+  // a point tapped or found: marker, coordinates to read out, and remembered for the Tools page (sunrise, sun direction)
+  function showPoint({ lat, lng }, title) {
     const dec = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
     marker = marker || new maplibregl.Marker({ color: '#b4441c' });
-    marker.setLngLat(e.lngLat).addTo(map);
+    marker.setLngLat([lng, lat]).addTo(map);
+    SURVIVAL.store('map-point', JSON.stringify({ lat, lng, title: title || '' }));
+    found.hidden = true;
     panel.classList.remove('warn');
-    const label = document.createElement('div'); label.className = 'muted'; label.textContent = t('map.share');
+    const label = document.createElement('div'); label.className = 'muted'; label.textContent = title ? `${title}: ${t('map.share')}` : t('map.share');
     const big = document.createElement('div'); big.className = 'coords'; big.textContent = dec;
     const small = document.createElement('div'); small.className = 'muted'; small.textContent = `${dms(lat, 'N', 'S')}  ${dms(lng, 'E', 'W')}`;
     const btn = document.createElement('button'); btn.className = 'btn ghost'; btn.type = 'button'; btn.textContent = t('map.copy');
@@ -139,7 +241,8 @@
       catch { getSelection().selectAllChildren(big); }   // clipboard API needs a secure context; select the text instead
     };
     panel.replaceChildren(label, big, small, btn);
-  });
+  }
+  map.on('click', e => showPoint(e.lngLat));
 })();
 </script>
 </body>
