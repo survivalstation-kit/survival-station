@@ -12,6 +12,12 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.35.0 (2026-11-08)
+
+- **Virus scanning added to the bootable drive.**
+  - **ClamAV** (free, open source): MAKE-BOOTABLE.bat writes `clamav-scan.sh` to the drive. From Linux Mint you run it to scan a computer's disk from outside Windows (install, update signatures, scan, list what it finds).
+  - **Kaspersky Rescue Disk** added to the optional systems menu: a bootable antivirus that updates its own signatures and scans. It has no published checksum and is refreshed daily, so it is downloaded over HTTPS from Kaspersky's official domain (verified by host, not checksum) with a clear note; Kaspersky is a Russian company and some organisations avoid it.
+  - Help, the on-drive `ISO\READ-ME.txt` and `THIRD-PARTY-NOTICES.md` explain both and when to use an offline scan.
 ## 1.34.0 (2026-11-08)
 
 - **MAKE-BOOTABLE.bat now offers several systems on one drive** (Ventoy lists each in its boot menu; pick which to start). Besides Linux Mint, optional and all free, each downloaded from its official site and checked against its official SHA-256:

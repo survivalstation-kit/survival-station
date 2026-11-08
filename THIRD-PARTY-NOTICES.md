@@ -32,6 +32,8 @@ material, which is the responsibility of its publishers and of whoever builds or
 | Ventoy (boot section, installed only by `MAKE-BOOTABLE.bat`) | **GPL-3.0** | https://github.com/ventoy/Ventoy |
 | Linux Mint XFCE (`ISO/` on a bootable kit, downloaded by `MAKE-BOOTABLE.bat`) | Free software, mostly GPL; the Linux Mint name and logo are trademarks | https://linuxmint.com |
 | SystemRescue, Rescuezilla, antiX, Memtest86+, Kali Linux (optional ISOs added by `MAKE-BOOTABLE.bat`, each from its official site and checked against its official SHA-256) | Each is free software under its own licences (mostly GPL); names and logos are the projects' trademarks. Kali Linux includes security-testing tools for use only on systems and networks you own or are authorised to test. | https://www.system-rescue.org , https://rescuezilla.com , https://antixlinux.com , https://www.memtest.org , https://www.kali.org |
+| ClamAV (free virus scanner, run by `clamav-scan.sh` inside Linux Mint) | GPL-2.0 | https://www.clamav.net |
+| Kaspersky Rescue Disk (optional ISO added by `MAKE-BOOTABLE.bat`; proprietary freeware, Kaspersky Lab) | Free to use; not redistributed in this repository. Downloaded over HTTPS from Kaspersky's official server, which refreshes it daily with new virus signatures, so it has no fixed published checksum. Kaspersky is a Russian company; some governments and organisations restrict its use. | https://www.kaspersky.com/downloads/free-rescue-disk |
 
 **GPL-3.0 (kiwix-serve):** the program is passed on unchanged. Its complete source code is available at the
 address above, for the version on the kit (see the Kiwix releases page); this notice is the offer of source.

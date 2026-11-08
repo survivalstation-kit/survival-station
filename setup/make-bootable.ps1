@@ -141,20 +141,26 @@ function Fetch-Text { foreach ($u in $args) { $r = (& curl.exe -L --fail -s $u) 
 # $item = @{ Name; File; Url; Sha256; Zip; Keep } ; $Keep is a wildcard of older files of the same system to clear.
 function Save-Image($item) {
   $dest = Join-Path $isoDir $item.File
-  if ($item.Sha256 -notmatch '^[0-9a-f]{64}$') { throw "no official checksum found for $($item.File)" }
+  # Most images are verified against an official SHA-256. A few (e.g. Kaspersky Rescue Disk) publish no checksum
+  # and change daily, so they are verified only by HTTPS to the official domain ($item.NoChecksum + $item.Host).
+  if ($item.NoChecksum) {
+    if ($item.Url -notmatch ('^https://[^/]*' + [regex]::Escape($item.Host) + '/')) { throw "refusing $($item.File): not an https link on $($item.Host)" }
+  } elseif ($item.Sha256 -notmatch '^[0-9a-f]{64}$') { throw "no official checksum found for $($item.File)" }
   if (Test-Path $dest) {
-    # a .zip image keeps only the extracted .iso (its hash differs from the zip's), so existence is enough
-    if ($item.Zip -or (Get-FileHash $dest -Algorithm SHA256).Hash.ToLower() -eq $item.Sha256) {
-      Say " $($item.Name): already here and checked. OK." " $($item.Name): já está aqui e conferido. OK." Green; return $true
+    # a .zip image keeps only the extracted .iso (its hash differs), and a no-checksum image can't be re-verified,
+    # so for those existence is enough (delete the file to force a fresh download)
+    if ($item.Zip -or $item.NoChecksum -or (Get-FileHash $dest -Algorithm SHA256).Hash.ToLower() -eq $item.Sha256) {
+      Say " $($item.Name): already on the drive." " $($item.Name): já está no pendrive." Green; return $true
     }
   }
+  if ($item.NoChecksum) { Say " Note: $($item.Name) has no published checksum; it is downloaded over HTTPS from its official site ($($item.Host)) and updates its own virus signatures when it runs." " Nota: $($item.Name) não tem checksum publicado; é baixado por HTTPS do site oficial ($($item.Host)) e atualiza as próprias assinaturas de vírus ao rodar." Yellow }
   $dl = Join-Path $isoDir ($item.File + $(if ($item.Zip) { '.zip' } else { '' }) + '.part')
   if ((Get-PSDrive $Drive).Free -lt 6GB) { Say " Not enough free space on $Drive`: for $($item.Name)." " Espaço insuficiente em $Drive`: para $($item.Name)." Yellow; return $false }
   Say " Downloading $($item.Name) (resumes if interrupted)..." " Baixando $($item.Name) (continua de onde parou se cair)..."
   & curl.exe -L --fail -C - --retry 5 --retry-delay 5 -o $dl $item.Url
   if ($LASTEXITCODE) { Say " Download failed for $($item.Name) (curl $LASTEXITCODE): run again to resume." " Falha no download de $($item.Name) (curl $LASTEXITCODE): rode de novo para continuar." Yellow; return $false }
   Say ' Checking against the official checksum...' ' Conferindo com o checksum oficial...'
-  if ((Get-FileHash $dl -Algorithm SHA256).Hash.ToLower() -ne $item.Sha256) { Remove-Item $dl -Force; Say " $($item.Name) is damaged (checksum mismatch): run again." " $($item.Name) veio corrompido (checksum não bate): rode de novo." Yellow; return $false }
+  if (-not $item.NoChecksum -and (Get-FileHash $dl -Algorithm SHA256).Hash.ToLower() -ne $item.Sha256) { Remove-Item $dl -Force; Say " $($item.Name) is damaged (checksum mismatch): run again." " $($item.Name) veio corrompido (checksum não bate): rode de novo." Yellow; return $false }
   if ($item.Zip) {
     $x = Join-Path $isoDir ('_x_' + [guid]::NewGuid().ToString('N'))
     Expand-Archive $dl $x -Force
@@ -164,7 +170,8 @@ function Save-Image($item) {
     Remove-Item $x -Recurse -Force; Remove-Item $dl -Force
   } else { Move-Item -Force $dl $dest }
   if ($item.Keep) { Get-ChildItem $isoDir -Filter $item.Keep -ErrorAction SilentlyContinue | Where-Object { $_.Name -ne $item.File } | ForEach-Object { Remove-Item $_.FullName -Force; Say " removed the older $($_.Name)" " removido o antigo $($_.Name)" } }
-  Say " $($item.Name) checked: OK." " $($item.Name) conferido: OK." Green; return $true
+  if ($item.NoChecksum) { Say " $($item.Name): downloaded. OK." " $($item.Name): baixado. OK." Green } else { Say " $($item.Name) checked: OK." " $($item.Name) conferido: OK." Green }
+  return $true
 }
 
 # ---------------------------------------------------------------- 2. Linux Mint XFCE (always), then optional extras
@@ -212,6 +219,12 @@ $Images = [ordered]@{
     @{ Name = 'Kali Linux (live)'; File = $file; Url = "https://cdimage.kali.org/current/$file"; Keep = 'kali-linux-*-live-amd64.iso'
        Sha256 = (Find-Hash $sums $file) }
   } }
+  kaspersky = @{ Desc = (T 'antivirus rescue disk: scan a computer for viruses outside Windows (~0.7 GB)' 'disco antivírus de resgate: procurar vírus num computador fora do Windows (~0,7 GB)'); Resolve = {
+    # Kaspersky publishes no checksum and refreshes this file daily with new virus signatures, so it is
+    # verified by HTTPS to the official domain. It downloads over https from kaspersky-labs.com.
+    @{ Name = 'Kaspersky Rescue Disk'; File = 'kaspersky-rescue-disk.iso'; NoChecksum = $true; Host = 'kaspersky-labs.com'
+       Url = 'https://rescuedisk.s.kaspersky-labs.com/updatable/2018/krd.iso' }
+  } }
 }
 
 function Add-Image($key) {
@@ -238,10 +251,49 @@ if ($Extras) {
 }
 foreach ($k in $want) { Add-Image $k }
 
+# ---------------------------------------------------------------- ClamAV offline virus scan, to run from Linux Mint
+# ClamAV has no boot ISO; this script runs it inside Linux Mint (already on the drive) to scan a computer's
+# disk from outside Windows. Saved at the drive root next to START-LINUX.sh; must use LF line endings.
+$clamav = @'
+#!/usr/bin/env bash
+# Scan a computer for viruses with ClamAV (free, open source), from Linux Mint on this drive. Survival Station.
+# Usage:  bash clamav-scan.sh  [folder or disk to scan]
+echo "== ClamAV offline virus scan =="
+if ! command -v clamscan >/dev/null 2>&1; then
+  echo "Installing ClamAV (needs internet, just this once)..."
+  sudo apt-get update -y && sudo apt-get install -y clamav || { echo "Could not install ClamAV (no internet?)."; exit 1; }
+fi
+echo "Updating virus signatures (needs internet)..."
+sudo systemctl stop clamav-freshclam 2>/dev/null
+sudo freshclam || echo "Could not update signatures; scanning with what is already installed."
+TARGET="$1"
+if [ -z "$TARGET" ]; then
+  echo; echo "Disks and folders you can scan:"; ls -1d /media/*/* /mnt/* 2>/dev/null
+  echo; read -r -p "Type the full path to scan (e.g. the Windows disk above): " TARGET
+fi
+[ -d "$TARGET" ] || { echo "Not a folder: $TARGET"; exit 1; }
+LOG="$HOME/clamav-found.txt"
+echo "Scanning $TARGET  (this can take a long time). Anything infected is listed and saved to $LOG"
+clamscan -r -i --bell "$TARGET" | tee "$LOG"
+echo
+echo "Done. ClamAV only REPORTS problems; it does not delete anything."
+echo "To move infected files out of the way instead, run again adding:  --move=$HOME/quarantine"
+'@
+[IO.File]::WriteAllText((Join-Path $root 'clamav-scan.sh'), ($clamav -replace "`r`n", "`n"), (New-Object Text.UTF8Encoding $false))
+
 # ---------------------------------------------------------------- the on-drive guide, listing what is actually there
 $present = @(Get-ChildItem $isoDir -Filter *.iso -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name)
 $hasKali = [bool]($present | Where-Object { $_ -like 'kali-*' })
+$hasKav = [bool]($present | Where-Object { $_ -like 'kaspersky-*' })
 $list = ($present | ForEach-Object { "   - $_" }) -join "`r`n"
+$scanEn = "`r`nScan a computer for viruses (from outside Windows, which catches more):`r`n" +
+  "  - ClamAV (free, open source): start Linux Mint, open the SURVIVAL drive, right-click -> Open in Terminal,`r`n" +
+  "    and run:  bash clamav-scan.sh   (it needs internet once, to get the virus signatures).`r`n" +
+  $(if ($hasKav) { "  - Kaspersky Rescue Disk: in the Ventoy menu choose kaspersky-rescue-disk.iso; it updates its own`r`n    signatures and scans. (From Kaspersky, a Russian company; some organisations avoid it.)`r`n" } else { '' })
+$scanPt = "`r`nProcurar vírus num computador (de fora do Windows, o que pega mais):`r`n" +
+  "  - ClamAV (gratis, codigo aberto): inicie o Linux Mint, abra o pendrive SURVIVAL, botao direito -> Abrir no`r`n" +
+  "    Terminal, e rode:  bash clamav-scan.sh   (precisa de internet uma vez, para baixar as assinaturas).`r`n" +
+  $(if ($hasKav) { "  - Kaspersky Rescue Disk: no menu do Ventoy escolha kaspersky-rescue-disk.iso; ele atualiza as proprias`r`n    assinaturas e procura virus. (E da Kaspersky, empresa russa; algumas organizacoes evitam.)`r`n" } else { '' })
 $kaliEn = if ($hasKali) { "`r`nKali Linux is for testing the security of systems and networks you OWN or have written permission to test`r`n(e.g. your own Wi-Fi). Using it against anything else is illegal and is your responsibility.`r`n" } else { '' }
 $kaliPt = if ($hasKali) { "`r`nO Kali Linux serve para testar a segurança de sistemas e redes que você POSSUI ou tem permissão por escrito`r`npara testar (ex.: o seu próprio Wi-Fi). Usá-lo contra qualquer outra coisa é ilegal e de sua responsabilidade.`r`n" } else { '' }
 [IO.File]::WriteAllText((Join-Path $isoDir 'READ-ME.txt'), @"
@@ -255,7 +307,7 @@ Nothing is installed on the computer unless you choose to install it.
 
 Systems on this drive:
 $list
-$kaliEn
+$scanEn$kaliEn
 Iniciar um computador por este pendrive (Survival Station).
 1. Conecte o pendrive e ligue o computador apertando a tecla do menu de boot: geralmente F12, F11, F9, F8 ou Esc
    (Mac Intel: segure Option). Escolha o pendrive.
@@ -263,7 +315,7 @@ Iniciar um computador por este pendrive (Survival Station).
 3. Na primeira vez num computador com Secure Boot: o Ventoy pede para registrar a chave uma vez; siga as telas.
 4. No Linux Mint: abra o gerenciador de arquivos, abra o pendrive SURVIVAL e rode:  bash START-LINUX.sh
 Nada é instalado no computador, a não ser que você escolha instalar.
-$kaliPt
+$scanPt$kaliPt
 "@, (New-Object Text.UTF8Encoding $false))
 
 Write-Host ''
