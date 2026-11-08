@@ -1055,10 +1055,24 @@ function Get-LastPercent($file) {
 function Get-RemoteSize($url) {
   try { [int64](Invoke-WebRequest $url -Method Head -UseBasicParsing -MaximumRedirection 10).Headers['Content-Length'] } catch { 0 }
 }
+# GitHub's release download links sometimes fail for a while (504 Gateway Time-out on big files) while the
+# same file still comes through GitHub's API. Returns that route's short-lived download address and size.
+function Get-GitHubAsset($url) {
+  if ($url -notmatch '^https://github\.com/([^/]+/[^/]+)/releases/download/([^/]+)/([^/?#]+)$') { return $null }
+  $repo = $Matches[1]; $tag = $Matches[2]; $name = [uri]::UnescapeDataString($Matches[3])
+  try {
+    $a = (Invoke-RestMethod "https://api.github.com/repos/$repo/releases/tags/$tag" -TimeoutSec 30).assets | Where-Object { $_.name -eq $name } | Select-Object -First 1
+    if (-not $a) { return $null }
+    $loc = & curl.exe -s -o NUL -w '%{redirect_url}' -H 'Accept: application/octet-stream' $a.url
+    if ("$loc" -match '^https://') { @{ Url = "$loc"; Size = [int64]$a.size } }
+  } catch { $null }
+}
 
 # curl.exe ships with Windows 10+; it resumes (-C -) and survives flaky connections far better than Invoke-WebRequest
 function Download($url, $dest) {
   $size = Get-RemoteSize $url
+  $from = $url   # where curl fetches it: the link itself, or GitHub's API route when the link fails
+  if ($size -eq 0 -and ($gh = Get-GitHubAsset $url)) { $from = $gh.Url; $size = $gh.Size; Write-Host "   (GitHub's download link is not answering: using GitHub's API route)" }
   if ((Test-Path $dest) -and $size -gt 0 -and (Get-Item $dest).Length -eq $size) {
     Write-Host "   ok (already have) $(Split-Path $dest -Leaf)"; return
   }
@@ -1076,7 +1090,7 @@ function Download($url, $dest) {
   for ($try = 1; $try -le 5; $try++) {
     # curl runs quietly in the background; the progress table follows the .part file every half second
     # (this file and the whole build), as do the title, the builder window and the My kit page
-    $p = Start-Process curl.exe -NoNewWindow -PassThru -ArgumentList @('-L', '--fail', '--retry', '5', '--retry-delay', '5', '-C', '-', '-s', '-S', '-o', "`"$fetch`"", "`"$url`"")
+    $p = Start-Process curl.exe -NoNewWindow -PassThru -ArgumentList @('-L', '--fail', '--retry', '5', '--retry-delay', '5', '-C', '-', '-s', '-S', '-o', "`"$fetch`"", "`"$from`"")
     $null = $p.Handle   # keeps ExitCode readable after the process ends
     Add-ChildProcess $p
     Start-ProgressTable 'This file'
@@ -1094,6 +1108,8 @@ function Download($url, $dest) {
     $code = $p.ExitCode
     if ($code -eq 0) { break }
     Write-Host "   retry $try (curl error $code)..." -ForegroundColor Yellow; Start-Sleep 5
+    # a GitHub file: try (again) through GitHub's API, with a fresh address (they expire after a few minutes)
+    if ($gh = Get-GitHubAsset $url) { if ($from -eq $url) { Write-Host "   switching to GitHub's API route" }; $from = $gh.Url }
   }
   if ($code -ne 0) { throw "Download failed (curl error $code): $url" }
   if ($stage) {

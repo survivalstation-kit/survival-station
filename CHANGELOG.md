@@ -12,6 +12,9 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.21.1 (2026-11-08)
+
+- **Downloads from GitHub no longer stop the build when GitHub's download link fails.** GitHub's normal link for some big files (for example the PocketPal AI app) can answer "504 Gateway Time-out" for a while, which ended the build with "curl error 22". The builder now fetches the same file through GitHub's API route instead, with a fresh address on every retry.
 ## 1.21.0 (2026-11-08)
 
 - **Updates straight from GitHub when there is internet.** **Check for updates** and **Verify / repair** now also look at the latest release on GitHub (github.com/survivalstation-kit/survival-station):
