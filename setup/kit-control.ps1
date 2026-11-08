@@ -92,6 +92,11 @@ while ($true) {
       Start-Process $PS -ArgumentList ('-NoProfile -STA -ExecutionPolicy Bypass -WindowStyle Hidden -File "{0}" -Kit "{1}." -Action {2}' -f $gui, $Root, $action)
       Send $ctx 200 @{ ok = $true } $origin
     }
+    # the home page's "Shut down the kit": closes the servers and the start window (this helper then stops by itself)
+    elseif ($req.HttpMethod -eq 'POST' -and $path -eq '/shutdown' -and $origin) {
+      Send $ctx 200 @{ ok = $true } $origin
+      Start-Process $PS -WindowStyle Hidden -ArgumentList ('-NoProfile -ExecutionPolicy Bypass -File "{0}" -Quiet' -f (Join-Path $PSScriptRoot 'stop-old-kit.ps1'))
+    }
     # private documents (setup\private-docs.ps1) and the family plan; only the kit's own pages, on this computer
     elseif ($req.HttpMethod -eq 'POST' -and $path -like '/private/*' -and $origin) {
       $b = Read-Body $req

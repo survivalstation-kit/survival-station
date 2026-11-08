@@ -34,6 +34,7 @@
     <span class="pill" id="st-batt" hidden></span>
     <button class="pill power" type="button" id="st-power"></button>
     <button class="pill power" type="button" id="st-upd"></button>
+    <button class="pill power" type="button" id="st-off" hidden></button>
   </div>
   <p class="muted" id="power-note" hidden></p>
   <div class="notice" id="ai-start" hidden></div>
@@ -203,6 +204,19 @@
       updNote(t(r.ok ? 'upd.opened' : 'upd.nohelper'));
     } catch { updNote(t('upd.nohelper')); }
   };
+
+  // shut the kit down from here (on the computer running it): servers, helper and start window
+  if (onThisComputer && SURVIVAL.served) {
+    $('st-off').textContent = t('off.btn'); $('st-off').hidden = false;
+    $('st-off').onclick = async () => {
+      if (!confirm(t('off.ask'))) return;
+      try {
+        const r = await fetch('http://localhost:8091/shutdown', { method: 'POST' });
+        if (!r.ok) throw new Error();
+        document.querySelector('main').replaceChildren(Object.assign(document.createElement('h1'), { textContent: t('off.done') }));
+      } catch { alert(t('off.fail')); }
+    };
+  }
 
   // low power switch, and the battery where the browser tells it (on the computer itself)
   const power = () => {

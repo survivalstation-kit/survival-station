@@ -26,6 +26,8 @@ echo.
 
 rem ---- close a Survival Station that is still running (an earlier start never shut down, or another copy)
 if exist "setup\stop-old-kit.ps1" "%SYS%\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "%~dp0setup\stop-old-kit.ps1"
+rem ---- if this window is closed with its X (not a key press), close the servers too: none keep running on their own
+if exist "setup\watch-kit.ps1" start "" /min "%SYS%\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "%~dp0setup\watch-kit.ps1"
 
 rem ---- library server (all .zim files in library\)
 rem kiwix-serve names each book after the path it was given, so run it inside library\ with bare

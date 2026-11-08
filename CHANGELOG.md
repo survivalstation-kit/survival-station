@@ -12,6 +12,11 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.24.0 (2026-11-08)
+
+- **Closing the start window with its X now shuts the kit down too** (Windows). Before, only a key press in it did: closing it with X left the AI, library, map, voice and secure servers running with no window to stop them. A small hidden watcher (setup/watch-kit.ps1) now closes them as soon as the start window closes, however it closes.
+- **⏻ Shut down the kit** button on the home page, on the computer running the kit: it asks first, then closes every server, the helper and the start window.
+- Closing the browser still leaves the kit running, on purpose: phones on the same Wi-Fi may be using it, and the browser can be reopened.
 ## 1.23.1 (2026-11-08)
 
 - **"Library: offline" right after starting, although it works.** The library server starts with the AI but takes a while to open big books from a USB stick, and the home page checked only once, for 2.5 seconds. It now waits up to 5 seconds, then keeps checking every 5 seconds and shows the library as running (and its tile as available) as soon as it answers.
