@@ -12,6 +12,10 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.33.1 (2026-11-08)
+
+- **Verify / repair now checks the official guides** (`portal\guides`) and downloads any that are missing. Before, only a build or an update fetched them, so a kit that was only verified said "0 to fix" without them.
+
 ## 1.33.0 (2026-11-08)
 
 - **Bootable stick (optional): `MAKE-BOOTABLE.bat`** (Windows). Makes a USB drive able to start a computer whose own disk or Windows has failed, into **Linux Mint XFCE**, where the whole kit runs (`bash START-LINUX.sh`) and files can be copied from the computer's disk to safety.

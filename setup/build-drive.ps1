@@ -407,6 +407,12 @@ function Install-Voice {
   Set-Content (Join-Path $Target 'tools\whisper-VERSION') $rel.tag_name
 }
 $BaseSize = 825MB   # always installed: AI and library programs for 5 systems, map viewer, world map, official guides
+# Official guides on every kit (US government works, approved for public release): portal\guides, listed on the Books page
+$Guides = [ordered]@{
+  'FM-3-11.4-NBC-Protection-2003.pdf'                   = 'https://archive.org/download/MManuals/Fm3-11.4TacticsTechniquesAndProceduresForNbcProtection2003.pdf'
+  'FEMA-Nuclear-Detonation-Planning-Guidance-2022.pdf'  = 'https://www.fema.gov/sites/default/files/documents/fema_nuc-detonation-planning-guide.pdf'
+  'FEMA-Nuclear-Detonation-First-72-Hours-2023.pdf'     = 'https://remm.hhs.gov/fema_oet-72-hour-nuclear-detonation-response-guidance.pdf'
+}
 
 function Norm-Path($p) { $p.TrimEnd('\').ToLower() }
 
@@ -1499,6 +1505,9 @@ if ($Verify) {
     else { Report ok 'App pages, start files and tools are current' }
   }
 
+  $missGuides = @($Guides.Keys | Where-Object { -not (Test-Path (Join-Path $Target "portal\guides\$_")) })
+  if ($missGuides) { Report bad "Official guides missing: $($missGuides.Count) of $($Guides.Count) (needs internet)" @{ Kind = 'guides' } }
+  else { Report ok 'Official guides (nuclear, chemical and biological emergencies)' }
   $miss = @($Engines.Values | Where-Object { -not (Get-ChildItem (Join-Path $Target "engine\$_") -Filter 'llama-server*' -ErrorAction SilentlyContinue) })
   if ($miss) { Report bad "AI engine missing for: $($miss -join ', ')" @{ Kind = 'delete'; Path = (Join-Path $Target 'engine\VERSION') } }
   else { Report ok "AI engine for $($Engines.Values -join ', ')" }
@@ -1621,16 +1630,21 @@ if ($Verify) {
   $fixes = @($script:found | Where-Object { $_.Fix } | ForEach-Object { $_.Fix })
   Write-Host ("`n   {0} OK, {1} to fix, {2} downloading or unfinished" -f @($script:found | Where-Object State -eq 'ok').Count, $bad.Count, @($script:found | Where-Object State -eq 'wait').Count)
   if (-not $fixes) { Write-Host '   Nothing to repair.' -ForegroundColor Green; Write-Indexes; exit }
-  $fetch = @($fixes | Where-Object { $_.Kind -notin 'app', 'remove' })
+  $fetch = @($fixes | Where-Object { $_.Kind -notin 'app', 'remove', 'guides' })
   $remove = @($fixes | Where-Object { $_.Kind -eq 'remove' })
   Write-Host "`n   Repair will:"
   if ($fixes | Where-Object Kind -eq 'app') { Write-Host '    - copy the newest app pages, start files and tools (no internet needed)' }
+  if ($fixes | Where-Object Kind -eq 'guides') { Write-Host '    - download the official guides that are missing (needs internet)' }
   if ($remove) { Write-Host "    - remove $($remove.Count) file(s) that don't belong in the kit (no internet needed)" }
   if ($fetch) { Write-Host '    - download again what is missing or incomplete, and finish unfinished downloads (needs internet)' }
   if ($fetch -and $busy) { Write-Host '      A download is running on this drive right now, so this part is skipped: run Verify again when it finishes.' -ForegroundColor Yellow }
   if (-not $Yes -and (Read-Host "`n   Repair now? [Y/n]") -match '^n') { exit }
 
   if ($fixes | Where-Object Kind -eq 'app') { Step 'Copying the newest app files'; Copy-AppFiles; Write-Host '   done' }
+  if ($fixes | Where-Object Kind -eq 'guides') {
+    Step 'Official guides'
+    foreach ($g in $Guides.Keys) { try { Download $Guides[$g] (Join-Path $Target "portal\guides\$g") } catch { Write-Host "   (could not get $g`: $($_.Exception.Message))" -ForegroundColor Yellow } }
+  }
   foreach ($r in $remove) {
     try { Remove-Item -Force $r.Path -ErrorAction Stop; Write-Host "   removed $(Split-Path $r.Path -Leaf)" }
     catch { Write-Host "   could not remove $(Split-Path $r.Path -Leaf): close the kit (its library server has it open) and repair again" -ForegroundColor Yellow }
@@ -1776,13 +1790,8 @@ if ($Update) {
   }
 }
 
-# Official guides, on every kit (US government works, approved for public release): portal\guides, listed on the Books page
 Step 'Official guides (nuclear, chemical and biological emergencies)'
-$Guides = [ordered]@{
-  'FM-3-11.4-NBC-Protection-2003.pdf'                   = 'https://archive.org/download/MManuals/Fm3-11.4TacticsTechniquesAndProceduresForNbcProtection2003.pdf'
-  'FEMA-Nuclear-Detonation-Planning-Guidance-2022.pdf'  = 'https://www.fema.gov/sites/default/files/documents/fema_nuc-detonation-planning-guide.pdf'
-  'FEMA-Nuclear-Detonation-First-72-Hours-2023.pdf'     = 'https://remm.hhs.gov/fema_oet-72-hour-nuclear-detonation-response-guidance.pdf'
-}
+
 foreach ($g in $Guides.Keys) {
   try { Download $Guides[$g] (Join-Path $Target "portal\guides\$g") }
   catch { Write-Host "   (skipped $g for now: $($_.Exception.Message); Verify / repair or the next update will try again)" -ForegroundColor Yellow }
