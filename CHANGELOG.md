@@ -12,6 +12,10 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.27.2 (2026-11-08)
+
+- Help page: the print pack line mentions the Morse code chart, and the Morse line mentions both translators (text to dots and dashes, and back).
+
 ## 1.27.1 (2026-11-08)
 
 - **Text to Morse translator** in the Tools page's Morse code section: type a message and see it as dots and dashes (letters separated by spaces, words by /). **Copy** puts it on the clipboard as plain . and - so it pastes anywhere; the buttons flash or beep it. Accents are dropped (Ação becomes ACAO) and characters with no Morse code are listed as left out.
