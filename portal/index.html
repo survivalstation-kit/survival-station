@@ -212,6 +212,8 @@
       if (!confirm(t('off.ask'))) return;
       try {
         const r = await fetch('http://localhost:8091/shutdown', { method: 'POST' });
+        // 404: the helper still running is from before an update (it has no shutdown yet)
+        if (r.status === 404) { alert(t('off.old')); return; }
         if (!r.ok) throw new Error();
         document.querySelector('main').replaceChildren(Object.assign(document.createElement('h1'), { textContent: t('off.done') }));
       } catch { alert(t('off.fail')); }

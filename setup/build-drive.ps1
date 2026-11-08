@@ -1868,5 +1868,11 @@ if ($Target.Length -gt 3) {
 $script:prog.Item = 'finished'
 Show-Progress -Force -State 'done'
 Step "Done. Test it now while you still have internet: run $($Target)START-WINDOWS.bat"
+# a kit running from this target still runs its old programs: they only change on the next start
+$running = @(Get-CimInstance Win32_Process -Filter "Name='cmd.exe'" | Where-Object { "$($_.CommandLine)" -like "*$($Target)START-WINDOWS.bat*" })
+if ($running) {
+  Write-Host '   This kit is running right now: shut it down (a key in its black window) and start it again to use the new version.' -ForegroundColor Yellow
+  Write-Host '   Este kit está rodando agora: desligue (uma tecla na janela preta) e inicie de novo para usar a versão nova.' -ForegroundColor Yellow
+}
 Write-Host "   Log: $Log"
 try { Stop-Transcript | Out-Null } catch { }

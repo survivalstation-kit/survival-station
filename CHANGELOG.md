@@ -12,6 +12,9 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.24.1 (2026-11-08)
+
+- **"Could not reach the kit helper" after updating a running kit.** A kit updated while it runs keeps its old start window and helper until its next start, so the new **Shut down the kit** button could not work yet. The button now says exactly that (shut down with a key in the black window, then start again), and the builder says so at the end of an update when the kit is running.
 ## 1.24.0 (2026-11-08)
 
 - **Closing the start window with its X now shuts the kit down too** (Windows). Before, only a key press in it did: closing it with X left the AI, library, map, voice and secure servers running with no window to stop them. A small hidden watcher (setup/watch-kit.ps1) now closes them as soon as the start window closes, however it closes.
