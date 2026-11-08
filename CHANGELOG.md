@@ -12,6 +12,9 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.23.1 (2026-11-08)
+
+- **"Library: offline" right after starting, although it works.** The library server starts with the AI but takes a while to open big books from a USB stick, and the home page checked only once, for 2.5 seconds. It now waits up to 5 seconds, then keeps checking every 5 seconds and shows the library as running (and its tile as available) as soon as it answers.
 ## 1.23.0 (2026-11-08)
 
 - **Meshtastic (LoRa texting) on the Radio page**, in English and Portuguese: text messages and GPS positions with no phone network, no internet and no licence, passed from device to device. It covers:
