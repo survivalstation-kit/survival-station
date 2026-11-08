@@ -11,6 +11,7 @@ const SURVIVAL = (() => {
   const library = libHost + '/library';
   const tiles = secure ? location.origin + '/tiles' : `http://${host}:8092`;   // maps over 2 GB (map server)
   const voice = secure ? location.origin + '/voice' : `http://${host}:8093`;   // speech to text
+  const share = secure ? location.origin + '/share' : `http://${host}:8094`;   // shared map pins (setup\share-server.ps1)
 
   async function up(url, ms = 2500) {
     try {
@@ -166,5 +167,5 @@ const SURVIVAL = (() => {
   applyI18n();
   showVersion();
   showDisclaimer();
-  return { served, host, ai, secure, libHost, library, tiles, voice, up, store, lang, dict, t, isDark, lowPower, setLowPower, onKitComputer, loadData, saveData };
+  return { served, host, ai, secure, libHost, library, tiles, voice, share, up, store, lang, dict, t, isDark, lowPower, setLowPower, onKitComputer, loadData, saveData };
 })();

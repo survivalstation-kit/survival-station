@@ -110,6 +110,8 @@ set HTTPSPORT=8443
 if exist "tools\win\caddy\caddy.exe" if exist "%TEMP%\survival-Caddyfile" start "Secure server" /min "%~dp0tools\win\caddy\caddy.exe" run --config "%TEMP%\survival-Caddyfile" --adapter caddyfile
 rem ---- kit helper for the portal's "My kit" page (this computer only; stops when the AI stops)
 if exist "setup\kit-control.ps1" start "" /min "%SYS%\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "%~dp0setup\kit-control.ps1" -Root "%~dp0."
+rem ---- shared map pins for everyone on this Wi-Fi or hotspot (stops when the AI stops)
+if exist "setup\share-server.ps1" start "" /min "%SYS%\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "%~dp0setup\share-server.ps1" -Root "%~dp0."
 start "" http://localhost:%PORT%/
 echo.
 echo  READY / PRONTO:  http://localhost:%PORT%/

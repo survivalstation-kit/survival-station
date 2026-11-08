@@ -307,3 +307,11 @@ ul.ticks li:has(input:checked) label { color: var(--muted); text-decoration: lin
 .scale-cell.hi { background: color-mix(in srgb, var(--bad) 28%, var(--surface-2)); }
 
 @media print { .no-print, .checklists .copy-row, .checklists .toc { display: none !important; } ul.ticks li { break-inside: avoid; } }
+/* shared map pins (map.html) */
+.pin { font: inherit; font-size: 18px; line-height: 1; width: 34px; height: 34px; border-radius: 50%; border: 2px solid #fff; background: #555; color: #fff; box-shadow: 0 1px 5px rgba(0,0,0,.5); cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; }
+.pin-water { background: #1f6fd1; } .pin-shelter { background: #6b4fa0; } .pin-meet { background: #2f7a3a; } .pin-danger { background: #c0392b; }
+.pin-medical { background: #d81b60; } .pin-food { background: #b4641c; } .pin-power { background: #a88300; } .pin-other { background: #555; }
+.pin-form { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; width: 100%; }
+.pin-form select, .pin-form input { font: inherit; font-size: 15px; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; min-width: 0; }
+.pin-form input { flex: 1 1 200px; }
+.pin-form .muted { flex-basis: 100%; font-size: 13px; }

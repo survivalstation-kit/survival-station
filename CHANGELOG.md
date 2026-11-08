@@ -12,6 +12,11 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.29.0 (2026-11-08)
+
+- **Shared map pins**: tap a spot on the map, then **📍 Pin it for everyone**, and choose water, shelter, meeting point, danger, medical help, food, power or other, with a name and a note. Everyone connected to the kit, on the computer and on phones, sees the pins (refreshed every 15 seconds); tap a pin for its details or to remove it.
+  - A small new server, setup/share-server.ps1 (port 8094), keeps them on the kit in my-data\pins.json. It listens on the network so phones reach it, answers only the kit's own pages, checks every pin (position, type, lengths; at most 500), and stops with the kit. The secure address passes /share to it. Windows may ask once to allow "Windows PowerShell" through the firewall.
+  - Started by START-WINDOWS.bat; closed by the shutdown button, the start window and the next start. On Mac and Linux kits, or a page opened as a file, pins stay on that device.
 ## 1.28.0 (2026-11-08)
 
 - **✅ Checklists** (new page): go-bag (per person, 3 days), supplies at home (2 weeks), documents, and before you evacuate. Tick what is ready, add your own items, untick a list, print. Based on Ready.gov (FEMA), Red Cross and Defesa Civil lists.

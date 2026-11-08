@@ -240,9 +240,87 @@
       try { await navigator.clipboard.writeText(dec); btn.textContent = t('map.copied'); }
       catch { getSelection().selectAllChildren(big); }   // clipboard API needs a secure context; select the text instead
     };
-    panel.replaceChildren(label, big, small, btn);
+    const pinBtn = document.createElement('button'); pinBtn.className = 'btn'; pinBtn.type = 'button'; pinBtn.textContent = L('📍 Pin it for everyone', '📍 Marcar para todos');
+    pinBtn.onclick = () => pinForm(lat, lng, title);
+    panel.replaceChildren(label, big, small, btn, pinBtn);
   }
   map.on('click', e => showPoint(e.lngLat));
+
+  // ---- shared pins: water, shelter, meeting points, dangers... seen by everyone on the kit's Wi-Fi or hotspot
+  // (setup\share-server.ps1 on port 8094, or /share on the secure address). Without it (a Mac or Linux kit),
+  // pins stay on this device only.
+  const L = (en, pt) => SURVIVAL.lang === 'pt-BR' ? pt : en;
+  const PIN_TYPES = {
+    water: ['💧', L('Water', 'Água')], shelter: ['🏠', L('Shelter', 'Abrigo')], meet: ['🚩', L('Meeting point', 'Ponto de encontro')],
+    danger: ['⚠️', L('Danger', 'Perigo')], medical: ['➕', L('Medical help', 'Atendimento médico')], food: ['🍲', L('Food', 'Comida')],
+    power: ['🔌', L('Power / charging', 'Energia / carregar')], other: ['📌', L('Other', 'Outro')],
+  };
+  let shared = null;   // true: the share server answers; false: this device only
+  let pins = [];
+  const localPins = { get() { try { return JSON.parse(SURVIVAL.store('map-pins-local')) || []; } catch { return []; } }, set(p) { SURVIVAL.store('map-pins-local', JSON.stringify(p)); } };
+  async function call(path, body) {
+    const r = await fetch(SURVIVAL.share + path, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : { cache: 'no-store' });
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || r.status);
+    return (await r.json()).pins || [];
+  }
+  async function refresh() {
+    try { pins = await call('/pins'); shared = true; }
+    catch { shared = false; pins = localPins.get(); }
+    drawPins();
+  }
+  const markers = new Map();
+  function drawPins() {
+    const keep = new Set(pins.map(p => p.id));
+    for (const [id, m] of markers) if (!keep.has(id)) { m.remove(); markers.delete(id); }
+    for (const p of pins) {
+      if (markers.has(p.id)) continue;
+      const el = document.createElement('button'); el.type = 'button'; el.className = 'pin pin-' + p.type;
+      el.textContent = (PIN_TYPES[p.type] || PIN_TYPES.other)[0]; el.title = p.label || PIN_TYPES[p.type]?.[1] || '';
+      el.addEventListener('click', e => { e.stopPropagation(); pinInfo(p); });
+      markers.set(p.id, new maplibregl.Marker({ element: el }).setLngLat([p.lon, p.lat]).addTo(map));
+    }
+  }
+  function pinInfo(p) {
+    const [ico, kind] = PIN_TYPES[p.type] || PIN_TYPES.other;
+    const head = document.createElement('div'); head.className = 'coords'; head.textContent = `${ico} ${p.label || kind}`;
+    const info = document.createElement('div'); info.className = 'muted';
+    info.textContent = [kind, `${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}`, p.at ? new Date(p.at).toLocaleString(SURVIVAL.lang, { dateStyle: 'short', timeStyle: 'short' }) : ''].filter(Boolean).join(' · ');
+    const note = document.createElement('div'); note.textContent = p.note || '';
+    const del = document.createElement('button'); del.className = 'btn ghost'; del.type = 'button'; del.textContent = L('Remove this pin', 'Remover este marcador');
+    del.onclick = async () => {
+      if (!confirm(L('Remove this pin for everyone?', 'Remover este marcador para todos?'))) return;
+      try { if (shared) pins = await call('/pins/delete', { id: p.id }); else { pins = localPins.get().filter(x => x.id !== p.id); localPins.set(pins); } drawPins(); panel.replaceChildren(t('map.tap')); }
+      catch { alert(L('Could not remove it. Try again.', 'Não deu para remover. Tente de novo.')); }
+    };
+    panel.classList.remove('warn');
+    panel.replaceChildren(head, info, note, del);
+  }
+  function pinForm(lat, lng, title) {
+    const f = document.createElement('form'); f.className = 'pin-form';
+    const sel = document.createElement('select');
+    for (const [k, [ico, name]] of Object.entries(PIN_TYPES)) sel.add(new Option(`${ico} ${name}`, k));
+    const lab = document.createElement('input'); lab.maxLength = 60; lab.placeholder = L('Name (e.g. Clean water tap)', 'Nome (ex.: Torneira de água limpa)'); lab.value = title || '';
+    const note = document.createElement('input'); note.maxLength = 200; note.placeholder = L('Note (optional: hours, how many people…)', 'Observação (opcional: horário, quantas pessoas…)');
+    const go = document.createElement('button'); go.className = 'btn'; go.textContent = L('Save the pin', 'Salvar o marcador');
+    const cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'btn ghost'; cancel.textContent = L('Cancel', 'Cancelar');
+    cancel.onclick = () => showPoint({ lat, lng }, title);
+    const hint = document.createElement('div'); hint.className = 'muted';
+    hint.textContent = shared ? L('Everyone connected to this kit will see it.', 'Todos conectados a este kit vão ver.') : L('Only on this device: sharing works when the kit runs on a Windows computer.', 'Só neste aparelho: o compartilhamento funciona quando o kit roda num computador Windows.');
+    f.onsubmit = async e => {
+      e.preventDefault(); go.disabled = true;
+      const pin = { lat, lon: lng, type: sel.value, label: lab.value.trim(), note: note.value.trim() };
+      try {
+        if (shared) pins = await call('/pins', pin);
+        else { pins = [...localPins.get(), { ...pin, id: 'l' + Date.now(), at: Date.now() }]; localPins.set(pins); }
+        drawPins(); marker?.remove(); pinInfo(pins[pins.length - 1]);
+      } catch (err) { go.disabled = false; alert(String(err.message) === 'full' ? L('The map has too many pins: remove old ones first.', 'O mapa tem marcadores demais: remova os antigos antes.') : L('Could not save it. Try again.', 'Não deu para salvar. Tente de novo.')); }
+    };
+    f.append(sel, lab, note, go, cancel, hint);
+    panel.replaceChildren(f); lab.focus();
+  }
+  // pins list: shown and kept up to date while the map is open
+  await refresh();
+  setInterval(refresh, 15000);
 })();
 </script>
 </body>

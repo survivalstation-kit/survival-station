@@ -9,9 +9,10 @@
     /library/*  -> the library (kiwix-serve, started with --urlRootLocation /library)
     /tiles/*    -> the map server for maps over 2 GB
     /voice/*    -> speech to text (whisper-server, which listens on this computer only)
+    /share/*    -> shared map pins (setup\share-server.ps1)
     everything else -> the AI server, which also serves the portal pages
 #>
-param([string]$Kit, [int]$Port = 8080, [int]$LibPort = 8090, [int]$MapPort = 8092, [int]$VoicePort = 8093, [int]$HttpsPort = 8443,
+param([string]$Kit, [int]$Port = 8080, [int]$LibPort = 8090, [int]$MapPort = 8092, [int]$VoicePort = 8093, [int]$SharePort = 8094, [int]$HttpsPort = 8443,
       [string]$Caddyfile = (Join-Path $env:TEMP 'survival-Caddyfile'))
 
 $Kit = (Resolve-Path $Kit).Path.TrimEnd('\')
@@ -47,6 +48,9 @@ $sites {
 	}
 	handle_path /voice/* {
 		reverse_proxy 127.0.0.1:$VoicePort
+	}
+	handle_path /share/* {
+		reverse_proxy 127.0.0.1:$SharePort
 	}
 	handle {
 		reverse_proxy 127.0.0.1:$Port
