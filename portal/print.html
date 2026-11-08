@@ -55,12 +55,43 @@
   const plan = FAMILY_PLAN.load();
   const hasPlan = plan && (plan.people || []).concat(plan.contacts || []).some(r => Object.values(r).some(Boolean));
 
+  // one printed page: the alphabet, numbers, timing and the signals to know (the Tools page has the full guide)
+  function morseChart() {
+    const M = { A: '·–', B: '–···', C: '–·–·', D: '–··', E: '·', F: '··–·', G: '––·', H: '····', I: '··', J: '·–––', K: '–·–', L: '·–··', M: '––',
+      N: '–·', O: '–––', P: '·––·', Q: '––·–', R: '·–·', S: '···', T: '–', U: '··–', V: '···–', W: '·––', X: '–··–', Y: '–·––', Z: '––··',
+      1: '·––––', 2: '··–––', 3: '···––', 4: '····–', 5: '·····', 6: '–····', 7: '––···', 8: '–––··', 9: '––––·', 0: '–––––' };
+    const sec = document.createElement('section'); sec.className = 'card';
+    const h = document.createElement('h2'); h.textContent = L('Morse code', 'Código Morse');
+    const grid = document.createElement('div'); grid.className = 'morse-chart';
+    for (const [k, v] of Object.entries(M).sort(([a], [b]) => (/\d/.test(a) - /\d/.test(b)) || a.localeCompare(b))) {
+      const d = document.createElement('div'); const b = document.createElement('b'); b.textContent = k; const s = document.createElement('span'); s.textContent = v; d.append(b, s); grid.append(d);
+    }
+    const ul = document.createElement('ul');
+    for (const t of [
+      L('Dot = 1 unit, dash = 3. Gap inside a letter = 1, between letters = 3, between words = 7. Slow and even.', 'Ponto = 1 unidade, traço = 3. Pausa dentro da letra = 1, entre letras = 3, entre palavras = 7. Devagar e com ritmo igual.'),
+      L('SOS ···–––··· (one run, no gaps), pause, repeat. Three of anything (flashes, blasts, knocks) means distress.', 'SOS ···–––··· (sem pausa entre as letras), pausa, repita. Três de qualquer coisa (piscadas, apitos, batidas) significa socorro.'),
+      L('K –·– your turn; R ·–· received; ? ··––·· repeat; AR ·–·–· end of message; SK ···–·– end of contact; ········ error.', 'K –·– sua vez; R ·–· recebido; ? ··––·· repita; AR ·–·–· fim da mensagem; SK ···–·– fim do contato; ········ erro.'),
+      L('Trapped: tap a pipe or wall in groups of three, then listen. Torch: about 1 second per unit.', 'Preso: bata num cano ou parede em grupos de três e escute. Lanterna: cerca de 1 segundo por unidade.'),
+    ]) {
+      // the codes in the sentence, in the chart's font so dots and dashes are easy to count
+      const li = document.createElement('li');
+      for (const part of t.split(/([·–]{1,9})/)) {
+        if (/^[·–]+$/.test(part)) { const c = document.createElement('span'); c.className = 'morse-code'; c.textContent = part; li.append(c); }
+        else li.append(part);
+      }
+      ul.append(li);
+    }
+    sec.append(h, grid, ul);
+    return sec;
+  }
+
   // [id, label, ticked, () => nodes]
   const PARTS = [
     ['cards', L('Emergency cards (first aid, water, shelter, signals, radio)', 'Cartões de emergência (primeiros socorros, água, abrigo, sinais, rádio)'), true,
       async () => { const d = await page(SURVIVAL.dict._cards); return [...d.querySelectorAll('main section.card')].map(s => document.importNode(s, true)); }],
     ['radio', L('Radio: what to do now, and the frequencies', 'Rádio: o que fazer agora e as frequências'), true,
       async () => sectionsOf(await page('radio.html'), radioIds)],
+    ['morse', L('Morse code chart and key signals', 'Tabela do código Morse e sinais principais'), true, async () => [morseChart()]],
     ['plan', hasPlan ? L('Family plan (from this device)', 'Plano da família (deste aparelho)') : L('Family plan: none on this device yet (fill it in on the Family plan page)', 'Plano da família: ainda não há neste aparelho (preencha na página Plano da família)'), hasPlan,
       async () => [FAMILY_PLAN.printable(plan)]],
     ['start', L('How to start the kit', 'Como iniciar o kit'), true,

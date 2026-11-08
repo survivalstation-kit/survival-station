@@ -249,3 +249,10 @@ p.warn { color: var(--warn); font-weight: 600; }
 .fav-list li { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
 .fav-list code { overflow-wrap: anywhere; font-size: 14px; }
 .fav-list .copy-row .btn { padding: 6px 12px; font-size: 14px; }
+/* Morse code chart (tools.html) */
+.morse-chart { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 6px; margin: 8px 0 14px; }
+.morse-chart div { display: flex; align-items: baseline; gap: 8px; background: var(--surface-2); border-radius: 8px; padding: 6px 10px; }
+.morse-chart b { font-size: 18px; min-width: 1.2em; }
+.morse-chart span, .morse-code { font-family: var(--mono); font-size: 17px; letter-spacing: .05em; font-weight: 700; white-space: nowrap; }
+.morse-sig th { white-space: nowrap; }
+@media print { .morse-chart div { border: 1px solid #999; } }

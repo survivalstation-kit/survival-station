@@ -12,6 +12,17 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.27.0 (2026-11-08)
+
+- **Morse code guide** on the Tools page (English and Portuguese):
+  - the full chart: letters, numbers and common punctuation;
+  - timing (dot 1, dash 3, gaps 1 / 3 / 7) and sending slowly and evenly;
+  - how to send with a torch or phone light, whistle or horn, a mirror in the sun, a radio, and **when trapped** (tap a pipe or wall in groups of three, then listen; whistle before shouting);
+  - signals to know: SOS, K, R, AR, SK, ? and the error signal;
+  - how to read incoming Morse, a **translator** from dots and dashes to text, and **ear practice** (a random letter, then the answer);
+  - learning tips.
+- **SOS is now sent as one run** (···–––···, no gaps between the letters), as the distress signal should be, by the flash and beep buttons.
+- The **print pack** has a one-page **Morse code chart** with the key signals, ticked by default. The Help page mentions the guide.
 ## 1.26.1 (2026-11-08)
 
 - **Pluggable transports explained** on the Private browsing page (English and Portuguese): what obfs4, WebTunnel, Snowflake and meek each disguise Tor as, which to try first, how to get a private obfs4 bridge (@GetBridgesBot, frontdesk@torproject.org) in the hardest places, and that they are already built into Tor Browser. Checked against the Tor Browser manual. The Help page mentions them.

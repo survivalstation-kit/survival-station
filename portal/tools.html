@@ -26,7 +26,7 @@
   <p class="lede" data-t="lede"></p>
   <nav class="toc">
     <a href="#cpr" data-t="cpr.h"></a><a href="#water" data-t="water.h"></a><a href="#supplies" data-t="sup.h"></a>
-    <a href="#signal" data-t="sig.h"></a><a href="#sun" data-t="sun.h"></a>
+    <a href="#signal" data-t="sig.h"></a><a href="#morse" data-t="mo.h"></a><a href="#sun" data-t="sun.h"></a>
   </nav>
 
   <section class="card" id="cpr">
@@ -108,6 +108,55 @@
     <p class="muted" data-t="sig.note"></p>
   </section>
 
+  <section class="card" id="morse">
+    <h2 data-t="mo.h"></h2>
+    <p data-t="mo.intro"></p>
+    <h3 data-t="mo.chart"></h3>
+    <div class="morse-chart" id="mo-chart"></div>
+    <h3 data-t="mo.timing"></h3>
+    <ul>
+      <li data-t="mo.t1"></li>
+      <li data-t="mo.t2"></li>
+      <li data-t="mo.t3"></li>
+      <li data-t="mo.t4"></li>
+    </ul>
+    <h3 data-t="mo.send"></h3>
+    <ul>
+      <li data-t="mo.s1"></li>
+      <li data-t="mo.s2"></li>
+      <li data-t="mo.s3"></li>
+      <li data-t="mo.s4"></li>
+      <li data-t="mo.s5"></li>
+    </ul>
+    <h3 data-t="mo.sig"></h3>
+    <table class="morse-sig" id="mo-sig"></table>
+    <h3 data-t="mo.read"></h3>
+    <ol>
+      <li data-t="mo.r1"></li>
+      <li data-t="mo.r2"></li>
+      <li data-t="mo.r3"></li>
+    </ol>
+    <h3 data-t="mo.decode"></h3>
+    <div class="form">
+      <label><span data-t="mo.decode.in"></span> <input type="text" id="mo-in" maxlength="200" placeholder="... --- ...  /  .... . .-.. .--." autocomplete="off" spellcheck="false"></label>
+    </div>
+    <p class="result" id="mo-out"></p>
+    <h3 data-t="mo.practice"></h3>
+    <p data-t="mo.practice.how"></p>
+    <div class="buttons">
+      <button class="btn" type="button" id="mo-play" data-t="mo.practice.play"></button>
+      <button class="btn ghost" type="button" id="mo-again" data-t="mo.practice.again" hidden></button>
+      <button class="btn ghost" type="button" id="mo-show" data-t="mo.practice.show" hidden></button>
+    </div>
+    <p class="result" id="mo-answer"></p>
+    <h3 data-t="mo.learn"></h3>
+    <ul>
+      <li data-t="mo.l1"></li>
+      <li data-t="mo.l2"></li>
+      <li data-t="mo.l3"></li>
+    </ul>
+  </section>
+
   <section class="card" id="sun">
     <h2 data-t="sun.h"></h2>
     <div class="form">
@@ -168,6 +217,35 @@
       'sig.message': 'Message in Morse code', 'sig.mflash': 'Flash the message', 'sig.mbeep': 'Beep the message',
       'sig.note': 'Turn the volume and brightness all the way up. Tap the button again, or tap the white screen, to stop. A real whistle, mirror or torch carries much farther than a phone.',
       'sig.tapstop': 'Tap to stop', 'sig.stop': '⏹ Stop',
+      'mo.h': 'Morse code', 'mo.intro': 'Morse code spells letters with short and long signals: a dot (·, "dit") and a dash (–, "dah"). Anything that can be short or long works: a torch, a whistle, a car horn, a mirror flash, knocks on a wall or pipe, or a radio. It reaches farther than a voice and gets through noise.',
+      'mo.chart': 'The alphabet and numbers', 'mo.timing': 'Timing: the rhythm is the code',
+      'mo.t1': 'A dot is 1 unit long; a dash is 3 units (three times a dot).',
+      'mo.t2': 'Between the dots and dashes of one letter: 1 unit of silence.',
+      'mo.t3': 'Between letters: 3 units. Between words: 7 units.',
+      'mo.t4': 'Go slowly and evenly: a clear slow message beats a fast unreadable one. With a torch, about one second per unit is easy to read from far away.',
+      'mo.send': 'How to send',
+      'mo.s1': 'Torch or phone light: cover and uncover it, or switch it on and off, pointed at the person, plane or boat. The 💡 buttons above do it for you.',
+      'mo.s2': 'Whistle or horn: short blast = dot, long blast = dash. Sound carries far at night and in fog.',
+      'mo.s3': 'Trapped (rubble, a collapsed building): tap on a pipe or wall with a stone or metal object so rescuers can find you. Knocks can\'t be long, so tap SOS as three quick, three slow, three quick, or simply groups of three knocks, then stop and listen. Use a whistle if you have one; shout only as a last resort, to save breath and avoid breathing dust.',
+      'mo.s4': 'Mirror in the sun: aim the flash at the target through a V made with your fingers; a mirror flash can be seen many kilometres away.',
+      'mo.s5': 'Radio: on a radio that has a "CW" mode, or by keying the transmit button on and off. Use only where you are allowed to transmit (see the Radio page), except in a real emergency.',
+      'mo.sig': 'Signals worth knowing',
+      'mo.sig.sos': 'Distress: "I need help". Sent as one run with no gaps between letters, then a pause, again and again.',
+      'mo.sig.k': '"Over": your turn to answer.', 'mo.sig.r': '"Received": I got your message.', 'mo.sig.ar': 'End of message.',
+      'mo.sig.sk': 'End of contact (goodbye).', 'mo.sig.q': '"Repeat, I didn\'t understand".', 'mo.sig.err': 'Error: I made a mistake, the last word starts again (8 dots).',
+      'mo.read': 'How to read incoming Morse',
+      'mo.r1': 'Write down what you see or hear: a dot for each short signal and a dash for each long one, a space when there is a pause between letters, and a / for a longer pause between words.',
+      'mo.r2': 'Look each group up in the chart above, or type it in the translator below.',
+      'mo.r3': 'Answer with R (received) or ? (repeat). Repeated groups of three (three flashes, three blasts) mean distress.',
+      'mo.decode': 'Translator: dots and dashes to text', 'mo.decode.in': 'Dots and dashes (space between letters, / between words)',
+      'mo.decode.unknown': 'unknown code',
+      'mo.practice': 'Practice by ear', 'mo.practice.how': 'Press Play, listen to a letter, say what you think it is, then show the answer. Learning the sound of each letter (not counting dots) is the fastest way.',
+      'mo.practice.play': '▶ Play a letter', 'mo.practice.again': '🔁 Hear it again', 'mo.practice.show': '👁 Show the answer',
+      'mo.practice.answer': 'It was {l}: {c}',
+      'mo.learn': 'Learning tips',
+      'mo.l1': 'Start with E (·), T (–), A (·–), N (–·), I (··), M (––), S (···) and O (–––): they make SOS and many common words.',
+      'mo.l2': 'Say it aloud: "dit" for a dot and "dah" for a dash. SOS sounds like "di-di-dit dah-dah-dah di-di-dit".',
+      'mo.l3': 'Practise ten minutes a day with family; agree a few signals in advance (for example: one long flash = "I\'m OK", SOS = "come now").',
       'sun.h': 'Sun, directions and daylight', 'sun.lat': 'Latitude', 'sun.lon': 'Longitude', 'sun.gps': '📍 Use this device\'s GPS',
       'sun.from': 'From the last point on the Map: {p}', 'sun.none': 'Tap a point on the Map (or type the coordinates) to see the sun times there.',
       'sun.rise': 'Sunrise', 'sun.set': 'Sunset', 'sun.noon': 'Sun highest (solar noon)', 'sun.daylight': 'Daylight', 'sun.now': 'Sun now',
@@ -211,6 +289,35 @@
       'sig.message': 'Mensagem em código Morse', 'sig.mflash': 'Piscar a mensagem', 'sig.mbeep': 'Bipar a mensagem',
       'sig.note': 'Ponha volume e brilho no máximo. Toque no botão de novo, ou na tela branca, para parar. Um apito de verdade, espelho ou lanterna alcança muito mais longe que um celular.',
       'sig.tapstop': 'Toque para parar', 'sig.stop': '⏹ Parar',
+      'mo.h': 'Código Morse', 'mo.intro': 'O código Morse escreve letras com sinais curtos e longos: o ponto (·, "di") e o traço (–, "dá"). Serve qualquer coisa que possa ser curta ou longa: lanterna, apito, buzina, reflexo de espelho, batidas numa parede ou cano, ou rádio. Alcança mais longe que a voz e passa pelo barulho.',
+      'mo.chart': 'O alfabeto e os números', 'mo.timing': 'Tempo: o ritmo é o código',
+      'mo.t1': 'O ponto dura 1 unidade; o traço dura 3 unidades (três vezes o ponto).',
+      'mo.t2': 'Entre os pontos e traços de uma mesma letra: 1 unidade de silêncio.',
+      'mo.t3': 'Entre letras: 3 unidades. Entre palavras: 7 unidades.',
+      'mo.t4': 'Vá devagar e com ritmo igual: uma mensagem lenta e clara vale mais que uma rápida que ninguém entende. Com lanterna, cerca de um segundo por unidade é fácil de ler de longe.',
+      'mo.send': 'Como transmitir',
+      'mo.s1': 'Lanterna ou luz do celular: cubra e descubra, ou ligue e desligue, apontando para a pessoa, o avião ou o barco. Os botões 💡 acima fazem isso para você.',
+      'mo.s2': 'Apito ou buzina: toque curto = ponto, toque longo = traço. O som vai longe à noite e na neblina.',
+      'mo.s3': 'Preso (escombros, desabamento): bata num cano ou parede com uma pedra ou objeto de metal para os socorristas acharem você. Batidas não podem ser longas, então bata o SOS como três rápidas, três lentas, três rápidas, ou simplesmente grupos de três batidas, depois pare e escute. Use um apito se tiver; grite só em último caso, para poupar o fôlego e não respirar poeira.',
+      'mo.s4': 'Espelho no sol: mire o reflexo no alvo por um V feito com os dedos; o brilho de um espelho é visto a muitos quilômetros.',
+      'mo.s5': 'Rádio: num rádio com modo "CW", ou apertando e soltando o botão de transmitir. Use só onde é permitido transmitir (veja a página Rádio), salvo numa emergência real.',
+      'mo.sig': 'Sinais que vale saber',
+      'mo.sig.sos': 'Socorro: "preciso de ajuda". Mandado numa sequência só, sem pausa entre as letras, depois uma pausa, e de novo.',
+      'mo.sig.k': '"Câmbio": sua vez de responder.', 'mo.sig.r': '"Recebido": entendi sua mensagem.', 'mo.sig.ar': 'Fim da mensagem.',
+      'mo.sig.sk': 'Fim do contato (tchau).', 'mo.sig.q': '"Repita, não entendi".', 'mo.sig.err': 'Erro: errei, a última palavra recomeça (8 pontos).',
+      'mo.read': 'Como ler Morse recebido',
+      'mo.r1': 'Anote o que vê ou ouve: um ponto para cada sinal curto e um traço para cada longo, um espaço quando houver pausa entre letras e uma / para a pausa maior entre palavras.',
+      'mo.r2': 'Procure cada grupo na tabela acima, ou digite no tradutor abaixo.',
+      'mo.r3': 'Responda com R (recebido) ou ? (repita). Grupos de três repetidos (três piscadas, três apitos) significam socorro.',
+      'mo.decode': 'Tradutor: pontos e traços para texto', 'mo.decode.in': 'Pontos e traços (espaço entre letras, / entre palavras)',
+      'mo.decode.unknown': 'código desconhecido',
+      'mo.practice': 'Treinar de ouvido', 'mo.practice.how': 'Aperte Tocar, escute uma letra, diga qual acha que é e veja a resposta. Aprender o som de cada letra (sem contar pontos) é o jeito mais rápido.',
+      'mo.practice.play': '▶ Tocar uma letra', 'mo.practice.again': '🔁 Ouvir de novo', 'mo.practice.show': '👁 Ver a resposta',
+      'mo.practice.answer': 'Era {l}: {c}',
+      'mo.learn': 'Dicas para aprender',
+      'mo.l1': 'Comece por E (·), T (–), A (·–), N (–·), I (··), M (––), S (···) e O (–––): elas formam o SOS e muitas palavras comuns.',
+      'mo.l2': 'Fale em voz alta: "di" para o ponto e "dá" para o traço. SOS soa como "di-di-di dá-dá-dá di-di-di".',
+      'mo.l3': 'Treine dez minutos por dia com a família; combinem alguns sinais antes (por exemplo: uma piscada longa = "estou bem", SOS = "venha agora").',
       'sun.h': 'Sol, direções e luz do dia', 'sun.lat': 'Latitude', 'sun.lon': 'Longitude', 'sun.gps': '📍 Usar o GPS deste aparelho',
       'sun.from': 'Do último ponto no Mapa: {p}', 'sun.none': 'Toque num ponto do Mapa (ou digite as coordenadas) para ver os horários do sol ali.',
       'sun.rise': 'Nascer do sol', 'sun.set': 'Pôr do sol', 'sun.noon': 'Sol mais alto (meio-dia solar)', 'sun.daylight': 'Luz do dia', 'sun.now': 'Sol agora',
@@ -314,7 +421,11 @@
   // ------------------------------------------------------------------ signals
   const MORSE = { a: '.-', b: '-...', c: '-.-.', d: '-..', e: '.', f: '..-.', g: '--.', h: '....', i: '..', j: '.---', k: '-.-', l: '.-..', m: '--',
     n: '-.', o: '---', p: '.--.', q: '--.-', r: '.-.', s: '...', t: '-', u: '..-', v: '...-', w: '.--', x: '-..-', y: '-.--', z: '--..',
-    0: '-----', 1: '.----', 2: '..---', 3: '...--', 4: '....-', 5: '.....', 6: '-....', 7: '--...', 8: '---..', 9: '----.' };
+    0: '-----', 1: '.----', 2: '..---', 3: '...--', 4: '....-', 5: '.....', 6: '-....', 7: '--...', 8: '---..', 9: '----.',
+    '.': '.-.-.-', ',': '--..--', '?': '..--..', '/': '-..-.', '=': '-...-', '@': '.--.-.' };
+  // one code as on/off steps, with no letter gaps (SOS and the other procedure signals are sent as one run)
+  const runSteps = code => [...code].flatMap((s, i) => [...(i ? [[false, 1]] : []), [true, s === '.' ? 1 : 3]]);
+  const pretty = code => code.replace(/\./g, '·').replace(/-/g, '–');
   // on/off steps in units: dot 1, dash 3, gap in a letter 1, between letters 3, between words 7
   function morseSteps(text) {
     const steps = [];
@@ -365,7 +476,7 @@
     next();
   }
   flash.addEventListener('click', () => running?.stop());
-  const SOS = morseSteps('sos');
+  const SOS = runSteps('...---...');   // the distress signal: one run, no gaps between the letters
   $('b-flash').onclick = e => play(SOS, 250, true, e.currentTarget, 12);
   $('b-sosbeep').onclick = e => play(SOS, 150, false, e.currentTarget, 14);
   // three long blasts, then a pause
@@ -374,6 +485,49 @@
   $('m-text').addEventListener('input', showCode); showCode();
   $('b-mflash').onclick = e => play(morseSteps($('m-text').value), 300, true, e.currentTarget, 14);
   $('b-mbeep').onclick = e => play(morseSteps($('m-text').value), 120, false, e.currentTarget, 14);
+
+  // ------------------------------------------------------------------ Morse code: chart, signals, translator, practice
+  const chart = $('mo-chart');
+  for (const k of [...'abcdefghijklmnopqrstuvwxyz0123456789', '.', ',', '?', '/']) {
+    const d = document.createElement('div');
+    const b = document.createElement('b'); b.textContent = k.toUpperCase();
+    const c = document.createElement('span'); c.textContent = pretty(MORSE[k]);
+    d.append(b, c); chart.append(d);
+  }
+  const SIGNALS = [['SOS', '...---...', 'mo.sig.sos'], ['K', '-.-', 'mo.sig.k'], ['R', '.-.', 'mo.sig.r'], ['AR', '.-.-.', 'mo.sig.ar'],
+                   ['SK', '...-.-', 'mo.sig.sk'], ['?', '..--..', 'mo.sig.q'], ['HH', '........', 'mo.sig.err']];
+  for (const [name, code, key] of SIGNALS) {
+    const tr = document.createElement('tr');
+    const th = document.createElement('th'); th.textContent = name;
+    const td1 = document.createElement('td'); td1.className = 'morse-code'; td1.textContent = pretty(code);
+    const td2 = document.createElement('td'); td2.textContent = tt(key);
+    tr.append(th, td1, td2); $('mo-sig').append(tr);
+  }
+  // dots and dashes to text (also accepts · – _ and the long dash)
+  const BACK = Object.fromEntries(Object.entries(MORSE).map(([k, v]) => [v, k.toUpperCase()]));
+  const decode = () => {
+    const s = $('mo-in').value.replace(/[·•*]/g, '.').replace(/[–—_−]/g, '-').trim();
+    const text = !s ? '' : s.split(/\s*[\/|]\s*|\s{3,}/).map(w => w.split(/\s+/).filter(Boolean).map(c => BACK[c] || (c === '...---...' ? 'SOS' : '¿')).join('')).join(' ');
+    $('mo-out').textContent = text + (text.includes('¿') ? `   (¿ = ${tt('mo.decode.unknown')})` : '');
+  };
+  $('mo-in').addEventListener('input', decode);
+  // ear practice: a random letter, beeped once at a comfortable speed
+  let quiz = '';
+  $('mo-play').onclick = () => {
+    if (running) running.stop();
+    const pool = 'etianmsodrkugwhvflpjbxcyzq';
+    quiz = pool[Math.floor(Math.random() * pool.length)];
+    $('mo-answer').textContent = ''; $('mo-again').hidden = false; $('mo-show').hidden = false;
+    playOnce(morseSteps(quiz));
+  };
+  // play once (the shared player repeats; stop it after one round)
+  function playOnce(steps) {
+    let i = 0;
+    const next = () => { if (i === steps.length) { tone(false); return; } const [on, units] = steps[i++]; tone(on); setTimeout(next, units * 110); };
+    next();
+  }
+  $('mo-again').onclick = () => quiz && playOnce(morseSteps(quiz));
+  $('mo-show').onclick = () => { if (quiz) $('mo-answer').textContent = tt('mo.practice.answer', { l: quiz.toUpperCase(), c: pretty(MORSE[quiz]) }); };
 
   // ------------------------------------------------------------------ sun
   // sun position: low-precision formulas from the Astronomical Almanac (about a minute for sunrise times)
