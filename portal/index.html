@@ -33,8 +33,11 @@
     <span class="pill" id="st-lib" data-i18n="st.lib.checking"></span>
     <span class="pill" id="st-batt" hidden></span>
     <button class="pill power" type="button" id="st-power"></button>
+    <button class="pill power" type="button" id="st-upd"></button>
   </div>
   <p class="muted" id="power-note" hidden></p>
+  <div class="notice" id="ai-start" hidden></div>
+  <div class="notice" id="upd-note" hidden><span id="upd-text"></span> <button class="btn" type="button" id="upd-go" hidden></button></div>
 
   <h2 data-i18n="home.start">Start here</h2>
   <div class="grid">
@@ -113,6 +116,33 @@
   if (!ai) { $('tile-ai').classList.add('off'); $('tile-map').classList.add('off'); }
   if (!lib) $('tile-lib').classList.add('off');
 
+  // AI not running: a page can't start programs (browsers forbid it), so say how, and keep checking;
+  // once the AI answers, go to (or reload) the kit's address so everything works
+  if (!ai) {
+    const box = $('ai-start');
+    if (SURVIVAL.served) box.textContent = t('ai.loading');   // the AI server sent this page: it is still loading
+    else {
+      // opened as a file: the kit folder is the one above portal\
+      let folder = decodeURIComponent(location.pathname).replace(/\/portal\/[^/]*$/, '');
+      const win = /^\/[A-Za-z]:/.test(folder);
+      if (win) folder = folder.slice(1).replace(/\//g, '\\');
+      const h = document.createElement('h3'); h.textContent = t('ai.start.t');
+      const ol = document.createElement('ol');
+      for (const k of ['ai.start.1', 'ai.start.2', 'ai.start.3']) { const li = document.createElement('li'); li.innerHTML = t(k); ol.append(li); }
+      const path = document.createElement('p'); path.className = 'qr-url'; path.textContent = folder || '?';
+      const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'btn'; copy.textContent = t('ai.start.copy');
+      copy.onclick = async () => { try { await navigator.clipboard.writeText(folder); copy.textContent = t('ai.start.copied'); } catch { getSelection().selectAllChildren(path); } };
+      const wait = document.createElement('p'); wait.className = 'muted'; wait.textContent = t('ai.start.wait');
+      box.append(h, ol, path, copy, wait);
+    }
+    box.hidden = false;
+    const timer = setInterval(async () => {
+      if (!await SURVIVAL.up(SURVIVAL.ai + '/health')) return;
+      clearInterval(timer);
+      if (SURVIVAL.served) location.reload(); else location.href = SURVIVAL.ai + '/';
+    }, 5000);
+  }
+
   try {
     const files = await (await fetch('docs/index.json', { cache: 'no-store' })).json();
     if (files.length) {
@@ -132,6 +162,36 @@
 
   // Survival-Data is optional (not on every kit): no tile pointing at a missing page
   if (SURVIVAL.served) fetch('survival-data/index.html', { method: 'HEAD' }).then(r => { if (!r.ok) $('tile-sd').hidden = true; }).catch(() => {});
+
+  // updates: compare with the latest release on GitHub (needs internet); "Update now" opens the builder's
+  // "Check for updates" on the computer running the kit, through the kit helper (setup\kit-control.ps1)
+  const newer = (a, b) => { const x = a.split('.').map(Number), y = b.split('.').map(Number); for (let i = 0; i < 3; i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0); return false; };
+  const onThisComputer = /^(localhost|127\.)/.test(location.hostname);
+  const updNote = (text, go) => { $('upd-text').textContent = text; $('upd-go').hidden = !go; $('upd-note').hidden = false; };
+  $('st-upd').textContent = t('upd.check');
+  $('upd-go').textContent = t('upd.get');
+  $('st-upd').onclick = async () => {
+    $('st-upd').textContent = t('upd.checking'); $('st-upd').classList.remove('ok', 'bad'); $('upd-note').hidden = true;
+    let v = '';
+    const mine = window.SURVIVAL_VERSION?.version || '0.0.0';
+    try {
+      const r = await fetch('https://api.github.com/repos/survivalstation-kit/survival-station/releases/latest', { cache: 'no-store' });
+      if (r.ok) v = ((await r.json()).tag_name || '').replace(/^v/, '');
+    } catch { }
+    $('st-upd').textContent = t('upd.check');
+    if (!v) return updNote(t('upd.offline'));
+    if (!newer(v, mine)) { $('st-upd').textContent = t('upd.ok').replace('{v}', mine); $('st-upd').classList.add('ok'); return; }
+    $('st-upd').classList.add('bad');
+    const msg = t('upd.new').replace('{n}', v).replace('{v}', mine);
+    if (onThisComputer && SURVIVAL.served) updNote(msg, true);
+    else updNote(msg + ' ' + t(SURVIVAL.served ? 'upd.phone' : 'upd.file'));
+  };
+  $('upd-go').onclick = async () => {
+    try {
+      const r = await fetch('http://localhost:8091/open?action=updates', { method: 'POST' });
+      updNote(t(r.ok ? 'upd.opened' : 'upd.nohelper'));
+    } catch { updNote(t('upd.nohelper')); }
+  };
 
   // low power switch, and the battery where the browser tells it (on the computer itself)
   const power = () => {

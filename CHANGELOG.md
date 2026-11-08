@@ -12,6 +12,16 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.22.0 (2026-11-08)
+
+- **Check for updates on the home page.** A new **🔄 Check for updates** button next to the status pills compares the kit with the latest release on GitHub (needs internet):
+  - up to date: it says so, with the version;
+  - newer version out: on the computer running the kit, **Update now** opens the builder's "Check for updates" there; on a phone, it says how to update from the computer;
+  - no internet: it says updates need a connection, and that the kit works fine without them.
+- **When the AI is not running, the home page says how to start it.** Browsers do not let a page start programs, so when the home page is opened as a file (the kit not started), it shows:
+  - the kit's folder, with a button to copy its path;
+  - which start file to double-click (Windows, Mac, Linux), and what to do if it says "No AI found";
+  - it keeps checking, and switches to the full kit by itself as soon as the AI answers.
 ## 1.21.1 (2026-11-08)
 
 - **Downloads from GitHub no longer stop the build when GitHub's download link fails.** GitHub's normal link for some big files (for example the PocketPal AI app) can answer "504 Gateway Time-out" for a while, which ended the build with "curl error 22". The builder now fetches the same file through GitHub's API route instead, with a fresh address on every retry.
