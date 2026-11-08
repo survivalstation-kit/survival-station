@@ -12,6 +12,16 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.34.0 (2026-11-08)
+
+- **MAKE-BOOTABLE.bat now offers several systems on one drive** (Ventoy lists each in its boot menu; pick which to start). Besides Linux Mint, optional and all free, each downloaded from its official site and checked against its official SHA-256:
+  - **SystemRescue** - repair a broken Windows/Linux start-up, recover deleted files, and **reset the password of a local Windows account you are locked out of** (includes chntpw).
+  - **Rescuezilla** - back up and restore a whole disk with simple screens.
+  - **Memtest86+** - test the computer's memory (RAM) for faults.
+  - **antiX** - a very light Linux for old or slow computers.
+  - **Kali Linux** - a security-testing system, **for checking the security of your own network and devices, or ones you have written permission to test** (for example your own Wi-Fi). Using it against anything else is illegal and is the user's responsibility; the kit's "use at your own risk" terms apply.
+  - Each resolver finds the project's current version and checksum at run time, so downloads stay up to date. Run MAKE-BOOTABLE.bat again to add or update systems; nothing is erased once the drive is bootable.
+- Help, the on-drive `ISO\READ-ME.txt` and `THIRD-PARTY-NOTICES.md` updated, with the authorised-use note for Kali.
 ## 1.33.1 (2026-11-08)
 
 - **Verify / repair now checks the official guides** (`portal\guides`) and downloads any that are missing. Before, only a build or an update fetched them, so a kit that was only verified said "0 to fix" without them.
