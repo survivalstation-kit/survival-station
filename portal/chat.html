@@ -65,21 +65,72 @@ useLib.onchange = () => SURVIVAL.store('uselib', useLib.checked ? '1' : '0');
 const handed = new URLSearchParams(location.search).get('q');
 if (handed) input.value = handed;
 
-// ---------------------------------------------------------------- library lookup (RAG)
-// kiwix-serve full-text search -> fetch the best articles -> keep the paragraphs that match the question
+// ---------------------------------------------------------------- what the AI reads before answering
+// 1. the kit's own emergency card for the question (checked advice, with the right doses),
+// 2. the focused books (medical encyclopedias, the water/medicine/post-disaster guides, Appropedia),
+// 3. the whole library only when those have nothing. Every article must really be about the question:
+// the complete Wikipedia matches almost any set of words (a song for "bleeding", oils for "bleach").
 
 const STOP = new Set(t('chat.stop.words').split(' '));
 const LIB_LANGS = [dict._kiwix, ...Object.values(I18N).map(d => d._kiwix).filter(k => k !== dict._kiwix)];
 const MAX_SOURCES = 3, CHARS_PER_SOURCE = 1400;
+const FOCUS = /^(mdwiki|wikipedia_[a-z]+_medicine|zimgit-|appropedia|energypedia|wikem)/;   // library book names
 
 function keywords(q) {
   return [...new Set(q.toLowerCase().normalize('NFC').split(/[^\p{L}\p{N}]+/u)
     .filter(w => w.length > 2 && !STOP.has(w)))];
 }
+// word stems, so "bleeding" also finds "bleed" and "purify" finds "purifying"; a stem must start a word
+// ("arm" isn't in "warm", "thin(k)" isn't in "anything")
+const stemsOf = words => words.map(w => w.slice(0, Math.max(4, w.length - 2)));
+const stemRes = new Map();
+const stemRe = s => stemRes.get(s) || stemRes.set(s, new RegExp('[^\\p{L}\\p{N}]' + s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'u')).get(s);
+const hitsIn = (text, stems) => { const low = ' ' + text.toLowerCase(); return stems.filter(s => stemRe(s).test(low)).length; };
 
-async function kiwixSearch(words, lang, signal) {
-  const url = `${SURVIVAL.library}/search?format=xml&pageLength=${MAX_SOURCES + 2}`
-    + `&books.filter.lang=${lang}&pattern=${encodeURIComponent(words.join(' '))}`;
+// the kit's emergency card section that the question is about, if any
+let cardSections = null;
+function cards() {
+  cardSections = cardSections || fetch(dict._cards).then(r => r.text()).then(html => {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    doc.querySelectorAll('th, td, li, p, h3').forEach(e => e.append(' '));
+    // data-also: other words people use for the card's subject ("massagem cardíaca" for RCP)
+    return [...doc.querySelectorAll('section.card[id]')].map(s => ({
+      id: s.id, title: s.querySelector('h2')?.textContent.trim() || '', also: s.dataset.also || '', text: s.textContent.replace(/\s+/g, ' ').trim() }));
+  }).catch(() => []);
+  return cardSections;
+}
+async function findCard(words) {
+  const stems = stemsOf(words);
+  let best = null;
+  for (const c of await cards()) {
+    const inTitle = hitsIn(c.title + ' ' + c.also, stems), inText = hitsIn(c.text + ' ' + c.also, stems);
+    // the card's title names the subject ("flood"), or the card covers most of the question
+    if ((inTitle >= 1 && inText >= 1) || inText >= Math.max(3, Math.ceil(stems.length * 0.75))) {
+      // a title that is about the question wins: "Severe bleeding" over "Shock (after injury, bleeding, burns)"
+      const titleWords = c.title.split(/[^\p{L}\p{N}]+/u).filter(w => w.length > 2).length || 1;
+      const score = inTitle / titleWords * 10 + inTitle * 2 + inText;
+      if (!best || score > best.score) best = { c, score };
+    }
+  }
+  if (!best) return null;
+  // the card's subject (its title before "—" or "(", plus its other words): library articles must name it
+  const subject = stemsOf(keywords(best.c.title.split(/[—(]/)[0] + ' ' + best.c.also));
+  return { title: `${t('chat.card')}: ${best.c.title}`, card: true, subject, link: `${dict._cards}#${best.c.id}`, text: best.c.text.slice(0, CHARS_PER_SOURCE) };
+}
+
+// the library's books, to search the focused ones first
+let catalog = null;
+function libraryBooks() {
+  catalog = catalog || fetch(`${SURVIVAL.library}/catalog/v2/entries?count=-1`).then(r => r.text()).then(x => {
+    const xml = new DOMParser().parseFromString(x, 'application/xml');
+    return [...xml.querySelectorAll('entry')].map(e => ({ name: e.querySelector('name')?.textContent || '', lang: e.querySelector('language')?.textContent || '' }));
+  }).catch(() => []);
+  return catalog;
+}
+
+async function kiwixSearch(words, lang, signal, book) {
+  const url = `${SURVIVAL.library}/search?format=xml&pageLength=5&books.filter.lang=${lang}`
+    + (book ? `&books.filter.name=${encodeURIComponent(book)}` : '') + `&pattern=${encodeURIComponent(words.join(' '))}`;
   const res = await fetch(url, { signal });
   if (!res.ok) return [];
   const xml = new DOMParser().parseFromString(await res.text(), 'application/xml');
@@ -89,20 +140,47 @@ async function kiwixSearch(words, lang, signal) {
     book: it.querySelector('book > title')?.textContent.trim(),
   })).filter(r => r.link);
 }
-
-async function findArticles(question, signal) {
-  let words = keywords(question);
-  if (!words.length) return [];
-  for (const lang of LIB_LANGS) {
-    // fewer words = more hits; drop the shortest words until something matches
-    let w = [...words].sort((a, b) => b.length - a.length).slice(0, 5);
-    while (w.length) {
-      const hits = await kiwixSearch(w, lang, signal).catch(() => []);
-      if (hits.length) return hits;
-      w = w.slice(0, -1);
-    }
+// fewer words = more hits: drop the shortest words until something matches
+async function searchWords(words, lang, signal, book) {
+  let w = [...words].sort((a, b) => b.length - a.length).slice(0, 5);
+  while (w.length) {
+    const hits = await kiwixSearch(w, lang, signal, book).catch(() => []);
+    if (hits.length) return hits;
+    w = w.slice(0, -1);
   }
   return [];
+}
+
+// what the AI reads: the matching card, then up to MAX_SOURCES relevant articles
+async function findSources(question, withLibrary, signal, onReading) {
+  const words = keywords(question);
+  if (!words.length) return [];
+  const out = [];
+  const card = await findCard(words);
+  if (card) out.push(card);
+  if (!withLibrary) return out;
+  const stems = stemsOf(words), books = await libraryBooks();
+  for (const lang of LIB_LANGS) {
+    const focus = books.filter(b => b.lang === lang && FOCUS.test(b.name)).map(b => b.name);
+    // the focused books, each on its own; then the whole library, but only in the reader's own language and
+    // only when no card matched (a card covers the essentials; the full Wikipedia mostly adds noise)
+    const groups = card || lang !== LIB_LANGS[0] ? [focus] : [focus, null];
+    for (const group of groups) {
+      if (group && !group.length) continue;
+      const hits = group ? (await Promise.all(group.map(name => searchWords(words, lang, signal, name)))).flat()
+                         : await searchWords(words, lang, signal);
+      // articles with the question's words in their title first; one copy of each title
+      const seen = new Set();
+      const ranked = hits.map((h, i) => ({ h, s: hitsIn(h.title, stems) * 2 - i * 0.01 })).sort((a, b) => b.s - a.s).map(x => x.h)
+        .filter(h => { const k = h.title.toLowerCase(); return !seen.has(k) && seen.add(k); })
+        .filter(h => !card || hitsIn(h.title, card.subject) > 0);   // with a card: articles about its subject only
+      if (!ranked.length) continue;
+      onReading?.(ranked.length);
+      const read = (await Promise.all(ranked.slice(0, 6).map(h => readArticle(h, words, signal).catch(() => null)))).filter(Boolean);
+      if (read.length) return out.concat(read.sort((a, b) => b.score - a.score)).slice(0, MAX_SOURCES);
+    }
+  }
+  return out;
 }
 
 const SKIP_SECTIONS = /refer|ligaç|ver_também|see_also|external|notes|notas|bibliograf|leitura|further/i;
@@ -118,12 +196,14 @@ async function readArticle(hit, words, signal) {
     .filter(s => s.length > 40);
   if (!blocks.length) return null;
   // score each paragraph by how many question words it contains (prefix match handles plurals/verb forms)
-  const stems = words.map(w => w.slice(0, Math.max(4, w.length - 2)));
-  const scored = blocks.map((text, i) => {
-    const low = text.toLowerCase();
-    return { i, text, score: stems.reduce((n, s) => n + (low.includes(s) ? 1 : 0), 0) + (i === 0 ? 0.5 : 0) };
-  });
-  if (Math.max(...scored.map(b => b.score)) < 1) return null;   // article never mentions the question's words
+  const stems = stemsOf(words);
+  const scored = blocks.map((text, i) => ({ i, text, score: hitsIn(text, stems) + (i === 0 ? 0.5 : 0) }));
+  // relevant = the title names the subject and a paragraph has the question's words, or, for an article whose
+  // title doesn't, a paragraph has most of them (the full Wikipedia matches a few words almost anywhere)
+  const inTitle = hitsIn(hit.title, stems), n = stems.length;
+  const need = inTitle ? Math.max(1, Math.min(2, n)) : Math.min(4, n, Math.ceil(n / 2) + 1);
+  const top = Math.max(...scored.map(b => Math.floor(b.score)));
+  if (top < need) return null;
   const keep = [];
   let used = 0;
   for (const b of [...scored].sort((a, b) => b.score - a.score)) {
@@ -131,7 +211,7 @@ async function readArticle(hit, words, signal) {
     keep.push(b); used += b.text.length;
   }
   const text = keep.sort((a, b) => a.i - b.i).map(b => b.text).join('\n').slice(0, CHARS_PER_SOURCE);
-  return { ...hit, text };
+  return { ...hit, text, score: top + inTitle * 2 };
 }
 
 // ---------------------------------------------------------------- UI
@@ -168,7 +248,7 @@ function renderTools(tools, sources, question, photo) {
     for (const s of sources) {
       const li = document.createElement('li');
       const a = document.createElement('a');
-      a.href = SURVIVAL.libHost + s.link; a.target = '_blank'; a.rel = 'noopener';
+      a.href = s.card ? s.link : SURVIVAL.libHost + s.link; a.target = '_blank'; a.rel = 'noopener';   // cards are kit pages
       a.textContent = s.title + (s.book ? ` — ${s.book}` : '');
       li.append(a); ol.append(li);
     }
@@ -211,14 +291,10 @@ async function ask() {
   busy = new AbortController();
   let answer = '', sources = [];
   try {
-    if (useLib.checked && !(photo && q === t('chat.photo.default'))) {   // a photo with no question: nothing to look up yet
-      status.textContent = t('chat.searching');
-      const hits = await findArticles(q, busy.signal);
-      if (hits.length) {
-        status.textContent = t('chat.reading', { n: Math.min(hits.length, MAX_SOURCES) });
-        const read = await Promise.all(hits.slice(0, MAX_SOURCES + 1).map(h => readArticle(h, keywords(q), busy.signal).catch(() => null)));
-        sources = read.filter(Boolean).slice(0, MAX_SOURCES);
-      }
+    if (!(photo && q === t('chat.photo.default'))) {   // a photo with no question: nothing to look up yet
+      // the kit's matching emergency card always (it's local and checked); the library when ticked
+      if (useLib.checked) status.textContent = t('chat.searching');
+      sources = await findSources(q, useLib.checked, busy.signal, n => { status.textContent = t('chat.reading', { n: Math.min(n, MAX_SOURCES) }); });
     }
     status.textContent = t(photo ? 'chat.photo.looking' : 'chat.thinking');
     renderTools(tools, sources, q, !!photo);

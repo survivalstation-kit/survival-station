@@ -2,6 +2,33 @@
 
 *[Português (Brasil): LEIA-ME.md](LEIA-ME.md)*
 
+**A free emergency kit that works with no internet.** First aid, offline maps, a radio guide, tools and an AI
+assistant that cites its sources, all on a USB stick. Plug it into any laptop and it runs: nothing to install,
+no account. Phones on the laptop's hotspot use it too.
+
+| | |
+|---|---|
+| ![Home page](docs/screenshots/home.jpg) | ![AI answer citing the emergency card and the library](docs/screenshots/chat.jpg) |
+| ![Map search: nearest hospitals](docs/screenshots/map-search.jpg) | ![Tools: CPR rhythm, water, SOS](docs/screenshots/tools.jpg) |
+| ![Emergency cards in Portuguese](docs/screenshots/cards-pt.jpg) | ![On a phone](docs/screenshots/phone-home.jpg) |
+
+**Why:** governments advise every household to be ready for at least 72 hours on its own
+([USA](https://www.ready.gov/kit), [Canada](https://www.getprepared.gc.ca/cnt/kts/index-en.aspx),
+[UK](https://prepare.campaign.gov.uk/), [Red Cross](https://www.redcross.org/get-help/how-to-prepare-for-emergencies/survival-kit-supplies.html),
+[Brasil: Defesa Civil](https://www.gov.br/mdr/pt-br/assuntos/protecao-e-defesa-civil)). Food, water and a torch
+are on every list. Reliable information, when the internet and phone networks are down, usually isn't.
+
+### Quick start
+1. On a **Windows** computer with internet, download this project (**Code → Download ZIP**) and unzip it.
+2. Plug in a USB stick (32–256 GB, formatted exFAT) and double-click **`MAKE-USB.bat`**.
+3. Pick a size (**Lite**, **Standard** or **Full**), your languages and maps, then click **Build the drive**. It downloads everything, which takes a while.
+4. When it says Done, run **`START-WINDOWS.bat`** on the stick (Mac: `START-MAC.command`; Linux: `START-LINUX.sh`) and test it.
+5. Share it: **`COPY-KIT.bat`** copies a finished kit to another stick with no internet.
+
+Printable flyers to spread the word: [English](promo/flyer-en.pdf) · [Português](promo/flyer-pt-BR.pdf).
+
+## What's on the kit
+
 An offline survival kit that runs from a USB drive. Plug it into a computer, double-click one file, and you get:
 
 - **A local AI assistant**: llama.cpp with Qwen3 / Llama models, running on the computer's CPU. No GPU and no internet needed. Before it answers, it **looks the question up in the offline library**, then shows the articles it used as numbered, clickable sources.
@@ -135,6 +162,21 @@ launch/        start-unix.sh (shared Mac/Linux launcher)
 - Linux builds expect a fairly recent distro (Ubuntu 22.04+). If a program won't run from the drive, the launcher copies it to `/tmp` and runs it from there.
 - Map search finds towns worldwide and, in the countries with a street map on the kit, neighbourhoods, hospitals, airports, mountains, lakes and parks (GeoNames). Streets and house numbers can't be searched. The GPS "locate me" button only works on the computer running the kit, because browsers block GPS on plain-http network addresses. On phones, Organic Maps does GPS offline, but download its region map in the app ahead of time.
 - Keep printed copies of the emergency cards, plus a spare drive.
+
+## Testing the AI before a release
+
+`tests/chat-safety.js` asks a running kit 15 real emergency questions, in English and Portuguese, through the real
+chat page. It checks three things:
+- the right emergency card is the first source;
+- no library source is off-topic;
+- the answer carries the key facts, for example bleach: 2 drops per litre / 8 per gallon, never "a cup".
+
+Run it with the kit's default model before every release:
+
+```
+npm install puppeteer-core
+node tests/chat-safety.js http://localhost:8080
+```
 
 ## Licence
 

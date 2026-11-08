@@ -52,7 +52,7 @@ const I18N = {
     'chat.new': 'New', 'chat.send': 'Send', 'chat.stop': 'Stop', 'chat.you': 'You', 'chat.assistant': 'Assistant',
     'chat.uselib': 'Look it up in the library', 'chat.searching': 'Searching the offline library…',
     'chat.reading': 'Reading {n} article(s)…', 'chat.thinking': 'Thinking…',
-    'chat.sources': 'From the offline library:', 'chat.searchlib': '🔎 Search the library for this',
+    'chat.sources': 'Sources (emergency cards and the offline library):', 'chat.searchlib': '🔎 Search the library for this',
     'chat.err': '⚠️ Could not reach the AI ({e}). Is the start window still open? Meanwhile, use the emergency cards or the library.',
     'chat.stopped': '(stopped)',
     'chat.photo.add': 'Add a photo', 'chat.photo.ready': 'Photo ready: add a question, or just press Send', 'chat.photo.default': 'What is in this photo?',
@@ -79,10 +79,12 @@ The person may be stressed, injured, cold, or caring for someone else. Always an
 - Lead with the most important action in one short line, then numbered steps.
 - Be concrete: quantities, times, distances. Use only common household items when possible.
 - Only when the question describes life-threatening signs (not breathing, heavy bleeding, chest pain, stroke signs, unconsciousness): say so first and tell them to get emergency help by any means (phone, SMS, radio, neighbours). Don't add this to other answers.
-- If you are unsure, say so plainly and give the safest option. Never invent drug doses.
+- If you are unsure, say so plainly and give the safest option.
+- Never guess a number that matters for safety: medicine doses, amounts of bleach or other chemicals, times, temperatures. Give one only if it appears in the excerpts below; otherwise say to check the Emergency cards or the Tools page.
 - Keep answers short unless asked for detail. Ask one clarifying question only if it really changes the advice.`,
-    'chat.withsources': `Excerpts from the offline library are below. Use them when they are relevant and cite them like [1] or [2]. If they don't cover the question, say so briefly and answer carefully from general knowledge.`,
-    'chat.stop.words': 'a an and are as at be by can do does for from get have how i if in into is it me my of on or should so that the their there this to was what when where which who why will with you your',
+    'chat.withsources': `Excerpts are below. Use them when they are relevant and cite them like [1] or [2]. An excerpt titled "Emergency card" is this kit's checked advice: follow its steps and copy its numbers exactly, and prefer it when other excerpts differ. If the excerpts don't cover the question, say so briefly and answer carefully from general knowledge, without safety-critical numbers.`,
+    'chat.card': 'Emergency card',
+    'chat.stop.words': 'a an and are as at be by can do does for from get have how i if in into is it me my of on or should so that the their there this to was what when where which who why will with you your make made need help use using someone something anyone think know want please',
 
     'map.title': 'Offline map', 'map.tap': 'Tap the map to get coordinates.',
     'map.copy': 'Copy', 'map.copied': 'Copied', 'map.goto': 'Go to…', 'map.world': 'World',
@@ -147,7 +149,7 @@ The person may be stressed, injured, cold, or caring for someone else. Always an
     'chat.new': 'Nova', 'chat.send': 'Enviar', 'chat.stop': 'Parar', 'chat.you': 'Você', 'chat.assistant': 'Assistente',
     'chat.uselib': 'Consultar a biblioteca', 'chat.searching': 'Buscando na biblioteca offline…',
     'chat.reading': 'Lendo {n} artigo(s)…', 'chat.thinking': 'Pensando…',
-    'chat.sources': 'Da biblioteca offline:', 'chat.searchlib': '🔎 Buscar isto na biblioteca',
+    'chat.sources': 'Fontes (cartões de emergência e biblioteca offline):', 'chat.searchlib': '🔎 Buscar isto na biblioteca',
     'chat.err': '⚠️ Não foi possível falar com a IA ({e}). A janela de início ainda está aberta? Enquanto isso, use os cartões de emergência ou a biblioteca.',
     'chat.stopped': '(interrompido)',
     'chat.photo.add': 'Adicionar uma foto', 'chat.photo.ready': 'Foto pronta: escreva uma pergunta, ou só aperte Enviar', 'chat.photo.default': 'O que tem nesta foto?',
@@ -174,10 +176,12 @@ A pessoa pode estar assustada, ferida, com frio ou cuidando de alguém. Responda
 - Comece pela ação mais importante em uma linha curta, depois passos numerados.
 - Seja concreto: quantidades, tempos, distâncias. Use itens comuns de casa quando possível.
 - Só quando a pergunta descrever sinais de risco de vida (não respira, sangramento forte, dor no peito, sinais de AVC, inconsciência): diga isso primeiro e oriente a buscar socorro por qualquer meio (SAMU 192, Bombeiros 193, SMS, rádio, vizinhos). Não acrescente isso a outras respostas.
-- Se não tiver certeza, diga claramente e dê a opção mais segura. Nunca invente doses de remédios.
+- Se não tiver certeza, diga claramente e dê a opção mais segura.
+- Nunca chute um número que importe para a segurança: doses de remédio, quantidade de água sanitária ou outros produtos, tempos, temperaturas. Só dê um número se ele aparecer nos trechos abaixo; se não, diga para conferir os Cartões de emergência ou a página Ferramentas.
 - Respostas curtas, a não ser que peçam detalhes. Faça no máximo uma pergunta, só se mudar a orientação.`,
-    'chat.withsources': `Abaixo há trechos da biblioteca offline. Use-os quando forem relevantes e cite como [1] ou [2]. Se não cobrirem a pergunta, diga isso brevemente e responda com cuidado a partir do conhecimento geral.`,
-    'chat.stop.words': 'a o as os um uma uns umas e é de do da dos das em no na nos nas por para pra com sem que se como quando onde qual quais quem porque por que eu meu minha me mim você voce seu sua isso isto esse essa este esta ao aos à às ou mais muito pode posso devo deve fazer faço tem ter está estou foi ser são não sim já',
+    'chat.withsources': `Abaixo há trechos. Use-os quando forem relevantes e cite como [1] ou [2]. Um trecho com o título "Cartão de emergência" é a orientação conferida deste kit: siga os passos, copie os números exatamente e prefira-o quando outros trechos forem diferentes. Se os trechos não cobrirem a pergunta, diga isso brevemente e responda com cuidado a partir do conhecimento geral, sem números importantes para a segurança.`,
+    'chat.card': 'Cartão de emergência',
+    'chat.stop.words': 'a o as os um uma uns umas e é de do da dos das em no na nos nas por para pra com sem que se como quando onde qual quais quem porque por que eu meu minha me mim você voce seu sua isso isto esse essa este esta ao aos à às ou mais muito pode posso devo deve fazer faço tem ter está estou foi ser são não sim já preciso precisa ajuda ajudar usar usando alguém algum alguma acho quero',
 
     'map.title': 'Mapa offline', 'map.tap': 'Toque no mapa para ver as coordenadas.',
     'map.copy': 'Copiar', 'map.copied': 'Copiado', 'map.goto': 'Ir para…', 'map.world': 'Mundo',

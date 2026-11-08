@@ -2,6 +2,26 @@
 
 *[English: README.md](README.md)*
 
+**Um kit de emergência gratuito que funciona sem internet.** Primeiros socorros, mapas offline, guia de rádio,
+ferramentas e um assistente de IA que cita as fontes, tudo num pendrive. Conecte em qualquer notebook e funciona:
+sem instalar nada, sem cadastro. Os celulares no roteador do notebook também usam.
+
+![Cartões de emergência em português](docs/screenshots/cards-pt.jpg)
+
+**Por quê:** governos recomendam que cada casa esteja pronta para pelo menos 72 horas por conta própria
+([Defesa Civil](https://www.gov.br/mdr/pt-br/assuntos/protecao-e-defesa-civil), [Cruz Vermelha](https://www.redcross.org/get-help/how-to-prepare-for-emergencies/survival-kit-supplies.html)).
+Água, comida e lanterna estão em todas as listas; informação confiável quando a internet e o celular caem, quase
+nunca. Cadastre-se também nos alertas da Defesa Civil: envie seu CEP por SMS para 40199.
+
+### Começo rápido
+1. Num computador **Windows** com internet, baixe este projeto (**Code → Download ZIP**) e descompacte.
+2. Conecte um pendrive (32 a 256 GB, formatado em exFAT) e clique duas vezes em **`MAKE-USB.bat`**.
+3. Escolha o tamanho (**Lite**, **Standard** ou **Full**), os idiomas e os mapas e clique em **Montar o pendrive**. Ele baixa tudo, o que demora.
+4. Quando aparecer Done, rode **`START-WINDOWS.bat`** no pendrive (Mac: `START-MAC.command`; Linux: `START-LINUX.sh`) e teste.
+5. Compartilhe: o **`COPY-KIT.bat`** copia um kit pronto para outro pendrive, sem internet.
+
+Folhetos para imprimir e divulgar: [Português](promo/flyer-pt-BR.pdf) · [English](promo/flyer-en.pdf).
+
 Um kit de sobrevivência que roda direto de um pendrive, **sem internet e sem instalar nada**. Conecte num computador, clique duas vezes em um arquivo e você tem:
 
 - **Assistente de IA local**, que roda no processador do computador e responde em português. Antes de responder, **busca na biblioteca offline** e mostra os artigos usados como fontes numeradas.

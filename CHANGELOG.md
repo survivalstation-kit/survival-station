@@ -12,6 +12,20 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.19.0 (2026-11-08)
+
+- **Safer, more accurate AI answers.** With the complete Wikipedia on the kit, the library lookup found unrelated articles (a song for "bleeding", oil refining for "bleach"), and one answer gave about 12 times the safe bleach dose. Now:
+  - **The kit's own emergency card comes first.** The card that matches the question is source [1], even with the library lookup off. The AI is told to follow its steps and copy its numbers exactly. Cards have extra words for their subject (e.g. "massagem cardíaca" finds the RCP card).
+  - **The focused books are searched first**: medical encyclopedias, the water, medicine and post-disaster guides, Appropedia. The whole library is searched only in the reader's own language and only when no card matched. With a card, articles must name its subject in their title.
+  - **Relevance:** words must match at the start of a word ("arm" no longer matches "warm"), and articles need most of the question's words. Common verbs ("make", "need", "fazer") don't count as subjects.
+  - **No guessed safety numbers:** doses, amounts of bleach or chemicals, times and temperatures only when they appear in the sources; otherwise the AI points to the Emergency cards or Tools page.
+- **`tests/chat-safety.js`**: 15 emergency questions (11 English, 4 Portuguese) through the real chat page, checking the right card, no off-topic sources, and key facts in the answer. It passed 15 of 15 with Qwen3-4B and the full library.
+- **README and LEIA-ME** open with screenshots, the official 72-hour preparedness advice, and a 5-step Quick Start.
+- **`promo/` folder for spreading the word:**
+  - printable flyers in English and Portuguese, HTML and PDF, with a QR code;
+  - ready-to-post texts for Hacker News, Reddit, Brazilian communities and short social posts;
+  - a video script.
+
 ## 1.18.1 (2026-11-08)
 
 - Published at https://github.com/survivalstation-kit/survival-station.
@@ -107,7 +121,7 @@ Ready to publish as open source.
 - **QR code for phones** on the home page ("Use it on a phone"): point a phone camera at it to open the kit, with nothing to type.
   - On the computer it shows the computer's network address. The start files write the addresses to `portal/kit-address.json` each time the kit starts, the one with a gateway (a phone hotspot) first; the others are listed as fallbacks.
   - On a connected phone it shows the address that phone uses, so it can be passed on.
-  - Tested: the code reads back as `http://192.168.50.220:8080/`.
+  - Tested: the code reads back as the kit's address (`http://192.168.x.x:8080/`).
 - The QR library (qrcode-generator 1.4.4, 57 KB) is downloaded with the map viewer. **Verify / repair** adds it to existing kits.
 
 ## 1.10.0 (2026-11-02)
