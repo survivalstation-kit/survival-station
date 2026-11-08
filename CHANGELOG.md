@@ -12,6 +12,11 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.18.1 (2026-11-08)
+
+- Published at https://github.com/survivalstation-kit/survival-station.
+- `LICENSE` is now the standard MIT text alone, so GitHub recognises it as MIT. The note that downloaded parts keep their own licences stays in the README and `THIRD-PARTY-NOTICES.md`.
+
 ## 1.18.0 (2026-11-07)
 
 Ready to publish as open source.
