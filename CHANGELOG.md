@@ -12,6 +12,11 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.32.0 (2026-11-08)
+
+- **Two new emergency cards**, English and Portuguese, from Ready.gov and CDC guidance: **Nuclear explosion or radiation** (drop and cover from a flash, get inside, stay inside 24 hours, stay tuned, removing contamination, potassium iodide only when told) and **Chemical leak, toxic gas or chemical attack** (upwind and uphill, sheltering in place, removing and washing off contamination; Brazil: 192, 193 and Disque-Intoxicação 0800 722 6001). The AI finds them like the other cards.
+- **Official guides on every kit** (`portal/guides`, about 23 MB, listed on the Books page): US Army **FM 3-11.4 NBC Protection** (approved for public release), FEMA's **Planning Guidance for Response to a Nuclear Detonation** (2022) and **the First 72 Hours** (2023). Chosen to fill what Survival-Data lacks (chemical and biological protection, current nuclear guidance). Existing kits get them with Check for updates.
+- Firearms operator manuals were left out on purpose: they are not released to the public (distribution C), even though copies circulate online. Survival-Data already has the public marksmanship manuals.
 ## 1.31.0 (2026-11-08)
 
 - **📖 Books** (new page and tile):

@@ -61,6 +61,7 @@ The model files are the GGUF conversions published on Hugging Face (bartowski, g
 | "zimgit" collections (medicine, water, food, post-disaster, knots) | Collections of documents by many publishers; each document keeps its publisher's terms. |
 | Maps: OpenStreetMap data, cut from Protomaps builds | ODbL — © OpenStreetMap contributors (shown on the map). https://www.openstreetmap.org/copyright |
 | Place names for the map search: GeoNames | CC BY 4.0 — https://www.geonames.org (credited on the map). |
+| Official guides in `portal/guides`: US Army FM 3-11.4, NBC Protection (2003, "Approved for public release; distribution is unlimited"); FEMA, Planning Guidance for Response to a Nuclear Detonation (3rd edition, 2022) and Nuclear Detonation Response Guidance: Planning for the First 72 Hours | US government works: public domain in the USA. https://www.fema.gov |
 | Weather page (online only): forecasts and place lookup by Open-Meteo | CC BY 4.0 — https://open-meteo.com (credited on the page). Free for non-commercial use. |
 | Weather page (online only): alerts from the US National Weather Service | Public domain (US government) — https://www.weather.gov |
 

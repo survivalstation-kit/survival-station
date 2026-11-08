@@ -56,6 +56,29 @@
   $('kit-books').append(tile('art-of-war.html', '⚔️', L('The Art of War', 'A Arte da Guerra'),
     L('Sun Tzu. Strategy, leadership and conflict in 13 short chapters. English and Portuguese, and read aloud by the device.', 'Sun Tzu. Estratégia, liderança e conflito em 13 capítulos curtos. Em português e inglês, e lido em voz alta pelo aparelho.')));
 
+  // ---- official guides the builder puts on every kit (portal\guides): public US government documents, in English
+  const GUIDES = [
+    ['FM-3-11.4-NBC-Protection-2003.pdf', L('Nuclear, biological and chemical protection (US Army FM 3-11.4)', 'Proteção nuclear, biológica e química (Exército dos EUA, FM 3-11.4)'),
+     L('Protective masks and clothing, warning signs, avoiding contamination and decontamination. 2003, approved for public release.', 'Máscaras e roupas de proteção, sinais de alerta, como evitar a contaminação e descontaminar. 2003, liberado para o público.')],
+    ['FEMA-Nuclear-Detonation-Planning-Guidance-2022.pdf', L('Response to a nuclear detonation (FEMA, 2022)', 'Resposta a uma detonação nuclear (FEMA, 2022)'),
+     L('Official US guidance: damage zones, fallout, sheltering, when to leave, and decontamination.', 'Orientação oficial dos EUA: zonas de dano, precipitação radioativa, abrigo, quando sair e descontaminação.')],
+    ['FEMA-Nuclear-Detonation-First-72-Hours-2023.pdf', L('The first 72 hours after a nuclear detonation (FEMA, 2023)', 'As primeiras 72 horas depois de uma detonação nuclear (FEMA, 2023)'),
+     L('A short companion: what to do in the first three days.', 'Um complemento curto: o que fazer nos três primeiros dias.')],
+  ];
+  const gh = document.createElement('h2'); gh.textContent = L('Official guides on this kit (PDF, in English)', 'Guias oficiais neste kit (PDF, em inglês)');
+  const gp = document.createElement('p'); gp.className = 'muted';
+  gp.textContent = L('For the steps to take right now, see the emergency cards: Nuclear / radiation and Chemical.', 'Para o que fazer na hora, veja os cartões de emergência: Nuclear / radiação e Químico.');
+  const gl = document.createElement('ul'); gl.className = 'reading-list';
+  for (const [file, t, about] of GUIDES) {
+    const li = document.createElement('li');
+    const a = document.createElement('a'); a.href = 'guides/' + file; a.target = '_blank'; a.rel = 'noopener'; a.textContent = t;
+    const p = document.createElement('div'); p.className = 'muted'; p.textContent = about;
+    li.append(a, p); gl.append(li);
+    // a kit built before these were added: say so instead of a broken link
+    if (SURVIVAL.served) fetch(a.href, { method: 'HEAD' }).then(r => { if (!r.ok) { p.textContent = L('Not on this kit yet: run Check for updates (needs internet).', 'Ainda não está neste kit: use Procurar atualizações (precisa de internet).'); a.removeAttribute('href'); } }).catch(() => {});
+  }
+  $('kit-books').after(gh, gp, gl);
+
   // ---- reading list: [title, author and year, what it is about, links]
   const LISTS = [
     [L('Robert Greene (under copyright: find in a library or buy)', 'Robert Greene (protegidos por direitos autorais: procure numa biblioteca ou compre)'), [

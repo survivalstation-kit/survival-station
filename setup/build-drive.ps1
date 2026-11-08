@@ -406,7 +406,7 @@ function Install-Voice {
   }
   Set-Content (Join-Path $Target 'tools\whisper-VERSION') $rel.tag_name
 }
-$BaseSize = 800MB   # always installed: AI and library programs for 5 systems, map viewer, world map
+$BaseSize = 825MB   # always installed: AI and library programs for 5 systems, map viewer, world map, official guides
 
 function Norm-Path($p) { $p.TrimEnd('\').ToLower() }
 
@@ -1774,6 +1774,18 @@ if ($Update) {
     try { Remove-Item -Force $r.File.FullName -ErrorAction Stop; Write-Host "   removed $($r.File.Name): $($r.Why)" }
     catch { Write-Host "   could not remove $($r.File.Name): close the kit and update again" -ForegroundColor Yellow }
   }
+}
+
+# Official guides, on every kit (US government works, approved for public release): portal\guides, listed on the Books page
+Step 'Official guides (nuclear, chemical and biological emergencies)'
+$Guides = [ordered]@{
+  'FM-3-11.4-NBC-Protection-2003.pdf'                   = 'https://archive.org/download/MManuals/Fm3-11.4TacticsTechniquesAndProceduresForNbcProtection2003.pdf'
+  'FEMA-Nuclear-Detonation-Planning-Guidance-2022.pdf'  = 'https://www.fema.gov/sites/default/files/documents/fema_nuc-detonation-planning-guide.pdf'
+  'FEMA-Nuclear-Detonation-First-72-Hours-2023.pdf'     = 'https://remm.hhs.gov/fema_oet-72-hour-nuclear-detonation-response-guidance.pdf'
+}
+foreach ($g in $Guides.Keys) {
+  try { Download $Guides[$g] (Join-Path $Target "portal\guides\$g") }
+  catch { Write-Host "   (skipped $g for now: $($_.Exception.Message); Verify / repair or the next update will try again)" -ForegroundColor Yellow }
 }
 
 Step 'Map viewer'
