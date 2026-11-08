@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checklists</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="checklists">
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html">Survival <span>Station</span></a>
+  <nav class="links">
+    <a href="index.html" data-i18n="nav.home">Home</a>
+    <a href="chat.html" data-i18n="nav.chat">Ask AI</a>
+    <a href="map.html" data-i18n="nav.map">Map</a>
+    <a href="cards.html" data-cards data-i18n="nav.cards">Emergency</a>
+    <a href="search.html" data-i18n="nav.search">Search</a>
+    <a href="help.html" data-i18n="nav.help">Help</a>
+  </nav>
+  <select class="lang-select" aria-label="Language / Idioma"></select>
+  <button class="theme-btn" type="button" data-i18n="theme">Theme</button>
+</div></header>
+
+<main class="wrap help checklists">
+  <h1 id="title"></h1>
+  <p class="lede" id="lede"></p>
+  <p class="copy-row"><button class="btn" type="button" id="print"></button> <span class="muted" id="where"></span></p>
+  <nav class="toc" id="toc"></nav>
+  <div id="lists"></div>
+  <p class="muted" id="source"></p>
+</main>
+
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+<script>
+(async () => {
+  const pt = SURVIVAL.lang === 'pt-BR';
+  const L = (en, p) => pt ? p : en;
+  const $ = id => document.getElementById(id);
+
+  // [id, title, intro, items]; item ids stay the same in both languages, so ticks survive a language change
+  const LISTS = [
+    ['bag', L('Go-bag (one per person, for 3 days)', 'Mochila de emergência (uma por pessoa, para 3 dias)'),
+     L('Packed and ready by the door, light enough to carry and walk with.', 'Pronta perto da porta, leve o bastante para carregar andando.'), [
+      ['water', L('Water: 3 litres per person per day, plus a bottle with a filter or purifying tablets', 'Água: 3 litros por pessoa por dia, mais uma garrafa com filtro ou pastilhas para purificar')],
+      ['food', L('Food that needs no cooking for 3 days (bars, nuts, canned food) and a can opener', 'Comida que não precisa cozinhar para 3 dias (barras, castanhas, enlatados) e um abridor de latas')],
+      ['meds', L('Medicines for at least a week, with a copy of the prescriptions', 'Remédios para pelo menos uma semana, com cópia das receitas')],
+      ['firstaid', L('First-aid kit', 'Kit de primeiros socorros')],
+      ['light', L('Torch (flashlight) or headlamp, with spare batteries', 'Lanterna ou lanterna de cabeça, com pilhas reserva')],
+      ['radio', L('Battery or hand-crank radio', 'Rádio a pilha ou a manivela')],
+      ['power', L('Phone, charger cable and a charged power bank', 'Celular, cabo do carregador e um power bank carregado')],
+      ['whistle', L('Whistle, to call for help', 'Apito, para pedir socorro')],
+      ['mask', L('Dust masks', 'Máscaras contra poeira')],
+      ['clothes', L('A change of clothes, sturdy shoes, rain jacket, warm layer', 'Uma muda de roupa, sapato firme, capa de chuva, agasalho')],
+      ['blanket', L('Emergency (foil) blanket or light sleeping bag', 'Manta térmica (aluminizada) ou saco de dormir leve')],
+      ['hygiene', L('Hygiene: soap, hand gel, toilet paper, sanitary pads, toothbrush, rubbish bags', 'Higiene: sabonete, álcool em gel, papel higiênico, absorventes, escova de dentes, sacos de lixo')],
+      ['cash', L('Cash in small notes and coins', 'Dinheiro em notas pequenas e moedas')],
+      ['docs', L('Copies of documents in a waterproof bag (see Documents)', 'Cópias dos documentos num saco à prova d\'água (veja Documentos)')],
+      ['glasses', L('Spare glasses, contact lenses, hearing-aid batteries', 'Óculos reserva, lentes de contato, pilhas do aparelho auditivo')],
+      ['tools', L('Multi-tool or knife, duct tape, matches or lighter in a waterproof bag', 'Canivete ou multiferramenta, fita adesiva (silver tape), fósforos ou isqueiro num saco à prova d\'água')],
+      ['map', L('Paper map of the area, pen and notebook, the family plan', 'Mapa de papel da região, caneta e caderno, o plano da família')],
+      ['kids', L('For babies and children: formula, nappies, a toy or book', 'Para bebês e crianças: fórmula, fraldas, um brinquedo ou livro')],
+      ['pets', L('For pets: food, water, lead, carrier, vaccination card', 'Para animais: ração, água, guia, caixa de transporte, carteira de vacinação')],
+      ['kit', L('This Survival Station stick and the printed emergency cards', 'Este pendrive do Survival Station e os cartões de emergência impressos')],
+    ]],
+    ['home', L('Supplies at home (for 2 weeks)', 'Estoque em casa (para 2 semanas)'),
+     L('For staying at home without shops, power or running water.', 'Para ficar em casa sem lojas, luz ou água encanada.'), [
+      ['water', L('Water: 4 litres per person per day (drinking, cooking, a little washing), and pets\' water', 'Água: 4 litros por pessoa por dia (beber, cozinhar, um pouco de higiene), e água dos animais')],
+      ['bleach', L('Plain unscented bleach to make water safe (see Tools)', 'Água sanitária comum, sem perfume, para tornar a água segura (veja Ferramentas)')],
+      ['food', L('Food that keeps: rice, beans, pasta, canned food, oil, salt, sugar, powdered milk', 'Comida que dura: arroz, feijão, macarrão, enlatados, óleo, sal, açúcar, leite em pó')],
+      ['cook', L('A way to cook without power: camping stove with fuel (use outdoors only), matches', 'Um jeito de cozinhar sem luz: fogareiro com combustível (use só ao ar livre), fósforos')],
+      ['meds', L('A month of regular medicines, and pain and fever medicine', 'Um mês dos remédios de uso contínuo, e remédio para dor e febre')],
+      ['light', L('Torches and lanterns for every room, and plenty of batteries', 'Lanternas e luminárias para cada cômodo, e bastante pilha')],
+      ['power', L('Power banks, and a small solar panel if you can (see the power calculator in Tools)', 'Power banks, e uma placa solar pequena se puder (veja a calculadora de energia em Ferramentas)')],
+      ['sanit', L('Toilet without water: a bucket with a lid, strong bags, cat litter or sawdust', 'Banheiro sem água: um balde com tampa, sacos resistentes, areia de gato ou serragem')],
+      ['fire', L('Fire extinguisher and a smoke and carbon-monoxide alarm', 'Extintor de incêndio e alarme de fumaça e de monóxido de carbono')],
+      ['shutoff', L('Know how to turn off the gas, water and electricity, and keep the tool next to them', 'Saber como desligar o gás, a água e a luz, e deixar a ferramenta perto')],
+      ['repair', L('Plastic sheeting, duct tape, rope, work gloves', 'Lona plástica, fita adesiva (silver tape), corda, luvas de trabalho')],
+      ['warm', L('Blankets and warm clothes for everyone', 'Cobertores e roupas quentes para todos')],
+      ['cash', L('Cash at home', 'Dinheiro em espécie em casa')],
+      ['rotate', L('Check dates and rotate food, water and batteries every 6 months (see Supplies)', 'Conferir as validades e trocar comida, água e pilhas a cada 6 meses (veja Estoque)')],
+    ]],
+    ['docs', L('Documents', 'Documentos'),
+     L('Copies in a waterproof bag in the go-bag, and scans in the kit\'s locked private documents.', 'Cópias num saco à prova d\'água na mochila, e digitalizadas nos documentos privados trancados do kit.'), [
+      ['id', L('ID cards, passports, driving licences', 'Identidade, passaporte, carteira de motorista')],
+      ['birth', L('Birth and marriage certificates', 'Certidões de nascimento e casamento')],
+      ['health', L('Health cards, prescriptions, list of medicines, allergies and blood types, vaccination cards', 'Cartão do SUS ou do plano, receitas, lista de remédios, alergias e tipos sanguíneos, carteiras de vacinação')],
+      ['insurance', L('Insurance policies (home, car, health, life)', 'Apólices de seguro (casa, carro, saúde, vida)')],
+      ['property', L('Property deed or rental contract, car papers', 'Escritura ou contrato de aluguel, documento do carro')],
+      ['bank', L('Bank and card details, and how to reach your bank', 'Dados do banco e dos cartões, e como falar com o banco')],
+      ['contacts', L('Emergency contacts on paper (phones die)', 'Contatos de emergência no papel (o celular descarrega)')],
+      ['photos', L('Recent photos of each family member and pet (to help find them)', 'Fotos recentes de cada pessoa da família e de cada animal (para ajudar a encontrar)')],
+      ['school', L('School and work contacts, and the children\'s school pickup plan', 'Contatos da escola e do trabalho, e o plano de buscar as crianças na escola')],
+      ['private', L('Scans saved in the kit\'s private documents, locked with a password', 'Digitalizações salvas nos documentos privados do kit, trancados com senha')],
+    ]],
+    ['evac', L('Before you evacuate', 'Antes de sair de casa (evacuação)'),
+     L('When the authorities say to leave, or you feel unsafe: leave early, don\'t wait.', 'Quando as autoridades mandarem sair, ou você não se sentir seguro: saia cedo, não espere.'), [
+      ['listen', L('Follow the authorities\' instructions and their recommended routes', 'Siga as instruções das autoridades e as rotas indicadas')],
+      ['bag', L('Take the go-bags, medicines, phone and charger, documents', 'Pegue as mochilas, os remédios, o celular e o carregador, os documentos')],
+      ['clothes', L('Wear sturdy shoes, long sleeves and long trousers', 'Use sapato firme, manga comprida e calça comprida')],
+      ['tell', L('Tell your out-of-area contact where you are going', 'Avise seu contato de fora da região para onde você vai')],
+      ['note', L('Leave a note on the door or inside saying where you went and when', 'Deixe um bilhete na porta ou dentro de casa dizendo para onde foi e quando')],
+      ['utilities', L('Turn off the electricity and water if told to; turn off gas only if told to or if you smell it (only a professional turns it back on)', 'Desligue a luz e a água se mandarem; desligue o gás só se mandarem ou se sentir cheiro (só um profissional religa)')],
+      ['pets', L('Take your pets', 'Leve os animais')],
+      ['neighbours', L('Check on neighbours who may need help (elderly, disabled, alone)', 'Veja se algum vizinho precisa de ajuda (idosos, pessoas com deficiência, quem mora sozinho)')],
+      ['lock', L('Close the windows and lock the doors', 'Feche as janelas e tranque as portas')],
+      ['flood', L('Never walk or drive through flood water: 15 cm can knock you down, 30 cm can float a car', 'Nunca atravesse água de enchente a pé ou de carro: 15 cm derrubam uma pessoa, 30 cm fazem um carro boiar')],
+      ['fuel', L('Keep the car\'s tank at least half full in risky seasons', 'Mantenha o tanque do carro pelo menos pela metade nas épocas de risco')],
+    ]],
+  ];
+
+  document.title = L('Checklists', 'Listas de preparação');
+  $('title').textContent = '✅ ' + document.title;
+  $('lede').textContent = L('Tick what you have ready. Your ticks and your own items are saved on this device (and on the kit, on the computer running it). Print them to keep with the go-bag.',
+                            'Marque o que já está pronto. As marcações e seus próprios itens ficam salvos neste aparelho (e no kit, no computador que roda o kit). Imprima para guardar com a mochila.');
+  $('print').textContent = L('🖨 Print', '🖨 Imprimir');
+  $('print').onclick = () => print();
+  $('source').textContent = L('Based on the public preparedness lists of Ready.gov (FEMA), the Red Cross and Brazil\'s Defesa Civil. Adapt them to your family, climate and risks.',
+                              'Baseado nas listas públicas de preparação do Ready.gov (FEMA), da Cruz Vermelha e da Defesa Civil. Adapte à sua família, ao clima e aos riscos da sua região.');
+
+  // saved: { ticks: { 'bag.water': true }, own: { bag: ['text', ...] } }
+  let data = (await SURVIVAL.loadData('checklists')) || {};
+  data.ticks = data.ticks || {}; data.own = data.own || {};
+  const save = async () => {
+    const onKit = await SURVIVAL.saveData('checklists', data);
+    $('where').textContent = onKit ? L('Saved on this device and on the kit.', 'Salvo neste aparelho e no kit.') : L('Saved on this device.', 'Salvo neste aparelho.');
+  };
+
+  const box = $('lists');
+  function render() {
+    box.replaceChildren(); $('toc').replaceChildren();
+    for (const [id, title, intro, items] of LISTS) {
+      const all = [...items.map(([k, text]) => [`${id}.${k}`, text, false]), ...(data.own[id] || []).map((text, i) => [`${id}.own${i}`, text, true, i])];
+      const done = all.filter(([k]) => data.ticks[k]).length;
+      const sec = document.createElement('section'); sec.className = 'card checklist'; sec.id = 'list-' + id;
+      const h = document.createElement('h2'); h.textContent = title;
+      const prog = document.createElement('span'); prog.className = 'pill' + (done === all.length ? ' ok' : ''); prog.textContent = `${done} / ${all.length}`; h.append(' ', prog);
+      const p = document.createElement('p'); p.className = 'muted'; p.textContent = intro;
+      const ul = document.createElement('ul'); ul.className = 'ticks';
+      for (const [key, text, own, i] of all) {
+        const li = document.createElement('li');
+        const lab = document.createElement('label');
+        const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !!data.ticks[key];
+        cb.onchange = () => { if (cb.checked) data.ticks[key] = true; else delete data.ticks[key]; save(); render(); };
+        lab.append(cb, ' ', text); li.append(lab);
+        if (own) {
+          const x = document.createElement('button'); x.type = 'button'; x.className = 'btn small ghost'; x.textContent = '✕'; x.title = L('Remove', 'Remover');
+          x.onclick = () => { data.own[id].splice(i, 1); Object.keys(data.ticks).filter(k => k.startsWith(id + '.own')).forEach(k => delete data.ticks[k]); save(); render(); };
+          li.append(' ', x);
+        }
+        ul.append(li);
+      }
+      // your own items, and starting the list again
+      const add = document.createElement('form'); add.className = 'copy-row no-print';
+      const inp = document.createElement('input'); inp.maxLength = 120; inp.placeholder = L('Add your own item…', 'Adicionar um item seu…');
+      const ab = document.createElement('button'); ab.className = 'btn small'; ab.textContent = L('➕ Add', '➕ Adicionar');
+      const reset = document.createElement('button'); reset.type = 'button'; reset.className = 'btn small ghost'; reset.textContent = L('Untick all', 'Desmarcar tudo');
+      reset.onclick = () => { if (confirm(L('Untick every item in this list?', 'Desmarcar todos os itens desta lista?'))) { Object.keys(data.ticks).filter(k => k.startsWith(id + '.')).forEach(k => delete data.ticks[k]); save(); render(); } };
+      add.onsubmit = e => { e.preventDefault(); const v = inp.value.trim(); if (!v) return; (data.own[id] = data.own[id] || []).push(v); save(); render(); };
+      add.append(inp, ab, reset);
+      sec.append(h, p, ul, add); box.append(sec);
+      const a = document.createElement('a'); a.href = '#list-' + id; a.textContent = title.replace(/ \(.*/, ''); $('toc').append(a);
+    }
+  }
+  render();
+  if (location.hash) document.querySelector(location.hash)?.scrollIntoView();
+})();
+</script>
+</body>
+</html>

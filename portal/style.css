@@ -257,3 +257,53 @@ p.warn { color: var(--warn); font-weight: 600; }
 .morse-sig th { white-space: nowrap; }
 @media print { .morse-chart div { border: 1px solid #999; } }
 .morse-out { white-space: normal; overflow-wrap: anywhere; word-spacing: .3em; min-height: 1.4em; }
+
+/* checklists (checklists.html) */
+.checklist h2 .pill { font-size: 13px; vertical-align: middle; }
+ul.ticks { list-style: none; padding: 0; margin: 8px 0; }
+ul.ticks li { padding: 5px 0; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 6px; }
+ul.ticks label { flex: 1; display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+ul.ticks input[type=checkbox] { width: 20px; height: 20px; flex: none; margin-top: 2px; accent-color: var(--accent); }
+ul.ticks li:has(input:checked) label { color: var(--muted); text-decoration: line-through; }
+.checklist form input, .supplies .form input, .supplies .form select { font: inherit; font-size: 15px; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; min-width: 0; }
+.checklist form input { flex: 1; min-width: 180px; }
+
+/* supplies (supplies.html) */
+.supplies .form { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)); gap: 8px 14px; }
+.supplies .form h2, .supplies .form .copy-row { grid-column: 1 / -1; margin: 0; }
+.supplies .form label { display: flex; flex-direction: column; gap: 3px; font-size: 14px; color: var(--muted); }
+.supplies-table { width: 100%; border-collapse: collapse; font-size: 15px; margin: 8px 0 16px; }
+.supplies-table th, .supplies-table td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.supplies-table tr.exp-bad td { background: color-mix(in srgb, var(--bad) 16%, transparent); }
+.supplies-table tr.exp-soon td { background: color-mix(in srgb, #e6a100 18%, transparent); }
+.supplies-table tr.exp-later td:nth-child(4) { color: #b07800; }
+.pill.warn { background: color-mix(in srgb, #e6a100 22%, var(--surface-2)); color: var(--text); }
+@media (max-width: 640px) {
+  .supplies-table tr:first-child { display: none; }
+  .supplies-table tr { display: block; border-bottom: 1px solid var(--line); padding: 6px 0; }
+  .supplies-table td { display: block; border: 0; padding: 2px 8px; }
+  .supplies-table td:first-child { font-weight: 700; }
+}
+
+/* phrasebook (phrases.html) */
+.phrase-langs { display: flex; flex-wrap: wrap; gap: 10px 18px; margin: 8px 0 12px; }
+.phrase-langs label { display: flex; flex-direction: column; gap: 3px; font-size: 14px; color: var(--muted); }
+.phrase-langs select { font: inherit; font-size: 16px; color: var(--text); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; }
+.phrase-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(170px, 46%), 1fr)); gap: 10px; margin-bottom: 18px; }
+.phrase-card { font: inherit; text-align: left; display: flex; flex-direction: column; gap: 4px; padding: 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--text); cursor: pointer; min-height: 120px; }
+.phrase-card:hover { border-color: var(--accent); }
+.phrase-ico { font-size: 38px; line-height: 1.1; }
+.phrase-card b { font-size: 17px; line-height: 1.25; }
+.phrase-card small { color: var(--muted); font-size: 13px; }
+.phrase-big { position: fixed; inset: 0; z-index: 90; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px; text-align: center; overflow-y: auto; }
+.phrase-big[hidden] { display: none; }
+.phrase-big-ico { font-size: clamp(80px, 22vw, 160px); line-height: 1; }
+.phrase-big-text { font-size: clamp(30px, 7vw, 64px); font-weight: 800; margin: 0; line-height: 1.15; max-width: 22ch; }
+.phrase-big-mine { color: var(--muted); font-size: 18px; margin: 0; }
+.phrase-big-scale { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; max-width: 760px; }
+.scale-cell { display: flex; flex-direction: column; align-items: center; min-width: 54px; padding: 8px 4px; border-radius: 10px; background: var(--surface-2); font-size: 22px; }
+.scale-cell b { font-size: 24px; }
+.scale-cell.mid { background: color-mix(in srgb, #e6a100 25%, var(--surface-2)); }
+.scale-cell.hi { background: color-mix(in srgb, var(--bad) 28%, var(--surface-2)); }
+
+@media print { .no-print, .checklists .copy-row, .checklists .toc { display: none !important; } ul.ticks li { break-inside: avoid; } }

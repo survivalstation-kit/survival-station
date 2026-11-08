@@ -64,6 +64,18 @@
     <a class="tile" href="plan.html">
       <div class="ico">👪</div><h3 data-i18n="tile.plan.t"></h3><p data-i18n="tile.plan.p"></p>
     </a>
+    <a class="tile" href="checklists.html">
+      <div class="ico">✅</div><h3 data-i18n="tile.check.t"></h3><p data-i18n="tile.check.p"></p>
+    </a>
+    <a class="tile" href="supplies.html">
+      <div class="ico">📦</div><h3 data-i18n="tile.supplies.t"></h3><p data-i18n="tile.supplies.p"></p>
+    </a>
+    <a class="tile" href="pfa.html">
+      <div class="ico">🫂</div><h3 data-i18n="tile.pfa.t"></h3><p data-i18n="tile.pfa.p"></p>
+    </a>
+    <a class="tile" href="phrases.html">
+      <div class="ico">🗣️</div><h3 data-i18n="tile.phrases.t"></h3><p data-i18n="tile.phrases.p"></p>
+    </a>
     <a class="tile" href="print.html">
       <div class="ico">🖨️</div><h3 data-i18n="tile.print.t"></h3><p data-i18n="tile.print.p"></p>
     </a>
@@ -214,6 +226,17 @@
       updNote(t(r.ok ? 'upd.opened' : 'upd.nohelper'));
     } catch { updNote(t('upd.nohelper')); }
   };
+
+  // supplies that expired or expire within 30 days (Supplies page)
+  SURVIVAL.loadData('supplies').then(d => {
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const left = (d?.items || []).filter(i => i.exp).map(i => Math.round((new Date(i.exp + 'T00:00') - today) / 86400000));
+    const gone = left.filter(n => n < 0).length, soon = left.filter(n => n >= 0 && n <= 30).length;
+    if (!gone && !soon) return;
+    const a = document.createElement('a'); a.href = 'supplies.html'; a.className = 'pill ' + (gone ? 'bad' : 'warn');
+    a.textContent = t('sup.alert').replace('{n}', gone + soon);
+    $('st-power').before(a);
+  }).catch(() => { });
 
   // shut the kit down from here (on the computer running it): servers, helper and start window
   if (onThisComputer && SURVIVAL.served) {

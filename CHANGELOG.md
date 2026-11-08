@@ -12,6 +12,15 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.28.0 (2026-11-08)
+
+- **✅ Checklists** (new page): go-bag (per person, 3 days), supplies at home (2 weeks), documents, and before you evacuate. Tick what is ready, add your own items, untick a list, print. Based on Ready.gov (FEMA), Red Cross and Defesa Civil lists.
+- **📦 Supplies** (new page): your stored water, food, medicines, batteries and more, with quantity, place and expiry date. Expired items turn red and those expiring within 30 days orange; the **home page warns** when something expires soon. Tips on rotating stock, medicines and batteries. Prints as a list.
+- Checklists and supplies are saved on the device and, on the computer running the kit, also on the stick (my-data\), so they survive a cleared browser and travel with copies of the kit (new /data endpoint in the kit helper, which keeps the page's data exactly as sent).
+- **🔋 Power calculator** on the Tools page: charges from a power bank, what a solar panel gives on a sunny day, how long a laptop runs the kit; tips to make power last; generator and carbon-monoxide safety (CDC / Red Cross).
+- **🫂 Psychological first aid** (new page, English and Portuguese): look, listen, link; what to say and not say; calming techniques; children; normal reactions; looking after yourself; help lines (CVV 188, 988). Based on the WHO "Psychological First Aid" guide. In the kit-wide search.
+- **🗣️ Phrasebook** (new page): 44 picture cards in English, Portuguese and Spanish (urgent, health with a 0–10 pain scale, needs, people, answers with numbers). Tap one to show it full screen; 🔊 has the device say it.
+- Help page and home page tiles for all of them.
 ## 1.27.2 (2026-11-08)
 
 - Help page: the print pack line mentions the Morse code chart, and the Morse line mentions both translators (text to dots and dashes, and back).

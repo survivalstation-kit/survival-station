@@ -30,6 +30,25 @@ const SURVIVAL = (() => {
     } catch { return null; }
   }
 
+  // ---- the user's own lists (checklists, supplies): kept in this browser and, on the computer running the kit,
+  // also on the stick (my-data\<name>.json, through the kit helper), so they survive a cleared browser and travel
+  // with the kit. The newest copy wins.
+  const onKitComputer = served && /^(localhost|127\.)/.test(location.hostname);
+  const HELPER = 'http://localhost:8091';
+  const parse = s => { try { return s ? JSON.parse(s) : null; } catch { return null; } };
+  async function loadData(name) {
+    const mine = parse(store('data-' + name));
+    let kit = null;
+    if (onKitComputer) try { const r = await fetch(`${HELPER}/data?name=${name}`, { cache: 'no-store' }); if (r.ok) kit = await r.json(); } catch { }
+    return (kit?.saved || 0) > (mine?.saved || 0) ? kit : mine;
+  }
+  async function saveData(name, data) {
+    data.saved = Date.now();
+    store('data-' + name, JSON.stringify(data));
+    if (!onKitComputer) return false;
+    try { return (await fetch(`${HELPER}/data?name=${name}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })).ok; } catch { return false; }
+  }
+
   // ---- language: saved choice, else the browser's language, else English
   function pickLang() {
     const saved = store('lang');
@@ -147,5 +166,5 @@ const SURVIVAL = (() => {
   applyI18n();
   showVersion();
   showDisclaimer();
-  return { served, host, ai, secure, libHost, library, tiles, voice, up, store, lang, dict, t, isDark, lowPower, setLowPower };
+  return { served, host, ai, secure, libHost, library, tiles, voice, up, store, lang, dict, t, isDark, lowPower, setLowPower, onKitComputer, loadData, saveData };
 })();

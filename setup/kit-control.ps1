@@ -97,6 +97,27 @@ while ($true) {
       Send $ctx 200 @{ ok = $true } $origin
       Start-Process $PS -WindowStyle Hidden -ArgumentList ('-NoProfile -ExecutionPolicy Bypass -File "{0}" -Quiet' -f (Join-Path $PSScriptRoot 'stop-old-kit.ps1'))
     }
+    # the user's own lists (checklists, supplies), kept on the stick so they travel with the kit: my-data\<name>.json
+    elseif ($path -eq '/data' -and $origin) {
+      $name = "$($req.QueryString['name'])"
+      if ($name -notmatch '^[a-z][a-z0-9-]{0,30}$') { Send $ctx 400 @{ error = 'bad name' } $origin; continue }
+      $file = Join-Path $Root "my-data\$name.json"
+      # kept and returned exactly as the page sent it (PowerShell's JSON conversion would flatten deep lists)
+      if ($req.HttpMethod -eq 'GET') {
+        $text = if (Test-Path $file) { [IO.File]::ReadAllText($file) } else { 'null' }
+        $r = $ctx.Response; $r.StatusCode = 200; $r.Headers['Access-Control-Allow-Origin'] = $origin; $r.Headers['Vary'] = 'Origin'; $r.Headers['Cache-Control'] = 'no-store'
+        $r.ContentType = 'application/json; charset=utf-8'; $bytes = [Text.Encoding]::UTF8.GetBytes($text); $r.OutputStream.Write($bytes, 0, $bytes.Length); $r.Close()
+      }
+      elseif ($req.HttpMethod -eq 'POST') {
+        $sr = New-Object IO.StreamReader($req.InputStream, [Text.Encoding]::UTF8); $text = $sr.ReadToEnd()
+        if ($text.Length -gt 1MB) { Send $ctx 413 @{ error = 'too big' } $origin; continue }
+        try { $null = $text | ConvertFrom-Json } catch { Send $ctx 400 @{ error = 'not JSON' } $origin; continue }
+        New-Item -ItemType Directory -Force (Split-Path $file) | Out-Null
+        [IO.File]::WriteAllText($file, $text, (New-Object Text.UTF8Encoding $false))
+        Send $ctx 200 @{ ok = $true } $origin
+      }
+      else { Send $ctx 405 @{ error = 'method' } $origin }
+    }
     # private favorites: the page encrypts them with the user's password before sending; only that encrypted
     # text is kept, at the top of the kit (outside portal\, so phones can never fetch the file)
     elseif ($path -eq '/favorites' -and $origin) {

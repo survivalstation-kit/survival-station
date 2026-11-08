@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phrasebook</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="phrases">
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html">Survival <span>Station</span></a>
+  <nav class="links">
+    <a href="index.html" data-i18n="nav.home">Home</a>
+    <a href="chat.html" data-i18n="nav.chat">Ask AI</a>
+    <a href="map.html" data-i18n="nav.map">Map</a>
+    <a href="cards.html" data-cards data-i18n="nav.cards">Emergency</a>
+    <a href="search.html" data-i18n="nav.search">Search</a>
+    <a href="help.html" data-i18n="nav.help">Help</a>
+  </nav>
+  <select class="lang-select" aria-label="Language / Idioma"></select>
+  <button class="theme-btn" type="button" data-i18n="theme">Theme</button>
+</div></header>
+
+<main class="wrap phrases">
+  <h1 id="title"></h1>
+  <p class="lede" id="lede"></p>
+  <div class="form phrase-langs">
+    <label><span id="l-mine"></span><select id="mine"></select></label>
+    <label><span id="l-theirs"></span><select id="theirs"></select></label>
+  </div>
+  <nav class="toc" id="toc"></nav>
+  <div id="groups"></div>
+  <p class="muted" id="note"></p>
+</main>
+
+<div class="phrase-big" id="big" hidden>
+  <div class="phrase-big-ico" id="big-ico"></div>
+  <p class="phrase-big-text" id="big-text"></p>
+  <p class="phrase-big-mine" id="big-mine"></p>
+  <div class="phrase-big-scale" id="big-scale" hidden></div>
+  <p class="copy-row"><button class="btn" type="button" id="big-say"></button> <button class="btn ghost" type="button" id="big-close"></button></p>
+</div>
+
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+<script>
+(() => {
+  const ui = SURVIVAL.lang === 'pt-BR' ? 'pt' : 'en';
+  const L = (en, p) => ui === 'pt' ? p : en;
+  const $ = id => document.getElementById(id);
+  const LANGS = { en: ['English', 'en-US'], pt: ['Português', 'pt-BR'], es: ['Español', 'es-ES'] };
+
+  // [icon, English, Português, Español]
+  const GROUPS = [
+    [L('Urgent', 'Urgente'), [
+      ['🆘', 'Help!', 'Socorro!', '¡Ayuda!'],
+      ['🚑', 'Call an ambulance!', 'Chame uma ambulância!', '¡Llame a una ambulancia!'],
+      ['🩸', 'I am hurt.', 'Estou ferido.', 'Estoy herido.'],
+      ['😮‍💨', 'I can\'t breathe.', 'Não consigo respirar.', 'No puedo respirar.'],
+      ['🫀', 'Chest pain.', 'Dor no peito.', 'Dolor en el pecho.'],
+      ['🏥', 'Where is the hospital?', 'Onde fica o hospital?', '¿Dónde está el hospital?'],
+      ['🔥', 'Fire!', 'Fogo!', '¡Fuego!'],
+      ['⚠️', 'Danger! Get out!', 'Perigo! Saia daqui!', '¡Peligro! ¡Salga!'],
+      ['🧒', 'A child is lost.', 'Uma criança está perdida.', 'Un niño está perdido.'],
+    ]],
+    [L('Health', 'Saúde'), [
+      ['👉', 'It hurts here.', 'Dói aqui.', 'Me duele aquí.'],
+      ['🤕', 'Headache.', 'Dor de cabeça.', 'Dolor de cabeza.'],
+      ['🤢', 'I feel sick. I am vomiting.', 'Estou enjoado. Estou vomitando.', 'Tengo náuseas. Estoy vomitando.'],
+      ['🌡️', 'I have a fever.', 'Estou com febre.', 'Tengo fiebre.'],
+      ['🥶', 'I am very cold.', 'Estou com muito frio.', 'Tengo mucho frío.'],
+      ['💊', 'I need my medicine.', 'Preciso do meu remédio.', 'Necesito mi medicina.'],
+      ['💉', 'I am diabetic.', 'Sou diabético.', 'Soy diabético.'],
+      ['🚫', 'I am allergic.', 'Tenho alergia.', 'Soy alérgico.'],
+      ['🤰', 'I am pregnant.', 'Estou grávida.', 'Estoy embarazada.'],
+      ['❤️', 'I have a heart condition.', 'Tenho problema de coração.', 'Tengo un problema del corazón.'],
+      ['😵', 'I feel dizzy.', 'Estou tonto.', 'Estoy mareado.'],
+      ['📊', 'How much does it hurt? (0 = none, 10 = worst)', 'Quanto dói? (0 = nada, 10 = o pior possível)', '¿Cuánto le duele? (0 = nada, 10 = lo peor)', 'pain'],
+    ]],
+    [L('Needs', 'Necessidades'), [
+      ['💧', 'Water, please.', 'Água, por favor.', 'Agua, por favor.'],
+      ['🍞', 'I am hungry.', 'Estou com fome.', 'Tengo hambre.'],
+      ['🚻', 'Where is the toilet?', 'Onde fica o banheiro?', '¿Dónde está el baño?'],
+      ['🛏️', 'I need a place to sleep.', 'Preciso de um lugar para dormir.', 'Necesito un lugar para dormir.'],
+      ['🧣', 'A blanket, please.', 'Um cobertor, por favor.', 'Una manta, por favor.'],
+      ['🍼', 'Milk or nappies for the baby.', 'Leite ou fraldas para o bebê.', 'Leche o pañales para el bebé.'],
+      ['🔌', 'Can I charge my phone?', 'Posso carregar meu celular?', '¿Puedo cargar mi teléfono?'],
+      ['📞', 'Can I make a call?', 'Posso fazer uma ligação?', '¿Puedo hacer una llamada?'],
+    ]],
+    [L('People', 'Pessoas'), [
+      ['👨‍👩‍👧', 'I am looking for my family.', 'Estou procurando minha família.', 'Busco a mi familia.'],
+      ['🗺️', 'I am lost.', 'Estou perdido.', 'Estoy perdido.'],
+      ['🧍', 'I am alone.', 'Estou sozinho.', 'Estoy solo.'],
+      ['🦻', 'I can\'t hear. Please write it down.', 'Não escuto. Por favor, escreva.', 'No oigo. Por favor, escríbalo.'],
+      ['🗣️', 'I don\'t speak your language.', 'Não falo a sua língua.', 'No hablo su idioma.'],
+      ['🐌', 'Please speak slowly.', 'Por favor, fale devagar.', 'Por favor, hable despacio.'],
+      ['🏠', 'Where is the shelter?', 'Onde fica o abrigo?', '¿Dónde está el refugio?'],
+    ]],
+    [L('Answers', 'Respostas'), [
+      ['✅', 'Yes.', 'Sim.', 'Sí.'],
+      ['❌', 'No.', 'Não.', 'No.'],
+      ['🤷', 'I don\'t know.', 'Não sei.', 'No sé.'],
+      ['👍', 'OK, I understand.', 'Tá bom, entendi.', 'Vale, entiendo.'],
+      ['❓', 'I don\'t understand.', 'Não entendi.', 'No entiendo.'],
+      ['✋', 'Wait, please.', 'Espere, por favor.', 'Espere, por favor.'],
+      ['🙏', 'Thank you.', 'Obrigado.', 'Gracias.'],
+      ['🔢', 'How many? (point at a number)', 'Quantos? (aponte um número)', '¿Cuántos? (señale un número)', 'count'],
+    ]],
+  ];
+  const IDX = { en: 1, pt: 2, es: 3 };
+
+  document.title = L('Phrasebook', 'Frases para mostrar');
+  $('title').textContent = '🗣️ ' + document.title;
+  $('lede').textContent = L('Point-and-show cards for when you don\'t share a language, or for people who can\'t hear or speak. Tap a card to show it big, and 🔊 to have the device say it.',
+                            'Cartões para apontar e mostrar quando vocês não falam a mesma língua, ou para quem não ouve ou não fala. Toque num cartão para mostrar grande, e em 🔊 para o aparelho falar.');
+  $('l-mine').textContent = L('I speak', 'Eu falo');
+  $('l-theirs').textContent = L('Show it in', 'Mostrar em');
+  $('big-say').textContent = L('🔊 Say it', '🔊 Falar'); $('big-close').textContent = L('Close', 'Fechar');
+  $('note').textContent = L('The spoken voice uses the languages installed on this device; if one is missing, the text still works. The pictures help people who can\'t read.',
+                            'A voz usa os idiomas instalados neste aparelho; se faltar algum, o texto continua funcionando. As figuras ajudam quem não sabe ler.');
+  for (const id of ['mine', 'theirs']) $(id).append(...Object.entries(LANGS).map(([k, [name]]) => new Option(name, k)));
+  const saved = (SURVIVAL.store('phrases-langs') || '').split(',');
+  $('mine').value = LANGS[saved[0]] ? saved[0] : ui;
+  $('theirs').value = LANGS[saved[1]] ? saved[1] : (ui === 'pt' ? 'es' : 'pt');
+
+  function say(text, lang) {
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text); u.lang = LANGS[lang][1]; u.rate = 0.9;
+      const v = speechSynthesis.getVoices().find(v => v.lang.replace('_', '-').toLowerCase().startsWith(LANGS[lang][1].slice(0, 2)));
+      if (v) u.voice = v;
+      speechSynthesis.speak(u);
+    } catch { }
+  }
+
+  let current = null;
+  function show(p) {
+    current = p;
+    const mine = $('mine').value, theirs = $('theirs').value;
+    $('big-ico').textContent = p[0]; $('big-text').textContent = p[IDX[theirs]];
+    $('big-mine').textContent = mine === theirs ? '' : p[IDX[mine]];
+    const scale = $('big-scale'); scale.replaceChildren(); scale.hidden = !p[4];
+    if (p[4] === 'pain') {
+      const faces = ['😀', '🙂', '🙂', '😐', '😐', '😕', '😟', '😣', '😖', '😫', '😭'];
+      for (let i = 0; i <= 10; i++) { const d = document.createElement('div'); d.className = 'scale-cell' + (i >= 7 ? ' hi' : i >= 4 ? ' mid' : ''); d.innerHTML = `<span>${faces[i]}</span><b>${i}</b>`; scale.append(d); }
+    } else if (p[4] === 'count') {
+      for (let i = 1; i <= 10; i++) { const d = document.createElement('div'); d.className = 'scale-cell'; d.innerHTML = `<b>${i}</b>`; scale.append(d); }
+    }
+    $('big').hidden = false; document.body.style.overflow = 'hidden';
+  }
+  const close = () => { $('big').hidden = true; document.body.style.overflow = ''; speechSynthesis?.cancel?.(); };
+  $('big-close').onclick = close;
+  addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  $('big-say').onclick = () => current && say(current[IDX[$('theirs').value]], $('theirs').value);
+
+  function render() {
+    SURVIVAL.store('phrases-langs', `${$('mine').value},${$('theirs').value}`);
+    const mine = $('mine').value, theirs = $('theirs').value;
+    $('groups').replaceChildren(); $('toc').replaceChildren();
+    GROUPS.forEach(([name, list], gi) => {
+      const h = document.createElement('h2'); h.textContent = name; h.id = 'g' + gi;
+      const a = document.createElement('a'); a.href = '#g' + gi; a.textContent = name; $('toc').append(a);
+      const grid = document.createElement('div'); grid.className = 'phrase-grid';
+      for (const p of list) {
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'phrase-card';
+        const i = document.createElement('span'); i.className = 'phrase-ico'; i.textContent = p[0];
+        const t = document.createElement('b'); t.textContent = p[IDX[theirs]];
+        const m = document.createElement('small'); m.textContent = mine === theirs ? '' : p[IDX[mine]];
+        b.append(i, t, m); b.onclick = () => show(p);
+        grid.append(b);
+      }
+      $('groups').append(h, grid);
+    });
+  }
+  $('mine').onchange = render; $('theirs').onchange = render;
+  render();
+})();
+</script>
+</body>
+</html>

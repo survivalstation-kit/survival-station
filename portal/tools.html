@@ -26,7 +26,7 @@
   <p class="lede" data-t="lede"></p>
   <nav class="toc">
     <a href="#cpr" data-t="cpr.h"></a><a href="#water" data-t="water.h"></a><a href="#supplies" data-t="sup.h"></a>
-    <a href="#signal" data-t="sig.h"></a><a href="#morse" data-t="mo.h"></a><a href="#sun" data-t="sun.h"></a>
+    <a href="#signal" data-t="sig.h"></a><a href="#morse" data-t="mo.h"></a><a href="#power" data-t="pw.h"></a><a href="#sun" data-t="sun.h"></a>
   </nav>
 
   <section class="card" id="cpr">
@@ -168,6 +168,53 @@
     </ul>
   </section>
 
+  <section class="card" id="power">
+    <h2 data-t="pw.h"></h2>
+    <p data-t="pw.intro"></p>
+    <div class="form">
+      <label><span data-t="pw.device"></span>
+        <select id="pw-dev">
+          <option value="15" data-t="pw.d.phone"></option>
+          <option value="25" data-t="pw.d.bigphone"></option>
+          <option value="13" data-t="pw.d.radio"></option>
+          <option value="4" data-t="pw.d.mesh"></option>
+          <option value="3" data-t="pw.d.lamp"></option>
+          <option value="35" data-t="pw.d.tablet"></option>
+          <option value="0" data-t="pw.d.custom"></option>
+        </select></label>
+      <label id="pw-custom-l" hidden><span data-t="pw.customwh"></span> <input type="number" id="pw-custom" min="1" step="1" value="20" inputmode="numeric"></label>
+      <label><span data-t="pw.bank"></span> <input type="number" id="pw-bank" min="0" step="1000" value="10000" inputmode="numeric"></label>
+      <label><span data-t="pw.solar"></span> <input type="number" id="pw-solar" min="0" step="5" value="20" inputmode="numeric"></label>
+      <label><span data-t="pw.sunh"></span> <input type="number" id="pw-sunh" min="0" max="12" step="0.5" value="4" inputmode="decimal"></label>
+    </div>
+    <div class="result" id="pw-out"></div>
+    <h3 data-t="pw.laptop"></h3>
+    <div class="form">
+      <label><span data-t="pw.lapwh"></span> <input type="number" id="pw-lapwh" min="1" step="5" value="50" inputmode="numeric"></label>
+      <label><span data-t="pw.lapuse"></span>
+        <select id="pw-lapuse">
+          <option value="12" data-t="pw.u.light"></option>
+          <option value="25" selected data-t="pw.u.mixed"></option>
+          <option value="45" data-t="pw.u.heavy"></option>
+        </select></label>
+    </div>
+    <div class="result" id="pw-lap"></div>
+    <h3 data-t="pw.tips"></h3>
+    <ul>
+      <li data-t="pw.t1"></li>
+      <li data-t="pw.t2"></li>
+      <li data-t="pw.t3"></li>
+    </ul>
+    <h3 data-t="pw.gen"></h3>
+    <ul>
+      <li data-t="pw.g1"></li>
+      <li data-t="pw.g2"></li>
+      <li data-t="pw.g3"></li>
+      <li data-t="pw.g4"></li>
+    </ul>
+    <p class="muted" data-t="pw.note"></p>
+  </section>
+
   <section class="card" id="sun">
     <h2 data-t="sun.h"></h2>
     <div class="form">
@@ -259,6 +306,26 @@
       'mo.l1': 'Start with E (·), T (–), A (·–), N (–·), I (··), M (––), S (···) and O (–––): they make SOS and many common words.',
       'mo.l2': 'Say it aloud: "dit" for a dot and "dah" for a dash. SOS sounds like "di-di-dit dah-dah-dah di-di-dit".',
       'mo.l3': 'Practise ten minutes a day with family; agree a few signals in advance (for example: one long flash = "I\'m OK", SOS = "come now").',
+      'pw.h': 'Power: batteries, power banks and solar', 'pw.intro': 'How far your stored power goes. Rough numbers: real results depend on cables, heat, age and use.',
+      'pw.device': 'Device to charge', 'pw.d.phone': 'Phone (about 15 Wh)', 'pw.d.bigphone': 'Large phone (about 25 Wh)', 'pw.d.radio': 'Handheld radio, e.g. Baofeng (about 13 Wh)',
+      'pw.d.mesh': 'Meshtastic device (about 4 Wh)', 'pw.d.lamp': 'Rechargeable headlamp (about 3 Wh)', 'pw.d.tablet': 'Tablet (about 35 Wh)', 'pw.d.custom': 'Other (type its Wh)',
+      'pw.customwh': 'Its battery in Wh (Wh = mAh × volts ÷ 1000)', 'pw.bank': 'Power bank capacity (mAh, printed on it)', 'pw.solar': 'Solar panel (watts)', 'pw.sunh': 'Hours of strong sun a day',
+      'pw.r.bank': 'Power bank: about {n} full charges', 'pw.r.bankhow': 'A {mah} mAh power bank holds about {wh} Wh; about a third is lost in the conversion and the cable.',
+      'pw.r.solar': 'Solar: about {n} full charges a day', 'pw.r.solarhow': 'A {w} W panel gives about {wh} Wh on a day with {h} h of strong sun (real panels deliver about 60–70% of their label), enough to refill the power bank {b} times.',
+      'pw.r.cloudy': 'Cloudy days: expect a quarter or less.',
+      'pw.laptop': 'A laptop running this kit', 'pw.lapwh': 'Laptop battery (Wh, on its label or battery report)', 'pw.lapuse': 'Use',
+      'pw.u.light': 'Light: cards, library and maps (about 12 W)', 'pw.u.mixed': 'Mixed: some AI questions (about 25 W)', 'pw.u.heavy': 'Heavy: AI answering all the time (about 45 W)',
+      'pw.r.lap': 'About {h} on battery', 'pw.r.laphow': 'Low power mode, the smallest AI model, a dim screen and closing other programs all make it last longer. A power bank can only charge a laptop through USB-C "PD" (check both).',
+      'pw.tips': 'Make it last',
+      'pw.t1': 'Phones: turn on battery saver, lower the brightness, switch off mobile data, Wi-Fi, Bluetooth and location when not needed; flight mode saves the most.',
+      'pw.t2': 'Charge from the car only with the engine running outdoors, never in a closed garage; a car USB socket charges slowly (about 5–10 W).',
+      'pw.t3': 'Solar: face the panel to the sun (north in the southern hemisphere, south in the northern), tilt it, keep it clean and unshaded; charge a power bank by day and the phone from it at night.',
+      'pw.gen': 'Generators and fuel: carbon monoxide kills',
+      'pw.g1': 'Never run a generator, camping stove, grill or engine indoors, in a garage, on a balcony or near windows and doors, even with them open. Keep it at least 6 m (20 ft) from the house, exhaust pointing away.',
+      'pw.g2': 'Carbon monoxide has no smell. Headache, dizziness, nausea or sleepiness while it runs: get everyone into fresh air at once and call for help. Use a battery CO alarm.',
+      'pw.g3': 'Never plug a generator into a wall socket ("back-feeding"): it can kill line workers and neighbours. Use heavy-duty extension cords, or a transfer switch fitted by an electrician.',
+      'pw.g4': 'Let it cool before refuelling. Store fuel in approved cans, outdoors, away from the generator.',
+      'pw.note': 'Sources: US CDC and Red Cross generator and carbon-monoxide guidance; typical battery figures.',
       'sun.h': 'Sun, directions and daylight', 'sun.lat': 'Latitude', 'sun.lon': 'Longitude', 'sun.gps': '📍 Use this device\'s GPS',
       'sun.from': 'From the last point on the Map: {p}', 'sun.none': 'Tap a point on the Map (or type the coordinates) to see the sun times there.',
       'sun.rise': 'Sunrise', 'sun.set': 'Sunset', 'sun.noon': 'Sun highest (solar noon)', 'sun.daylight': 'Daylight', 'sun.now': 'Sun now',
@@ -333,6 +400,26 @@
       'mo.l1': 'Comece por E (·), T (–), A (·–), N (–·), I (··), M (––), S (···) e O (–––): elas formam o SOS e muitas palavras comuns.',
       'mo.l2': 'Fale em voz alta: "di" para o ponto e "dá" para o traço. SOS soa como "di-di-di dá-dá-dá di-di-di".',
       'mo.l3': 'Treine dez minutos por dia com a família; combinem alguns sinais antes (por exemplo: uma piscada longa = "estou bem", SOS = "venha agora").',
+      'pw.h': 'Energia: pilhas, power banks e solar', 'pw.intro': 'Até onde a energia guardada vai. Números aproximados: o resultado real depende do cabo, do calor, da idade e do uso.',
+      'pw.device': 'Aparelho para carregar', 'pw.d.phone': 'Celular (cerca de 15 Wh)', 'pw.d.bigphone': 'Celular grande (cerca de 25 Wh)', 'pw.d.radio': 'Rádio portátil, ex. Baofeng (cerca de 13 Wh)',
+      'pw.d.mesh': 'Aparelho Meshtastic (cerca de 4 Wh)', 'pw.d.lamp': 'Lanterna de cabeça recarregável (cerca de 3 Wh)', 'pw.d.tablet': 'Tablet (cerca de 35 Wh)', 'pw.d.custom': 'Outro (digite os Wh)',
+      'pw.customwh': 'Bateria dele em Wh (Wh = mAh × volts ÷ 1000)', 'pw.bank': 'Capacidade do power bank (mAh, escrito nele)', 'pw.solar': 'Placa solar (watts)', 'pw.sunh': 'Horas de sol forte por dia',
+      'pw.r.bank': 'Power bank: cerca de {n} cargas completas', 'pw.r.bankhow': 'Um power bank de {mah} mAh guarda cerca de {wh} Wh; mais ou menos um terço se perde na conversão e no cabo.',
+      'pw.r.solar': 'Solar: cerca de {n} cargas completas por dia', 'pw.r.solarhow': 'Uma placa de {w} W dá cerca de {wh} Wh num dia com {h} h de sol forte (placas reais entregam uns 60–70% do rótulo), o bastante para encher o power bank {b} vezes.',
+      'pw.r.cloudy': 'Dias nublados: espere um quarto ou menos.',
+      'pw.laptop': 'Um notebook rodando este kit', 'pw.lapwh': 'Bateria do notebook (Wh, no rótulo ou no relatório da bateria)', 'pw.lapuse': 'Uso',
+      'pw.u.light': 'Leve: cartões, biblioteca e mapas (cerca de 12 W)', 'pw.u.mixed': 'Misto: algumas perguntas à IA (cerca de 25 W)', 'pw.u.heavy': 'Pesado: IA respondendo o tempo todo (cerca de 45 W)',
+      'pw.r.lap': 'Cerca de {h} na bateria', 'pw.r.laphow': 'O modo Economia, o menor modelo de IA, a tela mais escura e fechar outros programas fazem durar mais. Um power bank só carrega notebook por USB-C "PD" (confira os dois).',
+      'pw.tips': 'Fazer durar',
+      'pw.t1': 'Celular: ligue a economia de bateria, baixe o brilho, desligue dados móveis, Wi-Fi, Bluetooth e localização quando não precisar; o modo avião economiza mais.',
+      'pw.t2': 'Carregue no carro só com o motor ligado ao ar livre, nunca na garagem fechada; a USB do carro carrega devagar (cerca de 5–10 W).',
+      'pw.t3': 'Solar: vire a placa para o sol (para o norte no hemisfério sul, para o sul no hemisfério norte), incline, mantenha limpa e sem sombra; carregue o power bank de dia e o celular nele à noite.',
+      'pw.gen': 'Geradores e combustível: o monóxido de carbono mata',
+      'pw.g1': 'Nunca ligue gerador, fogareiro, churrasqueira ou motor dentro de casa, na garagem, na varanda ou perto de janelas e portas, mesmo abertas. Deixe a pelo menos 6 m da casa, com o escapamento virado para longe.',
+      'pw.g2': 'O monóxido de carbono não tem cheiro. Dor de cabeça, tontura, enjoo ou sono com o gerador ligado: leve todos para o ar livre na hora e peça socorro. Use um alarme de CO a pilha.',
+      'pw.g3': 'Nunca ligue o gerador numa tomada da casa: a energia volta pela rede e pode matar eletricistas e vizinhos. Use extensões grossas, ou uma chave de transferência instalada por eletricista.',
+      'pw.g4': 'Deixe esfriar antes de abastecer. Guarde o combustível em galões próprios, do lado de fora, longe do gerador.',
+      'pw.note': 'Fontes: orientações do CDC (EUA) e da Cruz Vermelha sobre geradores e monóxido de carbono; números típicos de baterias.',
       'sun.h': 'Sol, direções e luz do dia', 'sun.lat': 'Latitude', 'sun.lon': 'Longitude', 'sun.gps': '📍 Usar o GPS deste aparelho',
       'sun.from': 'Do último ponto no Mapa: {p}', 'sun.none': 'Toque num ponto do Mapa (ou digite as coordenadas) para ver os horários do sol ali.',
       'sun.rise': 'Nascer do sol', 'sun.set': 'Pôr do sol', 'sun.noon': 'Sol mais alto (meio-dia solar)', 'sun.daylight': 'Luz do dia', 'sun.now': 'Sol agora',
@@ -562,6 +649,26 @@
   }
   $('mo-again').onclick = () => quiz && playOnce(morseSteps(quiz));
   $('mo-show').onclick = () => { if (quiz) $('mo-answer').textContent = tt('mo.practice.answer', { l: quiz.toUpperCase(), c: pretty(MORSE[quiz]) }); };
+
+  // ------------------------------------------------------------------ power
+  // power bank: mAh at 3.7 V, about 65% reaches the device; solar: about 65% of the label in real use
+  function power() {
+    const dev = Number($('pw-dev').value) || Math.max(1, num('pw-custom'));
+    $('pw-custom-l').hidden = $('pw-dev').value !== '0';
+    const mah = num('pw-bank'), bankWh = mah * 3.7 / 1000, useful = bankWh * 0.65;
+    const w = num('pw-solar'), h = num('pw-sunh'), solarWh = w * h * 0.65;
+    const out = $('pw-out'); out.replaceChildren();
+    const line = (b, s) => { const p = document.createElement('p'); const strong = document.createElement('b'); strong.textContent = b; p.append(strong, document.createElement('br'), s); out.append(p); };
+    if (mah) line(tt('pw.r.bank', { n: nf(useful / dev, 1) }), tt('pw.r.bankhow', { mah: nf(mah), wh: nf(bankWh) }));
+    if (w && h) line(tt('pw.r.solar', { n: nf(solarWh * 0.85 / dev, 1) }), tt('pw.r.solarhow', { w: nf(w), wh: nf(solarWh), h: nf(h, 1), b: bankWh ? nf(solarWh / bankWh, 1) : '–' }) + ' ' + tt('pw.r.cloudy'));
+    const hours = num('pw-lapwh') * 0.9 / Number($('pw-lapuse').value);
+    $('pw-lap').replaceChildren();
+    const p = document.createElement('p'); const strong = document.createElement('b');
+    strong.textContent = tt('pw.r.lap', { h: `${Math.floor(hours)}h ${String(Math.round(hours % 1 * 60)).padStart(2, '0')}m` });
+    p.append(strong, document.createElement('br'), tt('pw.r.laphow')); $('pw-lap').append(p);
+  }
+  ['pw-dev', 'pw-custom', 'pw-bank', 'pw-solar', 'pw-sunh', 'pw-lapwh', 'pw-lapuse'].forEach(id => ['input', 'change'].forEach(ev => $(id).addEventListener(ev, power)));
+  power();
 
   // ------------------------------------------------------------------ sun
   // sun position: low-precision formulas from the Astronomical Almanac (about a minute for sunrise times)
