@@ -75,3 +75,4 @@ book: that decision and responsibility are yours.**
 | Kiwix for Android | GPL-3.0 | https://github.com/kiwix/kiwix-android |
 | PocketPal AI | MIT | https://github.com/a-ghorbani/pocketpal-ai |
 | Organic Maps | Apache-2.0 | https://github.com/organicmaps/organicmaps |
+| Meshtastic for Android | GPL-3.0 | https://github.com/meshtastic/Meshtastic-Android |

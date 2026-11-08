@@ -12,6 +12,16 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.23.0 (2026-11-08)
+
+- **Meshtastic (LoRa texting) on the Radio page**, in English and Portuguese: text messages and GPS positions with no phone network, no internet and no licence, passed from device to device. It covers:
+  - what it is good for, range and battery;
+  - which frequency version to buy (915 MHz in the Americas, 868 MHz in Europe) and easy ready-made devices;
+  - setup step by step: firmware (flasher.meshtastic.org), the app, Bluetooth PIN, the **region** (US, **BR_902** for Brazil, EU_868, ANZ; required before it transmits), names, a **private family channel** with a random key shared by QR code, position sharing, and testing;
+  - use in an emergency, and links to the library's Meshtastic, LoRa and MeshCore articles.
+
+  Checked against Meshtastic's official documentation.
+- **Meshtastic for Android** joins the Android apps extra (pps/android/Meshtastic.apk, the F-Droid build that needs no Google services). Kits that already have the apps get it with **Check for updates**.
 ## 1.22.0 (2026-11-08)
 
 - **Check for updates on the home page.** A new **🔄 Check for updates** button next to the status pills compares the kit with the latest release on GitHub (needs internet):

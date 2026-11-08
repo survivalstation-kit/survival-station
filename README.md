@@ -40,9 +40,9 @@ An offline survival kit that runs from a USB drive. Plug it into a computer, dou
 - **Family plan, print pack and private documents**: a family emergency plan to fill in and print, a one-click print pack (cards, radio, plan, start instructions), and a `private/` folder for IDs and insurance papers that phones never see, locked with a password by `PRIVATE-DOCS.bat` (OpenSSL format: Mac/Linux use `bash launch/private-docs.sh`, or `openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -md sha256`).
 - **Search**: one box searches the emergency cards and kit pages, the Survival Data guides (including the text inside the PDFs, opening at the right page), your documents and the full text of the library.
 - **Weather page**: when some connection is left (even a phone's data), a 7-day forecast from Open-Meteo, official US alerts, and the last forecast saved for when the connection goes; plus tips for reading the weather without internet.
-- **Radio page**: emergency frequencies, how to call for help, and how to set up a Baofeng UV-5R or TIDRADIO TD-H3 PLUS, with a CHIRP channel file (`portal/radio/survival-channels.csv`).
+- **Radio page**: emergency frequencies, how to call for help, and how to set up a Baofeng UV-5R or TIDRADIO TD-H3 PLUS, with a CHIRP channel file (`portal/radio/survival-channels.csv`); plus how to set up Meshtastic LoRa devices to text with no phone network.
 - **Phone access**: phones on the same hotspot or Wi-Fi open the computer's address in a browser.
-- **Android apps** to install ahead of time: Kiwix, PocketPal AI (runs the AI on the phone) and Organic Maps.
+- **Android apps** to install ahead of time: Kiwix, PocketPal AI (runs the AI on the phone), Organic Maps and Meshtastic (LoRa mesh texting).
 
 **For the people using the kit:** the portal has a built-in **Help** page (`portal/help.html`, English and Português). It covers starting the kit, every feature, phone access, and a troubleshooting table. It opens even when nothing is running. This README is for whoever builds the drive.
 
@@ -150,7 +150,7 @@ tools/<os>/whisper/  speech to text for the chat (the Voice extra)
 private/       your personal documents, locked with PRIVATE-DOCS.bat; not reachable from phones
 models/        .gguf AI models
 library/       .zim offline archives
-apps/android/  Kiwix, PocketPal AI, Organic Maps APKs
+apps/android/  Kiwix, PocketPal AI, Organic Maps, Meshtastic APKs
 setup/         build-drive.ps1
 launch/        start-unix.sh (shared Mac/Linux launcher)
 ```

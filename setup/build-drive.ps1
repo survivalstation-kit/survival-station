@@ -1389,9 +1389,12 @@ function Get-AppList {
     $url = "https://download.kiwix.org/release/kiwix-android/$kiwixApk"
     @{ Name = 'Kiwix.apk'; Url = $url; Size = Get-RemoteSize $url }
   }
-  foreach ($app in @(@{ Repo = 'a-ghorbani/pocketpal-ai'; Name = 'PocketPal-AI.apk' }, @{ Repo = 'organicmaps/organicmaps'; Name = 'OrganicMaps.apk' })) {
+  # Meshtastic: the F-Droid build, which needs no Google services, for every kind of phone (universal)
+  foreach ($app in @(@{ Repo = 'a-ghorbani/pocketpal-ai'; Name = 'PocketPal-AI.apk' }, @{ Repo = 'organicmaps/organicmaps'; Name = 'OrganicMaps.apk' },
+                     @{ Repo = 'meshtastic/Meshtastic-Android'; Name = 'Meshtastic.apk'; Like = '*fdroid-universal*.apk' })) {
     try {
-      $a = (Invoke-RestMethod "https://api.github.com/repos/$($app.Repo)/releases/latest").assets | Where-Object { $_.name -like '*.apk' } | Select-Object -First 1
+      $like = if ($app.Like) { $app.Like } else { '*.apk' }
+      $a = (Invoke-RestMethod "https://api.github.com/repos/$($app.Repo)/releases/latest").assets | Where-Object { $_.name -like $like } | Select-Object -First 1
       if ($a) { @{ Name = $app.Name; Url = $a.browser_download_url; Size = [int64]$a.size } }
     } catch { Write-Host "   (skipped $($app.Name): $($_.Exception.Message))" -ForegroundColor Yellow }
   }
@@ -1427,7 +1430,7 @@ if ($Catalog) {
   $apps = @(Get-AppList)
   $list += [ordered]@{ id = 'survival-data'; group = 'extra'; name = 'Survival-Data: preparedness, radio, medical PDFs (third-party books with no stated licence: your choice)'; file = 'portal/survival-data/index.html'; size = 1500MB }
   $list += [ordered]@{ id = 'voice'; group = 'extra'; name = 'Voice: speak questions to the AI, also on phones (Windows, Linux)'; file = ($WhisperModelFile -replace '\\', '/'); size = (Get-RemoteSize $WhisperModel) + 210MB }   # + speech servers (~20 MB) and Caddy (~50 MB) per system
-  $list += [ordered]@{ id = 'apps'; group = 'extra'; name = 'Android apps: Kiwix, PocketPal AI, Organic Maps'; file = 'apps/android/Kiwix.apk'; size = [int64]($apps | ForEach-Object { $_.Size } | Measure-Object -Sum).Sum }
+  $list += [ordered]@{ id = 'apps'; group = 'extra'; name = 'Android apps: Kiwix, PocketPal AI, Organic Maps, Meshtastic'; file = 'apps/android/Kiwix.apk'; size = [int64]($apps | ForEach-Object { $_.Size } | Measure-Object -Sum).Sum }
   $world = 0
   foreach ($r in $runs) {
     $r.P.WaitForExit()
@@ -1675,7 +1678,7 @@ foreach ($m in $MapList) {
 
 $total = if (Test-Path (Join-Path $Target 'engine\VERSION')) { 0 } else { $BaseSize }
 if ($WantSD -and -not (Test-Path (Join-Path $Target 'portal\survival-data\index.html'))) { $total += 1500MB }
-if ($WantApps -and -not (Test-Path (Join-Path $Target 'apps\android'))) { $total += 550MB }
+if ($WantApps -and -not (Test-Path (Join-Path $Target 'apps\android'))) { $total += 600MB }
 if ($WantVoice -and -not (Test-Voice)) { $total += 400MB }
 # files already on the target at the same size are skipped by Download, so they cost nothing
 foreach ($m in $modelList) { $m.Have = (Test-Same (Join-Path $Target "models\$($m.File)") $m.MainSize) -and (-not $m.Mmproj -or (Test-Same (Get-MmprojPath $m) $m.MmSize)) }

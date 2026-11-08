@@ -26,13 +26,13 @@
 <!-- ======================================================= English -->
 <article data-for="en">
   <h1>Two-way radio in an emergency</h1>
-  <p class="lede">What to listen to and how to call for help, the frequencies to program, and how to set up a <b>Baofeng UV-5R</b> and a <b>TIDRADIO TD-H3 PLUS</b>. Print this page and keep it with the radios.</p>
+  <p class="lede">What to listen to and how to call for help, the frequencies to program, how to set up a <b>Baofeng UV-5R</b> and a <b>TIDRADIO TD-H3 PLUS</b>, and <b>Meshtastic</b> LoRa texting. Print this page and keep it with the radios.</p>
   <p class="notice"><b>Program the radios now, while you have internet and time.</b> Typing frequencies on a keypad in the dark, under stress, is hard. The <a href="radio/survival-channels.csv" download>channel file</a> loads every frequency below in one go (see <a href="#chirp">Programming with CHIRP</a>).</p>
 
   <nav class="toc">
     <a href="#now">Emergency now</a><a href="#freqs">Frequencies</a><a href="#rules">Who may transmit</a>
     <a href="#uv5r">Baofeng UV-5R</a><a href="#h3">TIDRADIO TD-H3 PLUS</a><a href="#chirp">Programming with CHIRP</a>
-    <a href="#range">Range and battery</a><a href="#before">Before a disaster</a>
+    <a href="#range">Range and battery</a><a href="#mesh">Meshtastic (LoRa texting)</a><a href="#before">Before a disaster</a>
   </nav>
 
   <section class="card" id="now">
@@ -173,6 +173,51 @@
     </ul>
   </section>
 
+  <section class="card" id="mesh">
+    <h2>Meshtastic: text messages with no phone network (LoRa)</h2>
+    <p><b>Meshtastic</b> is free, open-source software for small, cheap LoRa radios (about US$25–80). Each one pairs with a phone by Bluetooth, and lets you send <b>text messages and your GPS position</b> to other Meshtastic users with <b>no cell network, no internet and no licence</b>. Every device also passes on messages it hears, so messages hop from device to device (a "mesh"): by default up to <b>3 hops</b>.</p>
+    <ul>
+      <li><b>Range per hop:</b> from a few hundred metres between buildings to <b>several kilometres</b> with a clear line of sight; much farther from a hill or a roof. Like the radios above, height matters more than anything.</li>
+      <li><b>What it is good for:</b> keeping a family or neighbourhood in touch, sharing positions on a map, short status messages. It is slow text, not voice, and not for photos.</li>
+      <li><b>Battery:</b> days on a charge, and it runs well from a small power bank or solar panel.</li>
+    </ul>
+
+    <h3>Buy the right version</h3>
+    <ul>
+      <li>Devices come in <b>frequency versions</b>: buy the <b>915 MHz</b> version in the Americas (USA, Canada, Brazil) and Australia, the <b>868 MHz</b> version in Europe. A wrong version will not work well, and may be illegal to use.</li>
+      <li>Ready-made, easy choices: <b>SenseCAP T1000-E</b> or <b>LILYGO T-Echo</b> (pocket size, GPS, long battery), <b>RAK WisBlock</b> kits (very low power, good for a fixed relay), <b>Heltec V3</b> (cheapest, needs a case and a battery). Several brands sell them with Meshtastic already installed.</li>
+      <li><b>Never switch one on without its antenna</b> screwed on: transmitting without it can damage the radio.</li>
+    </ul>
+
+    <h3>Set it up (do this now, with internet)</h3>
+    <ol>
+      <li><b>Firmware:</b> if it did not come with Meshtastic, install it from <b>flasher.meshtastic.org</b> in Chrome or Edge, with the device on a USB cable.</li>
+      <li><b>App:</b> install <b>Meshtastic</b> on the phone: Android from Google Play or the kit's <code>apps/android/Meshtastic.apk</code> (Android apps extra); iPhone from the App Store. A computer can use <b>client.meshtastic.org</b>.</li>
+      <li><b>Pair by Bluetooth</b> from the app. The PIN is shown on the device's screen; devices with no screen use <b>123456</b> (change it afterwards).</li>
+      <li><b>Set the region (required: the device does not transmit until you do):</b> Settings → LoRa → Region:
+        <ul>
+          <li><b>US</b> for the USA and Canada (902–928 MHz);</li>
+          <li><b>BR_902</b> for Brazil (902–907.5 MHz);</li>
+          <li><b>EU_868</b> for most of Europe;</li>
+          <li><b>ANZ</b> for Australia and New Zealand.</li>
+        </ul>
+        Leave the preset on the default, <b>LongFast</b>: devices only hear each other with the same region and preset. If your local mesh uses other settings, match theirs.</li>
+      <li><b>Name it:</b> Settings → User: a long name (for example "Maria – Rua 5") and a short 4-letter name.</li>
+      <li><b>Make a private family channel:</b> add a <b>second channel</b> (leave the first, the default public one, as it is), give it a name, and set its key (PSK) to <b>random</b>. Then share it from the app's channel screen as a <b>QR code</b> and scan it with every family device. The default channel's key is public: anyone can read it, so do not send private details there.</li>
+      <li><b>Position:</b> turn on position sharing for the family channel if you want to see each other on the app's map; set lower precision on the public channel.</li>
+      <li><b>Test it:</b> send messages between your devices at home, then from farther away, so you know your real range.</li>
+    </ol>
+
+    <h3>In an emergency</h3>
+    <ul>
+      <li>Send short messages: who, where (the coordinates from the <a href="map.html">Map</a>), what you need. Repeat if no reply.</li>
+      <li>Check the default public channel too: strangers nearby may relay your message or answer.</li>
+      <li><b>Get height:</b> put a device high up (an upper window, a roof, a pole). A device left on a roof with a small solar panel acts as a relay for the whole street; set its role to <b>ROUTER</b> only if it is truly well placed.</li>
+      <li>Meshtastic does not reach emergency services by itself. Use it alongside the radios above, not instead of them.</li>
+    </ul>
+    <p class="muted">Official guide: meshtastic.org/docs. Library articles on this kit: <a href="search.html?q=Meshtastic">Meshtastic</a>, <a href="search.html?q=LoRa">LoRa</a>, MeshCore (a similar system).</p>
+  </section>
+
   <section class="card" id="before">
     <h2>Before a disaster</h2>
     <ul>
@@ -189,13 +234,13 @@
 <!-- ======================================================= Português -->
 <article data-for="pt-BR" lang="pt-BR">
   <h1>Rádio comunicador na emergência</h1>
-  <p class="lede">O que ouvir e como pedir socorro, as frequências para gravar, e como configurar um <b>Baofeng UV-5R</b> e um <b>TIDRADIO TD-H3 PLUS</b>. Imprima esta página e guarde junto com os rádios. As frequências estão escritas com ponto, como o rádio mostra.</p>
+  <p class="lede">O que ouvir e como pedir socorro, as frequências para gravar, como configurar um <b>Baofeng UV-5R</b> e um <b>TIDRADIO TD-H3 PLUS</b>, e as mensagens LoRa do <b>Meshtastic</b>. Imprima esta página e guarde junto com os rádios. As frequências estão escritas com ponto, como o rádio mostra.</p>
   <p class="notice"><b>Grave os rádios agora, enquanto tem internet e tempo.</b> Digitar frequências no teclado, no escuro e sob estresse, é difícil. O <a href="radio/survival-channels.csv" download>arquivo de canais</a> grava de uma vez todas as frequências abaixo (veja <a href="#chirp-pt">Gravar com o CHIRP</a>).</p>
 
   <nav class="toc">
     <a href="#agora">Emergência agora</a><a href="#freqs-pt">Frequências</a><a href="#regras">Quem pode transmitir</a>
     <a href="#uv5r-pt">Baofeng UV-5R</a><a href="#h3-pt">TIDRADIO TD-H3 PLUS</a><a href="#chirp-pt">Gravar com o CHIRP</a>
-    <a href="#alcance">Alcance e bateria</a><a href="#antes">Antes de um desastre</a>
+    <a href="#alcance">Alcance e bateria</a><a href="#mesh-pt">Meshtastic (mensagens LoRa)</a><a href="#antes">Antes de um desastre</a>
   </nav>
 
   <section class="card" id="agora">
@@ -334,6 +379,49 @@
       <li><b>Bateria:</b> use potência LOW quando der, desligue a escuta dupla e a luz da tela, escute em horários combinados, tenha bateria reserva, e compre um estojo para pilhas AA ou use o USB-C do H3 PLUS com power bank. O frio gasta bateria: guarde num bolso interno.</li>
       <li><b>Fale pouco:</b> transmitir gasta muito mais bateria que escutar.</li>
     </ul>
+  </section>
+
+  <section class="card" id="mesh-pt">
+    <h2>Meshtastic: mensagens de texto sem rede de celular (LoRa)</h2>
+    <p>O <b>Meshtastic</b> é um programa livre e gratuito para radinhos LoRa pequenos e baratos (cerca de R$ 150–450). Cada um se conecta ao celular por Bluetooth e permite mandar <b>mensagens de texto e sua posição GPS</b> para outros usuários de Meshtastic <b>sem rede de celular, sem internet e sem licença</b>. Cada aparelho também repassa as mensagens que ouve, então elas pulam de aparelho em aparelho (uma "malha", <i>mesh</i>): por padrão até <b>3 saltos</b>.</p>
+    <ul>
+      <li><b>Alcance por salto:</b> de algumas centenas de metros entre prédios a <b>vários quilômetros</b> com visada livre; bem mais de um morro ou laje. Como nos rádios acima, altura é o que mais importa.</li>
+      <li><b>Serve para:</b> manter a família ou o bairro em contato, ver a posição de cada um no mapa, mandar recados curtos. É texto lento, não é voz, e não serve para fotos.</li>
+      <li><b>Bateria:</b> dias com uma carga, e funciona bem com um power bank pequeno ou placa solar.</li>
+    </ul>
+
+    <h3>Compre a versão certa</h3>
+    <ul>
+      <li>Os aparelhos vêm em <b>versões de frequência</b>: no Brasil (e nas Américas) compre a versão de <b>915 MHz</b>; na Europa, a de <b>868 MHz</b>. A versão errada não funciona bem e pode ser ilegal. No Brasil, prefira aparelhos homologados pela Anatel.</li>
+      <li>Opções prontas e fáceis: <b>SenseCAP T1000-E</b> ou <b>LILYGO T-Echo</b> (de bolso, com GPS, bateria longa), kits <b>RAK WisBlock</b> (consumo muito baixo, bons para um repetidor fixo), <b>Heltec V3</b> (o mais barato, precisa de caixinha e bateria). Várias marcas já vendem com o Meshtastic instalado.</li>
+      <li><b>Nunca ligue sem a antena</b> rosqueada: transmitir sem ela pode estragar o rádio.</li>
+    </ul>
+
+    <h3>Configure (faça agora, com internet)</h3>
+    <ol>
+      <li><b>Firmware:</b> se não veio com o Meshtastic, instale pelo <b>flasher.meshtastic.org</b> no Chrome ou Edge, com o aparelho no cabo USB.</li>
+      <li><b>App:</b> instale o <b>Meshtastic</b> no celular: Android pela Google Play ou o <code>apps/android/Meshtastic.apk</code> do kit (extra de apps Android); iPhone pela App Store. No computador, use o <b>client.meshtastic.org</b>.</li>
+      <li><b>Pareie por Bluetooth</b> pelo app. O PIN aparece na tela do aparelho; aparelhos sem tela usam <b>123456</b> (troque depois).</li>
+      <li><b>Escolha a região (obrigatório: o aparelho não transmite antes disso):</b> Settings → LoRa → Region:
+        <ul>
+          <li><b>BR_902</b> para o Brasil (902–907,5 MHz);</li>
+          <li><b>US</b> para EUA e Canadá; <b>EU_868</b> para a maior parte da Europa; <b>ANZ</b> para Austrália e Nova Zelândia.</li>
+        </ul>
+        Deixe o modo (preset) no padrão, <b>LongFast</b>: os aparelhos só se ouvem com a mesma região e o mesmo modo. Se o grupo Meshtastic da sua cidade usa outra configuração, use a mesma deles.</li>
+      <li><b>Dê um nome:</b> Settings → User: um nome longo (por exemplo "Maria – Rua 5") e um curto de 4 letras.</li>
+      <li><b>Crie um canal privado da família:</b> adicione um <b>segundo canal</b> (deixe o primeiro, o público padrão, como está), dê um nome e coloque a chave (PSK) como <b>random</b> (aleatória). Depois compartilhe pela tela de canais do app como <b>QR code</b> e leia com cada aparelho da família. A chave do canal padrão é pública: qualquer um pode ler, então não mande dados particulares nele.</li>
+      <li><b>Posição:</b> ligue o envio da posição no canal da família se quiserem se ver no mapa do app; use menos precisão no canal público.</li>
+      <li><b>Teste:</b> troque mensagens entre os aparelhos em casa, depois de mais longe, para saber o alcance real.</li>
+    </ol>
+
+    <h3>Na emergência</h3>
+    <ul>
+      <li>Mande mensagens curtas: quem, onde (as coordenadas do <a href="map.html">Mapa</a>), o que precisa. Repita se ninguém responder.</li>
+      <li>Olhe também o canal público padrão: pessoas por perto podem repassar sua mensagem ou responder.</li>
+      <li><b>Ganhe altura:</b> coloque um aparelho no alto (janela de andar alto, laje, poste). Um aparelho deixado na laje com uma plaquinha solar vira repetidor para a rua toda; ponha o papel (role) <b>ROUTER</b> só se ele estiver muito bem posicionado.</li>
+      <li>O Meshtastic não chama o socorro sozinho. Use junto com os rádios acima, não no lugar deles.</li>
+    </ul>
+    <p class="muted">Guia oficial (em inglês): meshtastic.org/docs. Artigos da biblioteca neste kit: <a href="search.html?q=Meshtastic">Meshtastic</a>, <a href="search.html?q=LoRa">LoRa</a>, MeshCore (sistema parecido).</p>
   </section>
 
   <section class="card" id="antes">
