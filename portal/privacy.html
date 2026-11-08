@@ -30,7 +30,7 @@
   <p class="notice"><b>Install and try them now, while the internet is normal.</b> In a crisis, the download sites may be slow or blocked. <b>Nothing makes you completely untraceable.</b> These tools hide <i>where</i> you connect from; what you type, the accounts you log into and the phone itself can still identify you.</p>
 
   <nav class="toc">
-    <a href="#which">Which one?</a><a href="#tor">Tor Browser</a><a href="#tor-blocked">If Tor is blocked</a>
+    <a href="#which">Which one?</a><a href="#tor">Tor Browser</a><a href="#tor-blocked">If Tor is blocked</a><a href="#transports">Pluggable transports</a>
     <a href="#tor-phone">Tor on phones</a><a href="#vpn">Proton VPN Free</a><a href="#habits">Safe habits</a>
   </nav>
 
@@ -49,7 +49,7 @@
     <ol>
       <li><b>Download</b> only from the official site: <b>torproject.org/download</b> (Windows, Mac, Linux). Avoid copies from other sites.</li>
       <li><b>Windows:</b> run the downloaded file and choose a folder to install to. You can choose your USB stick: it then runs from the stick on any Windows computer, leaving nothing behind. <b>Mac:</b> open the .dmg and drag Tor Browser to Applications. <b>Linux:</b> unpack it and run <code>start-tor-browser.desktop</code>.</li>
-      <li><b>Open Tor Browser</b> and click <b>Connect</b>. The first connection can take a minute. If it fails, see <a href="#tor-blocked">If Tor is blocked</a>.</li>
+      <li><b>Open Tor Browser</b> and click <b>Connect</b>. The first connection can take a minute. If it fails, see <a href="#tor-blocked">If Tor is blocked</a><a href="#transports">Pluggable transports</a>.</li>
       <li>Browse as usual, in that window only. Other browsers and apps on the computer are <b>not</b> protected.</li>
       <li><b>Security level:</b> the shield / settings menu → <i>Security Level</i>: <b>Standard</b> (everything works), <b>Safer</b> (turns off risky features on many sites) or <b>Safest</b> (text-only sites; most protective). The browser restarts to apply it.</li>
       <li><b>New Identity</b> (menu ≡ → <i>New identity</i>): closes every tab and starts fresh, so the next sites can't connect you to the previous ones.</li>
@@ -67,6 +67,19 @@
       <li>If none work, <b>ask for a bridge</b>: in the same Bridges section (request a bridge from torproject.org), or at <b>bridges.torproject.org</b> from another device, or through the Tor Project's Telegram bot <b>@GetBridgesBot</b>. Then choose to add a bridge manually and paste the lines you received.</li>
     </ol>
     <p class="muted">If the torproject.org site itself is blocked, the Tor Project's <b>GetTor</b> service sends download links by email or Telegram; see the official support pages at support.torproject.org.</p>
+  </section>
+
+  <section class="card" id="transports">
+    <h2>Pluggable transports: the disguises Tor can wear</h2>
+    <p>A <b>pluggable transport</b> changes how your connection to Tor looks, so a network that blocks Tor doesn't recognise it. They are <b>already built into Tor Browser</b> (on computers and on Android): there is nothing extra to install. You pick one when you choose a bridge (see <a href="#tor-blocked">If Tor is blocked</a>).</p>
+    <table>
+      <tr><th>obfs4</th><td>Makes Tor traffic <b>look random</b>, like no known kind of connection, and keeps censors from finding its bridges by scanning the internet. The usual first choice. In the hardest places (for example China) you need a <b>private</b> obfs4 bridge: ask the Telegram bot <b>@GetBridgesBot</b> (send <code>/bridges</code>), or email <b>frontdesk@torproject.org</b> with "private bridge" and your country in the subject.</td></tr>
+      <tr><th>WebTunnel</th><td>Makes it look like you are <b>visiting an ordinary secure website (HTTPS)</b>. Good where everything except normal web browsing is blocked.</td></tr>
+      <tr><th>Snowflake</th><td>Goes through <b>volunteers' browsers</b> around the world, so it looks like you are <b>on a video call</b>. Works without asking for a bridge address. Can be slower and change speed while you use it.</td></tr>
+      <tr><th>meek</th><td>Makes it look like you are <b>using a big website</b> (meek-azure: a Microsoft site). Very hard to block without blocking that site too, but <b>slow</b>: use it when the others fail. Works without asking for a bridge address.</td></tr>
+    </table>
+    <p><b>Which to try:</b> obfs4 → WebTunnel → Snowflake → meek. If none connect, ask for a bridge (above) and add it by hand.</p>
+    <p class="muted">You can help others too: a computer or browser left running the <b>Snowflake</b> extension (snowflake.torproject.org) becomes a proxy for people in censored places.</p>
   </section>
 
   <section class="card" id="tor-phone">
@@ -118,7 +131,7 @@
   <p class="notice"><b>Instale e teste agora, enquanto a internet está normal.</b> Numa crise, os sites para baixar podem ficar lentos ou bloqueados. <b>Nada deixa você totalmente impossível de rastrear.</b> Estas ferramentas escondem <i>de onde</i> você se conecta; o que você digita, as contas em que entra e o próprio celular ainda podem identificar você.</p>
 
   <nav class="toc">
-    <a href="#qual">Qual usar?</a><a href="#tor-pt">Tor Browser</a><a href="#tor-bloqueado">Se o Tor for bloqueado</a>
+    <a href="#qual">Qual usar?</a><a href="#tor-pt">Tor Browser</a><a href="#tor-bloqueado">Se o Tor for bloqueado</a><a href="#transportes">Transportes plugáveis</a>
     <a href="#tor-celular">Tor no celular</a><a href="#vpn-pt">Proton VPN Free</a><a href="#cuidados">Cuidados</a>
   </nav>
 
@@ -137,7 +150,7 @@
     <ol>
       <li><b>Baixe</b> só do site oficial: <b>torproject.org/download</b> (Windows, Mac, Linux). Evite cópias de outros sites.</li>
       <li><b>Windows:</b> rode o arquivo baixado e escolha uma pasta para instalar. Pode ser o seu pendrive: aí ele roda do pendrive em qualquer computador Windows, sem deixar nada para trás. <b>Mac:</b> abra o .dmg e arraste o Tor Browser para Aplicativos. <b>Linux:</b> descompacte e rode <code>start-tor-browser.desktop</code>.</li>
-      <li><b>Abra o Tor Browser</b> e clique em <b>Connect</b> (Conectar). A primeira conexão pode levar um minuto. Se falhar, veja <a href="#tor-bloqueado">Se o Tor for bloqueado</a>.</li>
+      <li><b>Abra o Tor Browser</b> e clique em <b>Connect</b> (Conectar). A primeira conexão pode levar um minuto. Se falhar, veja <a href="#tor-bloqueado">Se o Tor for bloqueado</a><a href="#transportes">Transportes plugáveis</a>.</li>
       <li>Navegue normalmente, só nessa janela. Os outros navegadores e apps do computador <b>não</b> ficam protegidos.</li>
       <li><b>Nível de segurança:</b> menu do escudo / configurações → <i>Security Level</i>: <b>Standard</b> (tudo funciona), <b>Safer</b> (desliga recursos arriscados em muitos sites) ou <b>Safest</b> (sites só de texto; o mais protegido). O navegador reinicia para aplicar.</li>
       <li><b>New Identity</b> (Nova identidade, no menu ≡): fecha todas as abas e começa do zero, para os próximos sites não ligarem você aos anteriores.</li>
@@ -155,6 +168,19 @@
       <li>Se nenhuma funcionar, <b>peça uma ponte</b>: na mesma seção Bridges (pedir uma ponte ao torproject.org), ou em <b>bridges.torproject.org</b> de outro aparelho, ou pelo robô do Telegram do Tor Project <b>@GetBridgesBot</b>. Depois escolha adicionar uma ponte manualmente e cole as linhas recebidas.</li>
     </ol>
     <p class="muted">Se o próprio site torproject.org estiver bloqueado, o serviço <b>GetTor</b> do Tor Project manda links de download por e-mail ou Telegram; veja as páginas oficiais em support.torproject.org.</p>
+  </section>
+
+  <section class="card" id="transportes">
+    <h2>Transportes plugáveis: os disfarces do Tor</h2>
+    <p>Um <b>transporte plugável</b> (pluggable transport) muda a aparência da sua conexão com o Tor, para que uma rede que bloqueia o Tor não a reconheça. Eles <b>já vêm dentro do Tor Browser</b> (no computador e no Android): não há nada extra para instalar. Você escolhe um ao escolher uma ponte (veja <a href="#tor-bloqueado">Se o Tor for bloqueado</a>).</p>
+    <table>
+      <tr><th>obfs4</th><td>Faz o tráfego do Tor <b>parecer aleatório</b>, sem cara de nenhum tipo de conexão conhecido, e impede que censores achem as pontes vasculhando a internet. É a primeira escolha. Nos lugares mais difíceis (por exemplo a China) é preciso uma ponte obfs4 <b>privada</b>: peça ao robô do Telegram <b>@GetBridgesBot</b> (mande <code>/bridges</code>), ou mande e-mail para <b>frontdesk@torproject.org</b> com "private bridge" e o seu país no assunto.</td></tr>
+      <tr><th>WebTunnel</th><td>Faz parecer que você está <b>visitando um site seguro comum (HTTPS)</b>. Bom onde tudo é bloqueado menos a navegação normal.</td></tr>
+      <tr><th>Snowflake</th><td>Passa pelos <b>navegadores de voluntários</b> do mundo todo, então parece que você está <b>numa chamada de vídeo</b>. Funciona sem pedir endereço de ponte. Pode ser mais lento e variar de velocidade.</td></tr>
+      <tr><th>meek</th><td>Faz parecer que você está <b>usando um site grande</b> (meek-azure: um site da Microsoft). Muito difícil de bloquear sem bloquear esse site também, mas <b>lento</b>: use quando os outros falharem. Funciona sem pedir endereço de ponte.</td></tr>
+    </table>
+    <p><b>Qual tentar:</b> obfs4 → WebTunnel → Snowflake → meek. Se nenhum conectar, peça uma ponte (acima) e adicione à mão.</p>
+    <p class="muted">Você também pode ajudar: um computador ou navegador com a extensão <b>Snowflake</b> (snowflake.torproject.org) ligada vira um ponto de passagem para pessoas em lugares censurados.</p>
   </section>
 
   <section class="card" id="tor-celular">

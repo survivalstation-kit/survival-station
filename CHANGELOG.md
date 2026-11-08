@@ -12,6 +12,9 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.26.1 (2026-11-08)
+
+- **Pluggable transports explained** on the Private browsing page (English and Portuguese): what obfs4, WebTunnel, Snowflake and meek each disguise Tor as, which to try first, how to get a private obfs4 bridge (@GetBridgesBot, frontdesk@torproject.org) in the hardest places, and that they are already built into Tor Browser. Checked against the Tor Browser manual. The Help page mentions them.
 ## 1.26.0 (2026-11-08)
 
 - **Private browsing page** (new tile 🕶️, English and Portuguese): how to use **Tor Browser** and **Proton VPN Free** when some internet is left, checked against the Tor Project's and Proton's own pages:
