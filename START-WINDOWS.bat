@@ -143,6 +143,8 @@ start "" "%~dp0portal\index.html"
 echo.
 echo  Leave this window open. Press any key to SHUT DOWN.
 echo  Deixe esta janela aberta. Aperte qualquer tecla para DESLIGAR.
+echo  Or use the red "Shut down the kit" button on the home page. Closing the browser does NOT stop the kit.
+echo  Ou use o botao vermelho "Desligar o kit" na pagina inicial. Fechar o navegador NAO desliga o kit.
 pause >nul
 taskkill /f /im llama-server.exe >nul 2>&1
 taskkill /f /im kiwix-serve.exe >nul 2>&1

@@ -32,7 +32,7 @@
   <nav class="toc">
     <a href="#what">What's inside</a><a href="#start">Starting it</a><a href="#cards-en">Emergency cards</a><a href="#ai">Ask the AI</a>
     <a href="#library">Library</a><a href="#map-en">Map</a><a href="#phone">Phones</a><a href="#docs-en">Documents</a>
-    <a href="#trouble">Problems?</a><a href="#stop">Shutting down</a><a href="#build">Updating the drive</a><a href="#about">About / licence</a>
+    <a href="#kit-en">My kit</a><a href="#trouble">Problems?</a><a href="#stop">Shutting down</a><a href="#build">Updating the drive</a><a href="#about">About / licence</a>
   </nav>
 
   <section class="card" id="what">
@@ -46,11 +46,13 @@
       <tr><th>👪 Family plan</th><td><a href="plan.html">Contacts, meeting places and each person's blood type, allergies and medicines.</a> Print it, and on the kit computer save a copy on the stick, locked with a password.</td></tr>
       <tr><th>🖨️ Print pack</th><td><a href="print.html">The emergency cards, radio frequencies, family plan and start instructions</a>, ready to print or save as PDF.</td></tr>
       <tr><th>🔒 Private documents</th><td>IDs, insurance papers and other personal files go in the kit's <code>private</code> folder, which phones can never see. Lock them with <code>PRIVATE-DOCS.bat</code> or on the <a href="kit.html">My kit</a> page (Mac/Linux: <code>bash launch/private-docs.sh</code>). Without the password they can't be opened, so write it down somewhere safe.</td></tr>
-      <tr><th>🛠️ Tools</th><td><a href="tools.html">Calculators and signals</a> that need no AI: bleach drops to make water safe, water and food for your group, SOS by screen flash, whistle tone or Morse code, sunrise, sunset and the sun's direction, and a compass where the phone allows it.</td></tr>
+      <tr><th>🛠️ Tools</th><td><a href="tools.html">Calculators and signals</a> that need no AI: bleach drops to make water safe, water and food for your group, a <b>CPR metronome</b> that beats the 100–120 compressions a minute and counts the rounds, SOS by screen flash, whistle tone or Morse code, sunrise, sunset and the sun's direction, and a compass where the phone allows it.</td></tr>
       <tr><th>🔎 Search</th><td><a href="search.html">One search box for the whole kit</a> (also on the home page): emergency cards, radio and help pages, the Survival Data guides (titles and the text inside the PDFs, opening at the right page), your documents, and the full text of every library book. Scanned PDFs (pictures of pages) can't be searched.</td></tr>
-      <tr><th>📡 Radio</th><td><a href="radio.html">Emergency frequencies</a>, how to call for help, and how to set up a Baofeng UV-5R or TIDRADIO TD-H3 PLUS, with a channel file for CHIRP. Print it and keep it with the radios.</td></tr>
+      <tr><th>📡 Radio</th><td><a href="radio.html">Emergency frequencies</a>, how to call for help, and how to set up a Baofeng UV-5R or TIDRADIO TD-H3 PLUS, with a channel file for CHIRP, and <b>Meshtastic</b>: cheap LoRa devices to text and share positions with no phone network. Print it and keep it with the radios.</td></tr>
       <tr><th>📻 Survival Data</th><td>A collection of survival, radio and medical manuals (PDFs, in English).</td></tr>
       <tr><th>📄 Your documents</th><td>Files the owner put on the drive: family contacts, medication lists, local maps.</td></tr>
+      <tr><th>🧰 My kit</th><td><a href="kit.html">What is on this kit</a>, a <b>Check the kit</b> test that starts each part and sees that it answers, and buttons to add more, update or repair it.</td></tr>
+      <tr><th>⚡ Low power</th><td>The <b>Low power</b> switch on the home page: dark pages, shorter answers, and the AI answers without looking up the library. On battery, the kit suggests it, and the start window picks the smallest AI model.</td></tr>
     </table>
     <p>Use the language menu at the top of any page to switch between English and Português. Your choice is remembered on that device.</p>
   </section>
@@ -68,9 +70,9 @@
       </li>
       <li>A black window opens. If it asks you to choose an AI model, wait 10 seconds for the default, or type the number of a smaller one on an old or slow computer.</li>
       <li>After a short wait, the browser opens this portal at <code>http://localhost:8080</code>.</li>
-      <li><b>Keep the black window open.</b> Closing it turns everything off.</li>
+      <li><b>Keep the black window open</b> while you use the kit. Closing it (or pressing a key in it) shuts everything down.</li>
     </ol>
-    <p class="muted">If the AI can't start, the emergency cards, this help page and your documents still open as plain files: just open <code>portal/index.html</code> on the drive.</p>
+    <p class="muted">If the AI can't start, the emergency cards, this help page and your documents still open as plain files: just open <code>portal/index.html</code> on the drive. If the kit isn't running, its home page shows the kit's folder and which start file to double-click, and switches to the full kit by itself once the AI starts.</p>
   </section>
 
   <section class="card" id="cards-en">
@@ -147,6 +149,15 @@
     <p>The Home page lists files saved in <code>portal/docs/</code> on the drive. Click one to open it. To add files, copy them into that folder, then (with the setup computer) run <code>setup\build-drive.ps1 -Drive X: -IndexOnly</code> so they appear in the list. You can always open them straight from the folder too.</p>
   </section>
 
+  <section class="card" id="kit-en">
+    <h2>My kit</h2>
+    <ul>
+      <li><a href="kit.html">My kit</a> lists what is on this kit: AI models, library books, maps and extras, with their sizes and the free space.</li>
+      <li><b>Check the kit</b> → <b>▶ Test everything</b> starts each part (AI, library, maps, voice, search) and shows which ones really answer. Do it after building or copying a kit, while you still have time to fix it.</li>
+      <li>On the computer running the kit: <b>Add more</b>, <b>Check for updates</b> and <b>Verify / repair</b> open the builder window, and the private documents can be locked and opened.</li>
+    </ul>
+  </section>
+
   <section class="card" id="trouble">
     <h2>Problems?</h2>
     <table>
@@ -154,18 +165,21 @@
       <tr><th>"AI: offline" on the Home page</th><td>The start program isn't running, or it was closed. Start it again and keep the black window open.</td></tr>
       <tr><th>Answers are very slow</th><td>Normal on old computers. Untick <i>Look it up in the library</i>, ask shorter questions, or restart with a smaller model. A USB 3 port (often blue) loads faster.</td></tr>
       <tr><th>The phone can't open the address</th><td>Check that the phone and computer are on the same Wi-Fi or hotspot. Type the address exactly, including <code>http://</code> and <code>:8080</code>. On Windows, allow access when the firewall asks (or allow "llama-server" and "kiwix-serve" in Windows Defender Firewall). Try another address from the list.</td></tr>
-      <tr><th>"Library: offline"</th><td>The drive has no library files, or the library server didn't start. Restart the kit.</td></tr>
+      <tr><th>"Library: offline"</th><td>Right after starting, the library needs a few seconds to open its books from the stick: the home page switches to "running" by itself (or press F5). If it stays offline, the drive has no library files or the library server didn't start: restart the kit.</td></tr>
       <tr><th>The map is empty or shows a message</th><td>Open it through the start program (<code>http://localhost:8080/map.html</code>), not as a file. If it says there are no maps, the drive was built without them.</td></tr>
       <tr><th>Mac: "cannot be opened"</th><td>Right-click <code>START-MAC.command</code> → Open → Open. Or in Terminal: <code>bash /Volumes/&lt;drive&gt;/START-MAC.command</code>.</td></tr>
       <tr><th>Linux: permission denied</th><td>Run it with <code>bash START-LINUX.sh</code> (not <code>./</code>). The launcher copies the programs to /tmp if the drive won't run them.</td></tr>
       <tr><th>Wrong language</th><td>Use the language menu at the top right of any page.</td></tr>
+      <tr><th>"Could not reach the kit helper"</th><td>The kit was updated while it was running, or its start window was closed. Shut it down with a key in the black window and start it again.</td></tr>
+      <tr><th>Servers still running after closing the browser</th><td>That's on purpose: phones may still be using the kit. Use the red <b>Shut down the kit</b> button on the home page when you're done.</td></tr>
     </table>
   </section>
 
   <section class="card" id="stop">
     <h2>Shutting down and saving power</h2>
     <ul>
-      <li>Click the black window and press any key (Windows), or press <b>Ctrl+C</b> (Mac / Linux). Then you can remove the drive safely.</li>
+      <li><b>Closing the browser does NOT stop the kit</b>: the AI, library and maps keep running (phones may be using them). To stop it, click the red <b>⏻ Shut down the kit</b> button on the home page (on the computer running the kit), or click the black window and press any key, or close that window (Windows). On Mac / Linux, press <b>Ctrl+C</b> in its window. Then you can remove the drive safely.</li>
+      <li>Turn on <b>⚡ Low power</b> on the home page to make the battery last longer.</li>
       <li>On battery, the AI uses a lot of power while it's writing an answer. Shut the kit down when you don't need it, and lower the screen brightness.</li>
       <li>Keep a spare copy of the drive and a printed set of emergency cards somewhere else.</li>
     </ul>
@@ -184,7 +198,7 @@
 
   <section class="card" id="build">
     <h2>Updating the drive (needs internet)</h2>
-    <p>Easiest: on the Windows computer running the kit, open <a href="kit.html">My kit</a> and click <strong>Add more</strong>, <strong>Check for updates</strong> or <strong>Verify / repair</strong>. Or double-click <code>MAKE-USB.bat</code> on the drive, choose the drive, and click <strong>Check for updates</strong>. It lists newer library editions, a newer AI engine, maps over a year old and a newer Survival-Data, with their sizes, and updates them if you say yes. In the same window you can tick more books, maps or languages and click <strong>Build the drive</strong>. Full instructions are in <code>README.md</code> (English) and <code>LEIA-ME.md</code> (Português) on the drive.</p>
+    <p>Easiest: on the Windows computer running the kit, open <a href="kit.html">My kit</a> and click <strong>Add more</strong>, <strong>Check for updates</strong> or <strong>Verify / repair</strong>. Or double-click <code>MAKE-USB.bat</code> on the drive, choose the drive, and click <strong>Check for updates</strong>. It lists newer library editions, a newer AI engine, maps over a year old and a newer Survival-Data, with their sizes, and updates them if you say yes. In the same window you can tick more books, maps or languages and click <strong>Build the drive</strong>. With internet, the kit's own pages and tools come straight from the newest release on GitHub. The home page's <strong>🔄 Check for updates</strong> button tells you when a new version is out. If the kit was running during an update, shut it down and start it again to use the new version. Full instructions are in <code>README.md</code> (English) and <code>LEIA-ME.md</code> (Português) on the drive.</p>
   </section>
 
   <section class="card" id="about">
@@ -203,7 +217,7 @@
   <nav class="toc">
     <a href="#o-que">O que tem</a><a href="#iniciar">Como iniciar</a><a href="#cartoes">Cartões</a><a href="#ia">Perguntar à IA</a>
     <a href="#biblioteca">Biblioteca</a><a href="#mapa">Mapa</a><a href="#celular">Celulares</a><a href="#documentos">Documentos</a>
-    <a href="#problemas">Problemas?</a><a href="#desligar">Desligar</a><a href="#atualizar">Atualizar o pendrive</a><a href="#sobre">Sobre / licença</a>
+    <a href="#kit-pt">Meu kit</a><a href="#problemas">Problemas?</a><a href="#desligar">Desligar</a><a href="#atualizar">Atualizar o pendrive</a><a href="#sobre">Sobre / licença</a>
   </nav>
 
   <section class="card" id="o-que">
@@ -217,11 +231,13 @@
       <tr><th>👪 Plano da família</th><td><a href="plan.html">Contatos, pontos de encontro e o tipo sanguíneo, alergias e remédios de cada um.</a> Imprima e, no computador do kit, salve uma cópia no pendrive, trancada com senha.</td></tr>
       <tr><th>🖨️ Pacote para imprimir</th><td><a href="print.html">Os cartões de emergência, as frequências de rádio, o plano da família e as instruções de início</a>, prontos para imprimir ou salvar em PDF.</td></tr>
       <tr><th>🔒 Documentos privados</th><td>Documentos, papéis do seguro e outros arquivos pessoais ficam na pasta <code>private</code> do kit, que os celulares nunca veem. Tranque com <code>PRIVATE-DOCS.bat</code> ou na página <a href="kit.html">Meu kit</a> (Mac/Linux: <code>bash launch/private-docs.sh</code>). Sem a senha não abrem, então anote-a num lugar seguro.</td></tr>
-      <tr><th>🛠️ Ferramentas</th><td><a href="tools.html">Calculadoras e sinais</a> que não precisam de IA: gotas de água sanitária para tornar a água segura, água e comida para o grupo, SOS com a tela piscando, apito ou código Morse, nascer e pôr do sol e a direção do sol, e uma bússola onde o celular permitir.</td></tr>
+      <tr><th>🛠️ Ferramentas</th><td><a href="tools.html">Calculadoras e sinais</a> que não precisam de IA: gotas de água sanitária para tornar a água segura, água e comida para o grupo, um <b>metrônomo de RCP</b> que marca as 100–120 compressões por minuto e conta os ciclos, SOS com a tela piscando, apito ou código Morse, nascer e pôr do sol e a direção do sol, e uma bússola onde o celular permitir.</td></tr>
       <tr><th>🔎 Buscar</th><td><a href="search.html">Uma busca para o kit inteiro</a> (também na página inicial): cartões de emergência, páginas de rádio e ajuda, guias do Survival Data (títulos e o texto dentro dos PDFs, abrindo na página certa), seus documentos e o texto completo de todos os livros da biblioteca. PDFs escaneados (fotos de páginas) não podem ser buscados.</td></tr>
-      <tr><th>📡 Rádio</th><td><a href="radio.html">Frequências de emergência</a>, como pedir socorro e como configurar um Baofeng UV-5R ou TIDRADIO TD-H3 PLUS, com arquivo de canais para o CHIRP. Imprima e guarde junto com os rádios.</td></tr>
+      <tr><th>📡 Rádio</th><td><a href="radio.html">Frequências de emergência</a>, como pedir socorro e como configurar um Baofeng UV-5R ou TIDRADIO TD-H3 PLUS, com arquivo de canais para o CHIRP, e o <b>Meshtastic</b>: radinhos LoRa baratos para mandar mensagens e a posição sem rede de celular. Imprima e guarde junto com os rádios.</td></tr>
       <tr><th>📻 Survival Data</th><td>Coleção de manuais de sobrevivência, rádio e medicina (PDFs, em inglês).</td></tr>
       <tr><th>📄 Seus documentos</th><td>Arquivos que o dono colocou no pendrive: contatos da família, lista de remédios, mapas locais.</td></tr>
+      <tr><th>🧰 Meu kit</th><td><a href="kit.html">O que tem neste kit</a>, um <b>Testar o kit</b> que inicia cada parte e confere se responde, e botões para adicionar, atualizar ou reparar.</td></tr>
+      <tr><th>⚡ Economia</th><td>O botão <b>Economia</b> na página inicial: páginas escuras, respostas mais curtas e a IA responde sem consultar a biblioteca. Na bateria, o kit sugere ligar, e a janela de início escolhe o menor modelo de IA.</td></tr>
     </table>
     <p>Use o menu de idioma no topo de qualquer página para trocar entre Português e English. A escolha fica salva no aparelho.</p>
   </section>
@@ -239,9 +255,9 @@
       </li>
       <li>Uma janela preta abre. Se ela pedir para escolher um modelo de IA, espere 10 segundos para usar o padrão, ou digite o número de um modelo menor se o computador for antigo ou lento.</li>
       <li>Depois de alguns instantes, o navegador abre este portal em <code>http://localhost:8080</code>.</li>
-      <li><b>Não feche a janela preta.</b> Fechar desliga tudo.</li>
+      <li><b>Deixe a janela preta aberta</b> enquanto usa o kit. Fechar a janela (ou apertar uma tecla nela) desliga tudo.</li>
     </ol>
-    <p class="muted">Se a IA não iniciar, os cartões de emergência, esta ajuda e seus documentos ainda abrem como arquivos comuns: abra <code>portal/index.html</code> no pendrive.</p>
+    <p class="muted">Se a IA não iniciar, os cartões de emergência, esta ajuda e seus documentos ainda abrem como arquivos comuns: abra <code>portal/index.html</code> no pendrive. Se o kit não estiver rodando, a página inicial mostra a pasta do kit e qual arquivo de início clicar, e passa sozinha para o kit completo quando a IA iniciar.</p>
   </section>
 
   <section class="card" id="cartoes">
@@ -318,6 +334,15 @@
     <p>A página Início lista os arquivos salvos em <code>portal/docs/</code> no pendrive. Clique para abrir. Para adicionar, copie os arquivos para essa pasta e depois, no computador de configuração, rode <code>setup\build-drive.ps1 -Drive X: -IndexOnly</code> para que apareçam na lista. Também dá para abrir direto pela pasta.</p>
   </section>
 
+  <section class="card" id="kit-pt">
+    <h2>Meu kit</h2>
+    <ul>
+      <li><a href="kit.html">Meu kit</a> mostra o que tem neste kit: modelos de IA, livros, mapas e extras, com os tamanhos e o espaço livre.</li>
+      <li><b>Testar o kit</b> → <b>▶ Testar tudo</b> inicia cada parte (IA, biblioteca, mapas, voz, busca) e mostra quais respondem de verdade. Faça isso depois de montar ou copiar um kit, enquanto ainda dá tempo de consertar.</li>
+      <li>No computador que roda o kit: <b>Adicionar</b>, <b>Procurar atualizações</b> e <b>Verificar / reparar</b> abrem a janela do construtor, e os documentos privados podem ser trancados e abertos.</li>
+    </ul>
+  </section>
+
   <section class="card" id="problemas">
     <h2>Problemas?</h2>
     <table>
@@ -325,18 +350,21 @@
       <tr><th>"IA: desligada" na página Início</th><td>O programa de início não está rodando ou foi fechado. Inicie de novo e mantenha a janela preta aberta.</td></tr>
       <tr><th>Respostas muito lentas</th><td>É normal em computadores antigos. Desmarque <i>Consultar a biblioteca</i>, faça perguntas mais curtas, ou reinicie com um modelo menor. Uma porta USB 3 (geralmente azul) carrega mais rápido.</td></tr>
       <tr><th>O celular não abre o endereço</th><td>Confira se o celular e o computador estão no mesmo Wi-Fi ou roteador. Digite o endereço exatamente, com <code>http://</code> e <code>:8080</code>. No Windows, permita o acesso quando o firewall perguntar (ou libere "llama-server" e "kiwix-serve" no Firewall do Windows Defender). Tente outro endereço da lista.</td></tr>
-      <tr><th>"Biblioteca: desligada"</th><td>O pendrive não tem arquivos da biblioteca, ou o servidor da biblioteca não iniciou. Reinicie o kit.</td></tr>
+      <tr><th>"Biblioteca: desligada"</th><td>Logo depois de iniciar, a biblioteca leva alguns segundos para abrir os livros do pendrive: a página inicial muda para "ligada" sozinha (ou aperte F5). Se continuar desligada, o pendrive não tem arquivos da biblioteca ou o servidor não iniciou: reinicie o kit.</td></tr>
       <tr><th>O mapa está vazio ou mostra uma mensagem</th><td>Abra pelo programa de início (<code>http://localhost:8080/map.html</code>), não como arquivo. Se disser que não há mapas, o pendrive foi montado sem eles.</td></tr>
       <tr><th>Mac: "não pode ser aberto"</th><td>Botão direito em <code>START-MAC.command</code> → Abrir → Abrir. Ou no Terminal: <code>bash /Volumes/&lt;pendrive&gt;/START-MAC.command</code>.</td></tr>
       <tr><th>Linux: permissão negada</th><td>Rode com <code>bash START-LINUX.sh</code> (não com <code>./</code>). O programa copia os arquivos para /tmp se o pendrive não deixar rodar.</td></tr>
       <tr><th>Idioma errado</th><td>Use o menu de idioma no canto superior direito de qualquer página.</td></tr>
+      <tr><th>"Não deu para falar com o ajudante do kit"</th><td>O kit foi atualizado enquanto rodava, ou a janela de início foi fechada. Desligue com uma tecla na janela preta e inicie de novo.</td></tr>
+      <tr><th>Os servidores continuam rodando depois de fechar o navegador</th><td>É de propósito: os celulares podem estar usando o kit. Quando terminar, use o botão vermelho <b>Desligar o kit</b> na página inicial.</td></tr>
     </table>
   </section>
 
   <section class="card" id="desligar">
     <h2>Desligar e economizar bateria</h2>
     <ul>
-      <li>Clique na janela preta e aperte qualquer tecla (Windows), ou aperte <b>Ctrl+C</b> (Mac / Linux). Depois, remova o pendrive com segurança.</li>
+      <li><b>Fechar o navegador NÃO desliga o kit</b>: a IA, a biblioteca e os mapas continuam rodando (os celulares podem estar usando). Para desligar, clique no botão vermelho <b>⏻ Desligar o kit</b> na página inicial (no computador que roda o kit), ou clique na janela preta e aperte qualquer tecla, ou feche essa janela (Windows). No Mac / Linux, aperte <b>Ctrl+C</b> na janela dele. Depois, remova o pendrive com segurança.</li>
+      <li>Ligue a <b>⚡ Economia</b> na página inicial para a bateria durar mais.</li>
       <li>Na bateria, a IA gasta muita energia enquanto escreve. Desligue o kit quando não estiver usando e diminua o brilho da tela.</li>
       <li>Guarde uma cópia reserva do pendrive e os cartões impressos em outro lugar.</li>
     </ul>
@@ -355,7 +383,7 @@
 
   <section class="card" id="atualizar">
     <h2>Atualizar o pendrive (precisa de internet)</h2>
-    <p>Mais fácil: no computador Windows que está rodando o kit, abra <a href="kit.html">Meu kit</a> e clique em <strong>Adicionar</strong>, <strong>Procurar atualizações</strong> ou <strong>Verificar / reparar</strong>. Ou clique duas vezes em <code>MAKE-USB.bat</code> no pendrive, escolha o pendrive e clique em <strong>Procurar atualizações</strong>. Ele mostra edições novas da biblioteca, um motor de IA mais novo, mapas com mais de um ano e um Survival-Data mais novo, com os tamanhos, e atualiza se você confirmar. Na mesma janela dá para marcar mais livros, mapas ou idiomas e clicar em <strong>Montar o pendrive</strong>. As instruções completas estão em <code>LEIA-ME.md</code> (Português) e <code>README.md</code> (English), no pendrive.</p>
+    <p>Mais fácil: no computador Windows que está rodando o kit, abra <a href="kit.html">Meu kit</a> e clique em <strong>Adicionar</strong>, <strong>Procurar atualizações</strong> ou <strong>Verificar / reparar</strong>. Ou clique duas vezes em <code>MAKE-USB.bat</code> no pendrive, escolha o pendrive e clique em <strong>Procurar atualizações</strong>. Ele mostra edições novas da biblioteca, um motor de IA mais novo, mapas com mais de um ano e um Survival-Data mais novo, com os tamanhos, e atualiza se você confirmar. Na mesma janela dá para marcar mais livros, mapas ou idiomas e clicar em <strong>Montar o pendrive</strong>. Com internet, as páginas e ferramentas do kit vêm direto da versão mais nova no GitHub. O botão <strong>🔄 Procurar atualizações</strong> da página inicial avisa quando sai uma versão nova. Se o kit estava rodando durante a atualização, desligue e inicie de novo para usar a versão nova. As instruções completas estão em <code>LEIA-ME.md</code> (Português) e <code>README.md</code> (English), no pendrive.</p>
   </section>
 
   <section class="card" id="sobre">

@@ -12,6 +12,10 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.25.0 (2026-11-08)
+
+- **A clear shutdown bar on the home page**, on the computer running the kit: a red **⏻ Shut down the kit** button with the reminder that closing the browser does NOT stop the kit (the AI, library and maps keep running and using the battery). The start window says the same.
+- **Help page brought up to date** (English and Portuguese): My kit and Check the kit, the CPR metronome, Low power, Meshtastic, how to shut down (button, key, closing the window), the home page's update check and updates from GitHub, the help shown when the kit isn't running, and new entries in Problems ("Library: offline" right after starting, "Could not reach the kit helper", servers still running after closing the browser).
 ## 1.24.1 (2026-11-08)
 
 - **"Could not reach the kit helper" after updating a running kit.** A kit updated while it runs keeps its old start window and helper until its next start, so the new **Shut down the kit** button could not work yet. The button now says exactly that (shut down with a key in the black window, then start again), and the builder says so at the end of an update when the kit is running.

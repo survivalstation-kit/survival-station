@@ -34,7 +34,11 @@
     <span class="pill" id="st-batt" hidden></span>
     <button class="pill power" type="button" id="st-power"></button>
     <button class="pill power" type="button" id="st-upd"></button>
-    <button class="pill power" type="button" id="st-off" hidden></button>
+  </div>
+  <div class="shutdown-bar" id="off-bar" hidden>
+    <span class="shutdown-ico" aria-hidden="true">⏻</span>
+    <p><b id="off-title"></b><br><span id="off-text"></span></p>
+    <button class="btn shutdown-btn" type="button" id="st-off"></button>
   </div>
   <p class="muted" id="power-note" hidden></p>
   <div class="notice" id="ai-start" hidden></div>
@@ -207,7 +211,8 @@
 
   // shut the kit down from here (on the computer running it): servers, helper and start window
   if (onThisComputer && SURVIVAL.served) {
-    $('st-off').textContent = t('off.btn'); $('st-off').hidden = false;
+    $('st-off').textContent = t('off.btn'); $('off-title').textContent = t('off.title'); $('off-text').textContent = t('off.text');
+    $('off-bar').hidden = false;
     $('st-off').onclick = async () => {
       if (!confirm(t('off.ask'))) return;
       try {
