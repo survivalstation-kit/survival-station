@@ -12,6 +12,10 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.35.1 (2026-11-08)
+
+- **`BOOTABLE-DRIVE.txt`** added to the kit root: a plain-text guide (English and Portuguese) to making the stick bootable, starting a computer from it, and scanning for viruses (ClamAV and Kaspersky), readable in any text editor without opening the portal. It ships on every kit.
+
 ## 1.35.0 (2026-11-08)
 
 - **Virus scanning added to the bootable drive.**

@@ -1,0 +1,118 @@
+===========================================================================
+ SURVIVAL STATION - BOOTABLE DRIVE AND VIRUS SCAN  (plain text, read anywhere)
+ English below, Portugues mais abaixo.  Full version: the Help page on the kit.
+===========================================================================
+
+WHAT THIS IS
+ Making the USB stick "bootable" lets it START a computer even when that
+ computer's own disk or Windows has failed. You boot a free system (Linux
+ Mint) from the stick, use the whole kit there, and copy your files to safety.
+ You can also add tools: repair, backup, memory test, and virus scanners.
+
+---------------------------------------------------------------------------
+MAKE THE STICK BOOTABLE (Windows, once)   --   THIS ERASES THE STICK
+---------------------------------------------------------------------------
+ 1. If the stick already has a kit, copy the kit to the computer first:
+    run COPY-KIT.bat  ->  choose "This computer".
+ 2. Double-click MAKE-BOOTABLE.bat. Allow administrator rights.
+    Type the stick's drive letter, then type ERASE to confirm.
+    It installs Ventoy and downloads Linux Mint (checked against the
+    official checksum). It also places clamav-scan.sh on the stick.
+ 3. When asked, pick any extra systems you want (type their numbers):
+      - SystemRescue : repair a broken start-up, recover files, and
+                       reset a forgotten LOCAL Windows account password
+      - Rescuezilla  : back up / restore a whole disk
+      - Memtest86+   : test the computer's memory (RAM)
+      - antiX        : a very light Linux for old computers
+      - Kali Linux   : security testing of YOUR OWN network/devices only
+      - Kaspersky Rescue Disk : bootable antivirus (see "Scan for viruses")
+ 4. Copy the kit back onto the stick:  run COPY-KIT.bat  (or MAKE-USB.bat).
+ Run MAKE-BOOTABLE.bat again any time to add or update systems; after the
+ first time it erases nothing.
+
+---------------------------------------------------------------------------
+START A COMPUTER FROM THE STICK
+---------------------------------------------------------------------------
+ 1. Plug in the stick, turn the computer on, and press the boot-menu key:
+    usually F12, F11, F9, F8 or Esc  (Apple Intel Macs: hold Option).
+    Choose the USB stick.
+ 2. In the Ventoy menu choose a system, then "Boot in normal mode".
+ 3. First time with Secure Boot: Ventoy asks to enroll its key once; follow it.
+ 4. In Linux Mint: open the SURVIVAL drive and run:  bash START-LINUX.sh
+ Nothing is installed on the computer unless you choose to install it.
+ Note: Apple computers with M1 or newer chips cannot boot this way.
+
+---------------------------------------------------------------------------
+SCAN A COMPUTER FOR VIRUSES  (from the stick, outside Windows - catches more)
+---------------------------------------------------------------------------
+ ClamAV (free, open source) - NOT a menu item; it is the script on the stick:
+   1. Boot the computer into Linux Mint (above).
+   2. Open the SURVIVAL drive, right-click in the folder -> Open in Terminal.
+   3. Run:   bash clamav-scan.sh
+      It installs ClamAV, updates the virus signatures (needs internet once),
+      lets you pick the computer's disk, scans it, and lists what it finds.
+      It only reports; it does not delete.
+
+ Kaspersky Rescue Disk (optional, pick it in the MAKE-BOOTABLE menu):
+   A full bootable antivirus. In the Ventoy boot menu choose
+   kaspersky-rescue-disk.iso; it updates its own signatures and scans.
+   Note: Kaspersky is a Russian company and some organisations avoid it; it
+   has no published checksum, so it is downloaded over HTTPS from its
+   official site.
+
+===========================================================================
+ PORTUGUES
+===========================================================================
+
+O QUE E ISTO
+ Tornar o pendrive "inicializavel" permite que ele INICIE um computador mesmo
+ quando o disco ou o Windows daquele computador falhou. Voce inicia um sistema
+ gratuito (Linux Mint) pelo pendrive, usa o kit inteiro ali e copia seus
+ arquivos para um lugar seguro. Da tambem para adicionar ferramentas: reparo,
+ backup, teste de memoria e antivirus.
+
+TORNAR O PENDRIVE INICIALIZAVEL (Windows, uma vez)  --  ISTO APAGA O PENDRIVE
+ 1. Se o pendrive ja tem um kit, copie o kit para o computador antes:
+    rode COPY-KIT.bat  ->  escolha "Este computador".
+ 2. Clique duas vezes em MAKE-BOOTABLE.bat. Permita o acesso de administrador.
+    Digite a letra do pendrive e depois digite ERASE para confirmar.
+    Ele instala o Ventoy e baixa o Linux Mint (conferido com o checksum
+    oficial). Tambem coloca o clamav-scan.sh no pendrive.
+ 3. Quando perguntar, escolha os sistemas extras que quiser (digite os numeros):
+      - SystemRescue : reparar o inicio travado, recuperar arquivos e
+                       resetar a senha esquecida de uma conta LOCAL do Windows
+      - Rescuezilla  : backup / restauracao de um disco inteiro
+      - Memtest86+   : testar a memoria (RAM) do computador
+      - antiX        : um Linux bem leve para computadores antigos
+      - Kali Linux   : teste de seguranca SOMENTE da sua propria rede/aparelhos
+      - Kaspersky Rescue Disk : antivirus inicializavel (veja "Procurar virus")
+ 4. Copie o kit de volta para o pendrive: rode COPY-KIT.bat (ou MAKE-USB.bat).
+ Rode o MAKE-BOOTABLE.bat de novo quando quiser para adicionar ou atualizar
+ sistemas; depois da primeira vez ele nao apaga nada.
+
+INICIAR UM COMPUTADOR PELO PENDRIVE
+ 1. Conecte o pendrive, ligue o computador e aperte a tecla do menu de boot:
+    geralmente F12, F11, F9, F8 ou Esc  (Mac Intel: segure Option).
+    Escolha o pendrive.
+ 2. No menu do Ventoy escolha um sistema e "Boot in normal mode".
+ 3. Primeira vez com Secure Boot: o Ventoy pede para registrar a chave; siga.
+ 4. No Linux Mint: abra o pendrive SURVIVAL e rode:  bash START-LINUX.sh
+ Nada e instalado no computador, a nao ser que voce escolha instalar.
+ Obs.: computadores Apple com chip M1 ou mais novo nao iniciam assim.
+
+PROCURAR VIRUS NUM COMPUTADOR (pelo pendrive, fora do Windows - pega mais)
+ ClamAV (gratis, codigo aberto) - NAO e item de menu; e o script no pendrive:
+   1. Inicie o computador no Linux Mint (acima).
+   2. Abra o pendrive SURVIVAL, botao direito na pasta -> Abrir no Terminal.
+   3. Rode:   bash clamav-scan.sh
+      Ele instala o ClamAV, atualiza as assinaturas de virus (precisa de
+      internet uma vez), deixa voce escolher o disco, procura e lista o que
+      achar. So informa; nao apaga.
+
+ Kaspersky Rescue Disk (opcional, escolha no menu do MAKE-BOOTABLE):
+   Um antivirus inicializavel completo. No menu de boot do Ventoy escolha
+   kaspersky-rescue-disk.iso; ele atualiza as proprias assinaturas e procura.
+   Obs.: a Kaspersky e uma empresa russa e algumas organizacoes a evitam; nao
+   tem checksum publicado, entao e baixado por HTTPS do site oficial.
+
+ Use por sua conta e risco. / Use at your own risk.

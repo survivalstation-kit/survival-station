@@ -419,7 +419,7 @@ function Norm-Path($p) { $p.TrimEnd('\').ToLower() }
 # The app itself: start files, portal pages, launchers and this builder. MAKE-USB.bat and COPY-KIT.bat
 # go on the kit too, so it can update itself and be copied without the project folder.
 # (LICENSE and THIRD-PARTY-NOTICES.md go on every kit: a shared kit carries the licences of what is on it)
-$AppRootFiles = 'START-WINDOWS.bat', 'START-MAC.command', 'START-LINUX.sh', 'MAKE-USB.bat', 'COPY-KIT.bat', 'PRIVATE-DOCS.bat', 'MAKE-BOOTABLE.bat', 'README.md', 'LEIA-ME.md', 'CHANGELOG.md', 'LICENSE', 'THIRD-PARTY-NOTICES.md'
+$AppRootFiles = 'START-WINDOWS.bat', 'START-MAC.command', 'START-LINUX.sh', 'MAKE-USB.bat', 'COPY-KIT.bat', 'PRIVATE-DOCS.bat', 'MAKE-BOOTABLE.bat', 'BOOTABLE-DRIVE.txt', 'README.md', 'LEIA-ME.md', 'CHANGELOG.md', 'LICENSE', 'THIRD-PARTY-NOTICES.md'
 function Get-AppFiles($from = $script:AppSrc) {   # relative paths of every app file in the project (not the drive's data folders)
   foreach ($f in $AppRootFiles) { if (Test-Path (Join-Path $from $f)) { $f } }
   foreach ($d in 'portal', 'launch', 'setup') {
