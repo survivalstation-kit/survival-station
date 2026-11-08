@@ -394,12 +394,39 @@ function Norm-Path($p) { $p.TrimEnd('\').ToLower() }
 # go on the kit too, so it can update itself and be copied without the project folder.
 # (LICENSE and THIRD-PARTY-NOTICES.md go on every kit: a shared kit carries the licences of what is on it)
 $AppRootFiles = 'START-WINDOWS.bat', 'START-MAC.command', 'START-LINUX.sh', 'MAKE-USB.bat', 'COPY-KIT.bat', 'PRIVATE-DOCS.bat', 'README.md', 'LEIA-ME.md', 'CHANGELOG.md', 'LICENSE', 'THIRD-PARTY-NOTICES.md'
-function Get-AppFiles {   # relative paths of every app file in the project (not the drive's data folders)
-  foreach ($f in $AppRootFiles) { if (Test-Path (Join-Path $Root $f)) { $f } }
+function Get-AppFiles($from = $script:AppSrc) {   # relative paths of every app file in the project (not the drive's data folders)
+  foreach ($f in $AppRootFiles) { if (Test-Path (Join-Path $from $f)) { $f } }
   foreach ($d in 'portal', 'launch', 'setup') {
-    Get-ChildItem (Join-Path $Root $d) -Recurse -File | ForEach-Object { $_.FullName.Substring($Root.Length).TrimStart('\') } |
+    Get-ChildItem (Join-Path $from $d) -Recurse -File | ForEach-Object { $_.FullName.Substring($from.TrimEnd('\').Length).TrimStart('\') } |
       Where-Object { $_ -notmatch '^portal\\(maps|vendor|survival-data)\\' }
   }
+}
+# ---------------------------------------------------------------- app updates from GitHub
+# Where the kit's own pages, start files and tools come from: this builder's folder, or, when there is internet
+# and it is newer, the latest release on GitHub. So a kit updates itself even when the builder runs from the kit.
+$AppRepo = 'survivalstation-kit/survival-station'
+$script:AppSrc = $Root
+function Test-NewerVersion($a, $b) {   # true when version $a is newer than $b ('' counts as very old)
+  try { [version]$(if ($a) { $a } else { '0.0' }) -gt [version]$(if ($b) { $b } else { '0.0' }) } catch { $false }
+}
+function Get-NewestApp {
+  if ($script:appChecked) { return }
+  $script:appChecked = $true
+  try { $rel = Invoke-RestMethod "https://api.github.com/repos/$AppRepo/releases/latest" -TimeoutSec 15 }
+  catch { Write-Host "   (GitHub not reachable: the app files come from this builder's folder, version $AppVersion)"; return }
+  $tag = "$($rel.tag_name)"; $v = $tag.TrimStart('v')
+  if (-not (Test-NewerVersion $v $AppVersion)) { Write-Host "   app $AppVersion here is the newest (latest on GitHub: $v)"; return }
+  Write-Host "   newer app on GitHub: $v (this builder's folder has $AppVersion), downloading it"
+  $zip = Join-Path $env:TEMP "survival-station-$v.zip"; $x = Join-Path $env:TEMP "survival-station-$v"
+  try {
+    if (Test-Path $x) { Remove-Item -Recurse -Force $x }
+    Invoke-WebRequest "https://github.com/$AppRepo/archive/refs/tags/$tag.zip" -OutFile $zip -UseBasicParsing -TimeoutSec 300
+    Expand-Any $zip $x
+    $src = (Get-ChildItem $x -Directory | Select-Object -First 1).FullName
+    if (-not $src -or (Get-AppVersion $src) -ne $v -or -not (Test-Path (Join-Path $src 'START-WINDOWS.bat'))) { throw 'the download is not a complete Survival Station release' }
+    $script:AppSrc = $src
+  } catch { Write-Host "   could not get the GitHub release ($($_.Exception.Message)): using this builder's folder" -ForegroundColor Yellow }
+  finally { Remove-Item $zip -Force -ErrorAction SilentlyContinue }
 }
 # Survival-Data's index.html hides its lists in CSS, but its click handler reads the inline style,
 # so the first click on a heading hid an already hidden list and nothing seemed to happen
@@ -841,12 +868,18 @@ function Build-Places {
 
 function Copy-AppFiles {
   Repair-SurvivalDataPage
-  if ((Norm-Path $Root) -eq (Norm-Path $Target)) { Write-Host '   (this builder runs from the kit itself: app files are already in place)'; return }
-  foreach ($f in $AppRootFiles) { Copy-Item -Force (Join-Path $Root $f) $Target }
-  foreach ($d in 'portal', 'launch', 'setup') { Copy-Item -Recurse -Force (Join-Path $Root $d) $Target }
+  Get-NewestApp
+  $src = $script:AppSrc
+  if ((Norm-Path $src) -eq (Norm-Path $Target)) { Write-Host '   (this builder runs from the kit itself: app files are already in place)'; return }
+  # never put older pages over newer ones (a kit updated from GitHub, then an old builder folder)
+  $kitV = Get-AppVersion $Target; $srcV = Get-AppVersion $src
+  if (Test-NewerVersion $kitV $srcV) { Write-Host "   (the kit has app $kitV, newer than $srcV here: kept as it is)"; return }
+  foreach ($f in $AppRootFiles) { if (Test-Path (Join-Path $src $f)) { Copy-Item -Force (Join-Path $src $f) $Target } }
+  foreach ($d in 'portal', 'launch', 'setup') { Copy-Item -Recurse -Force (Join-Path $src $d) $Target }
   # how to load the AI models in a phone app (opens in the iPhone Files app, no computer needed)
   New-Item -ItemType Directory -Force (Join-Path $Target 'models') | Out-Null
-  Copy-Item -Force (Join-Path $PSScriptRoot 'PHONE-AI-SETUP.txt') (Join-Path $Target 'models\PHONE-AI-SETUP.txt')
+  Copy-Item -Force (Join-Path $src 'setup\PHONE-AI-SETUP.txt') (Join-Path $Target 'models\PHONE-AI-SETUP.txt')
+  if ($srcV -ne $kitV) { Write-Host "   app $(if ($kitV) { $kitV } else { '(old)' }) -> $srcV" }
 }
 function Write-Choices {
   $rows = @(); $ids = @(); $custom = ''
@@ -1414,10 +1447,13 @@ if ($Verify) {
 
   $kitVersion = Get-AppVersion $Target
   Report info ("App version on the kit: {0}   (this builder: {1})" -f $(if ($kitVersion) { $kitVersion } else { 'before 1.0.0' }), $AppVersion)
-  # app files: newer or missing compared with this builder's folder
-  if ((Norm-Path $Root) -ne (Norm-Path $Target)) {
+  # app files: newer or missing compared with this builder's folder, or the latest GitHub release when online
+  Get-NewestApp
+  $appV = Get-AppVersion $script:AppSrc
+  if (Test-NewerVersion $kitVersion $appV) { Report ok "App pages: the kit has $kitVersion, newer than $appV here (kept)" }
+  elseif ((Norm-Path $script:AppSrc) -ne (Norm-Path $Target)) {
     $old = @(Get-AppFiles | Where-Object {
-      $src = Get-Item (Join-Path $Root $_); $dst = Join-Path $Target $_
+      $src = Get-Item (Join-Path $script:AppSrc $_); $dst = Join-Path $Target $_
       -not (Test-Path $dst) -or (Get-Item $dst).Length -ne $src.Length -or $src.LastWriteTime -gt (Get-Item $dst).LastWriteTime.AddSeconds(2) })
     if (-not (Test-Path (Join-Path $Target 'models\PHONE-AI-SETUP.txt'))) { $old += 'models\PHONE-AI-SETUP.txt' }
     if ($old) { Report bad "App pages and tools: $($old.Count) files missing or older than this builder's (e.g. $($old[0]))" @{ Kind = 'app' } }

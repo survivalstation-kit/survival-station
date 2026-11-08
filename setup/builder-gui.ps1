@@ -38,6 +38,9 @@ function Get-AppVersion($folder) {   # from portal\version.js, the one place the
   if ((Test-Path $f) -and ((Get-Content $f -Raw) -match "version:\s*'([^']+)'")) { $Matches[1] } else { '' }
 }
 $AppVersion = Get-AppVersion (Split-Path $PSScriptRoot)
+function Test-NewerVersion($a, $b) {   # true when version $a is newer than $b ('' counts as very old)
+  try { [version]$(if ($a) { $a } else { '0.0' }) -gt [version]$(if ($b) { $b } else { '0.0' }) } catch { $false }
+}
 $pt = (Get-UICulture).Name -like 'pt*'
 function T($en, $ptText) { if ($pt) { $ptText } else { $en } }
 
@@ -590,9 +593,15 @@ function Get-Updates {
     $old = if (Test-Path $stamp) { (Get-Content $stamp) -ne $c.sdPushed } else { (Get-Item $sd).CreationTime -lt ([datetime]$c.sdPushed).AddDays(-2) }   # unpacked folders carry the last commit's date
     if ($old) { $ups += [pscustomobject]@{ Text = T 'Survival-Data: newer version' 'Survival-Data: versão mais nova'; Size = 1500MB } }
   }
-  # the app itself (portal pages, start files, builder): newer in this project folder than on the kit
+  # the app itself (portal pages, start files, builder): a newer release on GitHub (when online; the update
+  # downloads it, even when this window runs from the kit), or newer files in this project folder
   $proj = Split-Path $PSScriptRoot
-  if ($proj.TrimEnd('\') -ne $r.TrimEnd('\')) {
+  $kitV = Get-AppVersion $r
+  $gh = try { "$((Invoke-RestMethod 'https://api.github.com/repos/survivalstation-kit/survival-station/releases/latest' -TimeoutSec 10).tag_name)".TrimStart('v') } catch { '' }
+  if ($gh -and (Test-NewerVersion $gh $kitV) -and (Test-NewerVersion $gh $AppVersion)) {
+    $ups += [pscustomobject]@{ Text = (T 'App {0} -> {1}: new pages, start files and tools from GitHub' 'App {0} -> {1}: páginas, arquivos de início e ferramentas novos do GitHub') -f $(if ($kitV) { $kitV } else { T 'before 1.0.0' 'anterior à 1.0.0' }), $gh; Size = 30MB }
+  }
+  elseif ($proj.TrimEnd('\') -ne $r.TrimEnd('\') -and -not (Test-NewerVersion $kitV $AppVersion)) {
     $code = @(Get-ChildItem (Join-Path $proj 'portal') -File -Include *.html, *.js, *.css -Recurse -ErrorAction SilentlyContinue |
               Where-Object { $_.FullName -notmatch '\\portal\\(vendor|maps|docs|survival-data)\\' }) +
             @(Get-ChildItem $proj -File -Include *.bat, *.command, *.sh -ErrorAction SilentlyContinue) + @(Get-ChildItem $PSScriptRoot -File)

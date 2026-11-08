@@ -101,6 +101,17 @@
     }
     row.append(note);
     box.append(p, row);
+    // with internet: say when a newer version is out on GitHub ("Check for updates" gets it)
+    const newer = (a, b) => { const x = a.split('.').map(Number), y = b.split('.').map(Number); for (let i = 0; i < 3; i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0); return false; };
+    const mine = window.SURVIVAL_VERSION?.version || '0.0.0';
+    fetch('https://api.github.com/repos/survivalstation-kit/survival-station/releases/latest', { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : null).then(rel => {
+        const v = (rel?.tag_name || '').replace(/^v/, '');
+        if (!v || !newer(v, mine)) return;
+        const n = el('p', L(`🆕 Version ${v} is out (this kit has ${mine}). Click "Check for updates" to get it from GitHub.`,
+                            `🆕 Saiu a versão ${v} (este kit tem a ${mine}). Clique em "Procurar atualizações" para baixar do GitHub.`), 'notice');
+        box.insertBefore(n, row);
+      }).catch(() => { /* no internet: nothing to say */ });
     if (st.choices) box.append(el('p', L('This kit remembers what it was built with (BUILD-CHOICES.txt), so "Add more" starts with those items ticked.',
                                          'Este kit lembra com o que foi montado (BUILD-CHOICES.txt), então "Adicionar" já começa com esses itens marcados.'), 'muted'));
   }

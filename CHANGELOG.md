@@ -10,8 +10,18 @@ To release a new version:
 2. Add a section below.
 3. Commit, and tag the commit `vX.Y.Z`.
 
-Kits pick up the new version with **Verify / repair** or **Check for updates**.
+Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.21.0 (2026-11-08)
+
+- **Updates straight from GitHub when there is internet.** **Check for updates** and **Verify / repair** now also look at the latest release on GitHub (github.com/survivalstation-kit/survival-station):
+  - if it is newer than the builder's own folder, they download it (a few MB) and update the kit's pages, start files and tools from it;
+  - so a kit can update itself, even when the builder is opened from the kit (the **My kit** page or the kit's own MAKE-USB.bat);
+  - with no internet, they use the builder's folder as before.
+- **Never older over newer:** a builder from an older copy no longer replaces newer pages on a kit; it keeps them and says so.
+- The **My kit** page says when a newer version is out on GitHub, when the device has internet.
+
+  Kits from before 1.21.0 need one update the old way (MAKE-USB.bat from a newer copy, then Check for updates); after that they update from GitHub on their own.
 ## 1.20.0 (2026-11-08)
 
 - **Weather page** (new tile ⛅ on the home page), for when there is still some connection, even only a phone's mobile data:
