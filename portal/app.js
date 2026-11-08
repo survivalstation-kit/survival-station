@@ -132,8 +132,20 @@ const SURVIVAL = (() => {
     } catch { }
   }
 
+  // "use at your own risk" on every page: at the bottom, under the chat's question box; the map, which fills the
+  // screen, carries it in its credits (map.html)
+  function showDisclaimer() {
+    const page = document.body.dataset.page;
+    if (page === 'map') return;
+    const p = document.createElement('p');
+    p.className = 'disclaimer';
+    p.textContent = t(page === 'chat' ? 'disclaimer.short' : 'disclaimer');
+    (page === 'chat' ? document.querySelector('.composer') : document.querySelector('main') || document.body)?.append(p);
+  }
+
   initTheme();
   applyI18n();
   showVersion();
+  showDisclaimer();
   return { served, host, ai, secure, libHost, library, tiles, voice, up, store, lang, dict, t, isDark, lowPower, setLowPower };
 })();

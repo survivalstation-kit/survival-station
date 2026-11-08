@@ -96,7 +96,7 @@
     style: style(SURVIVAL.isDark()),
     ...view,
     maxZoom: 19,
-    attributionControl: { compact: true },
+    attributionControl: { compact: true, customAttribution: SURVIVAL.t('disclaimer.short') },
   });
   map.addControl(new maplibregl.NavigationControl(), 'top-right');
   map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left');

@@ -10,6 +10,10 @@ echo " =============================================="
 echo "   SURVIVAL STATION  -  offline AI + library"
 echo "                        IA offline + biblioteca"
 echo " =============================================="
+echo " Use at your own risk: free resources gathered from others, not a substitute"
+echo " for emergency services. The AI can be wrong. No responsibility accepted."
+echo " Use por sua conta e risco: recursos gratuitos de terceiros, nao substitui o"
+echo " socorro. A IA pode errar. Os autores nao se responsabilizam."
 echo
 
 case "$(uname -s)-$(uname -m)" in

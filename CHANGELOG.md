@@ -12,6 +12,19 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.19.1 (2026-11-08)
+
+- **"Use at your own risk" everywhere.** One clear statement, in English and Portuguese:
+  - Survival Station brings together free material published by others, with short summaries of public emergency guidance, none of it reviewed by professionals for this kit;
+  - it is a reference tool, not a substitute for emergency services, and the AI can be wrong;
+  - it is provided "as is", and its authors and contributors accept no responsibility or liability for errors, misinformation, misuse or its answers.
+
+  It now appears in:
+  - **every kit page**, at the bottom (short form under the chat's question box, and in the map's credits);
+  - printed family plans and the print pack;
+  - the start window;
+  - the README, LEIA-ME, Help, `THIRD-PARTY-NOTICES.md`, the flyers, the post texts and the video script.
+
 ## 1.19.0 (2026-11-08)
 
 - **Safer, more accurate AI answers.** With the complete Wikipedia on the kit, the library lookup found unrelated articles (a song for "bleeding", oil refining for "bleach"), and one answer gave about 12 times the safe bleach dose. Now:

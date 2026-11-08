@@ -9,6 +9,12 @@ Link: https://github.com/survivalstation-kit/survival-station
 
 Tone: calm and factual. Mention the official 72-hour advice; avoid "lockdown", "collapse" or doomsday wording.
 
+**End every post with this line** (or its Portuguese version):
+
+> Use at your own risk: it brings together free resources published by others, and it is a reference tool, not a substitute for emergency services or medical care. The AI can be wrong, and the authors accept no responsibility for misinformation, misuse or its answers.
+
+> Use por sua conta e risco: o kit reúne recursos gratuitos publicados por outros e é uma ferramenta de consulta, que não substitui o socorro nem o atendimento médico. A IA pode errar, e os autores não se responsabilizam por informações incorretas, mau uso nem pelas respostas.
+
 ---
 
 ## Hacker News: "Show HN"

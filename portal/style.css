@@ -194,6 +194,8 @@ mark { background: #ffe08a; color: #1d1b16; border-radius: 3px; padding: 0 1px; 
 .plan-row > .btn { justify-self: start; }
 .plan .buttons { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
 .printout { display: none; }
+.disclaimer { color: var(--muted); font-size: 13px; line-height: 1.4; margin: 24px 0 12px; border-top: 1px solid var(--line); padding-top: 10px; }
+.composer .disclaimer { max-width: 760px; margin: 6px auto 0; padding: 0 16px; border: 0; font-size: 12px; }
 p.warn { color: var(--warn); font-weight: 600; }
 .copy-row input.pw { font: inherit; font-size: 15px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--text); min-width: 0; }
 .print-choices { display: flex; flex-direction: column; }

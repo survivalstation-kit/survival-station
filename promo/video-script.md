@@ -20,11 +20,13 @@ have a phone on the laptop's hotspot.
 | 1:50 | Phone: scan the QR code on the home page; the kit opens on the phone. | "Phones on the laptop's hotspot use everything in their browser. Scan the code, done." |
 | 2:05 | **COPY-KIT** window with the time estimate. | "And one stick can make another without internet, so one person can equip a whole street." |
 | 2:15 | GitHub page; text: **github.com/survivalstation-kit/survival-station**. | "It's free and open source, in English and Portuguese. Build yours now, while you still have internet. The link is below." |
-| 2:30 | End card with the link and "Not a substitute for emergency services." | (no voice) |
+| 2:30 | End card with the link and: "Use at your own risk. It brings together free resources published by others; not a substitute for emergency services. The authors accept no responsibility for misinformation or misuse." | (no voice) |
 
 **Description text:**
 
 > Survival Station is a free, open-source emergency kit on a USB stick: offline first aid, maps with place
 > search, a radio guide, tools and a local AI assistant that cites its sources. No internet or install needed;
 > phones join over the laptop's hotspot. Download: https://github.com/survivalstation-kit/survival-station
-> It is a reference tool, not a substitute for emergency services, doctors or official instructions.
+> Use at your own risk: it brings together free resources published by others, and it is a reference tool, not a
+> substitute for emergency services, doctors or official instructions. The AI can be wrong; the authors accept no
+> responsibility for misinformation, misuse or its answers.

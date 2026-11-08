@@ -7,6 +7,14 @@ so these terms travel with it** — this file is copied onto every kit for that 
 
 Licences can change: check the linked pages for the current terms.
 
+**Use at your own risk.** Survival Station brings together free material published by others, listed below,
+with short summaries of public emergency guidance written for the kit (the emergency cards, radio page and
+tools). None of it has been reviewed by medical, legal or emergency professionals for this kit. All of it,
+Survival Station's own code and pages and everything it downloads, is provided "as is", without warranty of any
+kind. The authors and contributors of Survival Station accept no responsibility or liability for errors,
+misinformation, misuse, the answers it gives, or the accuracy, completeness or legality of any third-party
+material, which is the responsibility of its publishers and of whoever builds or shares a kit.
+
 ## Programs on the kit
 
 | Part | Licence | Source |

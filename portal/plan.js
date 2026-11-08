@@ -83,6 +83,7 @@ const FAMILY_PLAN = (() => {
       filled.forEach(k => { const tr = tb.insertRow(); tr.append(el('th', null, tt(k === 'docs' ? 'docs.h' : k))); tr.insertCell().textContent = plan.fields[k]; });
       out.append(tb);
     }
+    out.append(el('p', 'disclaimer', SURVIVAL.t('disclaimer')));
     return out;
   }
   const load = () => { try { return JSON.parse(SURVIVAL.store('family-plan') || 'null'); } catch { return null; } };

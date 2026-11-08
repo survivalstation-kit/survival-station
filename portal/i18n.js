@@ -42,6 +42,8 @@ const I18N = {
     'home.phone.2': 'On the phone, open the browser and go to the address shown in the start window (<code>http://192.168.x.x:8080</code>).',
     'home.phone.3': 'Android without a computer: install the apps in <code>apps/android/</code> (Kiwix, PocketPal AI, Organic Maps) <i>before</i> disaster strikes.',
     'home.phone.4': 'iPhone or iPad: see the <a href="iphone.html">iPhone and iPad setup</a> (free App Store apps that use the files on this drive).',
+    'disclaimer': 'Use at your own risk. Survival Station brings together free material published by others (library, maps, AI models) with short summaries of public emergency guidance (the cards, radio page and tools). None of it has been reviewed by medical, legal or emergency professionals for this kit. It is a reference tool, not a substitute for emergency services, doctors or official instructions, and the AI can be wrong. It is provided "as is", without warranty of any kind; its authors and contributors accept no responsibility or liability for errors, misinformation, misuse, the answers it gives or the material it contains.',
+    'disclaimer.short': 'Use at your own risk: reference only, the AI can be wrong. No responsibility accepted.',
     'footer': 'Not a replacement for professional medical care or training. If any phone network works, call emergency services first (112 / 911 work on most phones even without a SIM).',
 
     'chat.title': "What's happening?",
@@ -139,6 +141,8 @@ The person may be stressed, injured, cold, or caring for someone else. Always an
     'home.phone.2': 'No celular, abra o navegador e acesse o endereço mostrado na janela de início (<code>http://192.168.x.x:8080</code>).',
     'home.phone.3': 'Android sem computador: instale os apps de <code>apps/android/</code> (Kiwix, PocketPal AI, Organic Maps) <i>antes</i> de uma emergência.',
     'home.phone.4': 'iPhone ou iPad: veja a <a href="iphone.html">configuração para iPhone e iPad</a> (apps grátis da App Store que usam os arquivos deste pendrive).',
+    'disclaimer': 'Use por sua conta e risco. O Survival Station reúne material gratuito publicado por outros (biblioteca, mapas, modelos de IA) e resumos curtos de orientações públicas de emergência (os cartões, a página de rádio e as ferramentas). Nada disso foi revisado por profissionais de saúde, jurídicos ou de emergência para este kit. É uma ferramenta de consulta e não substitui o socorro, os médicos nem as orientações oficiais, e a IA pode errar. É fornecido "no estado em que se encontra", sem garantia de nenhum tipo; seus autores e colaboradores não se responsabilizam por erros, informações incorretas, mau uso, pelas respostas que dá nem pelo material que contém.',
+    'disclaimer.short': 'Use por sua conta e risco: só consulta, a IA pode errar. Sem responsabilidade dos autores.',
     'footer': 'Não substitui atendimento médico nem treinamento. Se houver qualquer sinal de celular, ligue primeiro para a emergência: SAMU 192, Bombeiros 193, Polícia 190, Defesa Civil 199 (112 também funciona na maioria dos celulares, mesmo sem chip).',
 
     'chat.title': 'O que está acontecendo?',
