@@ -12,6 +12,12 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.31.0 (2026-11-08)
+
+- **📖 Books** (new page and tile):
+  - **The Art of War** by Sun Tzu, all 13 chapters, in **English and Portuguese**: a new translation made for the kit **from the original Chinese** (public domain), released into the public domain (CC0), so it has no copyright issue anywhere. Chapter titles in Chinese, a button to switch language, and **🔊 Listen**: the device reads a chapter or the whole book aloud with its own voice, offline, highlighting each paragraph, with pause and stop.
+  - Not based on Lionel Giles's 1910 translation or its LibriVox recordings: Giles died in 1958, so his translation is still protected in Brazil, Portugal, Europe and other countries until 2029.
+  - **Further reading** (links only, nothing copied): Robert Greene's *The 48 Laws of Power*, *The Laws of Human Nature* and *The 33 Strategies of War* (find in a library or Open Library), and free public-domain classics on the same themes on Project Gutenberg: Marcus Aurelius's *Meditations*, Machiavelli's *The Prince*, Le Bon's *The Crowd*, Laozi's *Tao Te Ching*.
 ## 1.30.0 (2026-11-08)
 
 - **More practical knowledge in the library** (English), chosen to fill gaps the kit didn't cover, with nothing duplicated:

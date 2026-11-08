@@ -315,3 +315,11 @@ ul.ticks li:has(input:checked) label { color: var(--muted); text-decoration: lin
 .pin-form select, .pin-form input { font: inherit; font-size: 15px; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; min-width: 0; }
 .pin-form input { flex: 1 1 200px; }
 .pin-form .muted { flex-basis: 100%; font-size: 13px; }
+/* books (books.html, art-of-war.html) */
+.book section.card p { line-height: 1.65; font-size: 17px; }
+.book .zh { font-size: .8em; font-weight: 400; }
+.book .reading { background: color-mix(in srgb, var(--accent) 16%, transparent); border-radius: 6px; }
+.book .btn.small { margin: 0 0 8px; }
+.reading-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.reading-list li { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; }
+.reading-list .copy-row { margin-top: 6px; gap: 14px; }

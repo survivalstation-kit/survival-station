@@ -64,6 +64,12 @@ The model files are the GGUF conversions published on Hugging Face (bartowski, g
 | Weather page (online only): forecasts and place lookup by Open-Meteo | CC BY 4.0 — https://open-meteo.com (credited on the page). Free for non-commercial use. |
 | Weather page (online only): alerts from the US National Weather Service | Public domain (US government) — https://www.weather.gov |
 
+## Written for the kit
+
+**The Art of War** (`portal/art-of-war.html`): a new English and Portuguese translation made for Survival Station from the original classical Chinese of Sun Tzu (public domain; text from Chinese Wikisource, https://zh.wikisource.org/wiki/孫子兵法). This translation is released into the public domain (CC0 1.0): anyone may copy, print, record or share it. It does not use Lionel Giles's 1910 English translation, which is still under copyright in countries where the term is the author's life plus 70 years (Giles died in 1958).
+
+The **Books** page only links to other books (libraries, Open Library, Project Gutenberg); it copies none of them.
+
 ## Optional: Survival-Data (not ticked by default)
 
 https://github.com/PR0M3TH3AN/Survival-Data states **no licence**, and its collection includes commercial books

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Books</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="books">
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html">Survival <span>Station</span></a>
+  <nav class="links">
+    <a href="index.html" data-i18n="nav.home">Home</a>
+    <a href="chat.html" data-i18n="nav.chat">Ask AI</a>
+    <a href="map.html" data-i18n="nav.map">Map</a>
+    <a href="cards.html" data-cards data-i18n="nav.cards">Emergency</a>
+    <a href="search.html" data-i18n="nav.search">Search</a>
+    <a href="help.html" data-i18n="nav.help">Help</a>
+  </nav>
+  <select class="lang-select" aria-label="Language / Idioma"></select>
+  <button class="theme-btn" type="button" data-i18n="theme">Theme</button>
+</div></header>
+
+<main class="wrap help books">
+  <h1 id="title"></h1>
+  <p class="lede" id="lede"></p>
+  <h2 id="on-kit"></h2>
+  <div class="grid" id="kit-books"></div>
+  <h2 id="more"></h2>
+  <p class="muted" id="more-note"></p>
+  <div id="reading"></div>
+</main>
+
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const pt = SURVIVAL.lang === 'pt-BR';
+  const L = (en, p) => pt ? p : en;
+  const q = s => encodeURIComponent(s);
+  const library = t => `https://search.worldcat.org/search?q=${q(t)}`;           // find it in a library near you
+  const openlib = t => `https://openlibrary.org/search?q=${q(t)}`;               // borrow or look it up
+  const gutenberg = id => `https://www.gutenberg.org/ebooks/${id}`;
+
+  document.title = L('Books', 'Livros');
+  $('title').textContent = '📖 ' + document.title;
+  $('lede').textContent = L('Books to read on the kit, with no internet, and a reading list of others worth finding.', 'Livros para ler no kit, sem internet, e uma lista de outros que vale a pena procurar.');
+  $('on-kit').textContent = L('On this kit', 'Neste kit');
+  $('more').textContent = L('Further reading (not on the kit)', 'Para ler depois (não estão no kit)');
+  $('more-note').textContent = L('Links only: these open when there is internet. Books still under copyright are not copied onto the kit; borrow them from a library or buy them. The free classics can be downloaded legally.',
+                                 'Só links: abrem quando houver internet. Livros ainda protegidos por direitos autorais não são copiados para o kit; pegue emprestado numa biblioteca ou compre. Os clássicos gratuitos podem ser baixados legalmente.');
+
+  // ---- on the kit
+  const tile = (href, ico, t, p) => { const a = document.createElement('a'); a.className = 'tile'; a.href = href; a.innerHTML = `<div class="ico">${ico}</div><h3></h3><p></p>`; a.querySelector('h3').textContent = t; a.querySelector('p').textContent = p; return a; };
+  $('kit-books').append(tile('art-of-war.html', '⚔️', L('The Art of War', 'A Arte da Guerra'),
+    L('Sun Tzu. Strategy, leadership and conflict in 13 short chapters. English and Portuguese, and read aloud by the device.', 'Sun Tzu. Estratégia, liderança e conflito em 13 capítulos curtos. Em português e inglês, e lido em voz alta pelo aparelho.')));
+
+  // ---- reading list: [title, author and year, what it is about, links]
+  const LISTS = [
+    [L('Robert Greene (under copyright: find in a library or buy)', 'Robert Greene (protegidos por direitos autorais: procure numa biblioteca ou compre)'), [
+      ['The 48 Laws of Power', 'Robert Greene, 1998', L('Power and influence, drawn from history. Portuguese: "As 48 Leis do Poder".', 'Poder e influência, tirados da história. Em português: "As 48 Leis do Poder".'), 'The 48 Laws of Power Robert Greene'],
+      ['The Laws of Human Nature', 'Robert Greene, 2018', L('Why people act as they do, in 18 "laws". Portuguese: "As Leis da Natureza Humana".', 'Por que as pessoas agem como agem, em 18 "leis". Em português: "As Leis da Natureza Humana".'), 'The Laws of Human Nature Robert Greene'],
+      ['The 33 Strategies of War', 'Robert Greene, 2006', L('Strategy for everyday conflict; builds on Sun Tzu. Portuguese: "As 33 Estratégias da Guerra".', 'Estratégia para os conflitos do dia a dia; parte de Sun Tzu. Em português: "As 33 Estratégias da Guerra".'), 'The 33 Strategies of War Robert Greene'],
+    ]],
+    [L('Free classics on the same themes (public domain)', 'Clássicos gratuitos sobre os mesmos temas (domínio público)'), [
+      ['Meditations', 'Marcus Aurelius, ~170 AD', L('A Roman emperor\'s notes on self-control and calm under pressure (Stoicism).', 'Anotações de um imperador romano sobre autocontrole e calma sob pressão (estoicismo).'), null, 2680],
+      ['The Prince', 'Niccolò Machiavelli, 1532', L('How power is won and kept, written plainly.', 'Como o poder é conquistado e mantido, escrito sem rodeios.'), null, 1232],
+      ['The Crowd: A Study of the Popular Mind', 'Gustave Le Bon, 1895', L('How people behave in crowds and panics: still useful in emergencies.', 'Como as pessoas se comportam em multidões e no pânico: ainda útil em emergências.'), null, 445],
+      ['Tao Te Ching', 'Laozi, ~400 BC', L('Short verses on simplicity, balance and leading without force; from the same tradition as Sun Tzu.', 'Versos curtos sobre simplicidade, equilíbrio e liderar sem força; da mesma tradição de Sun Tzu.'), null, 216],
+    ]],
+  ];
+  for (const [head, items] of LISTS) {
+    const h = document.createElement('h3'); h.textContent = head;
+    const ul = document.createElement('ul'); ul.className = 'reading-list';
+    for (const [t, by, about, search, gid] of items) {
+      const li = document.createElement('li');
+      const b = document.createElement('b'); b.textContent = t;
+      const s = document.createElement('span'); s.className = 'muted'; s.textContent = ` · ${by}`;
+      const p = document.createElement('div'); p.textContent = about;
+      const links = document.createElement('div'); links.className = 'copy-row';
+      const link = (href, label) => { const a = document.createElement('a'); a.href = href; a.target = '_blank'; a.rel = 'noopener'; a.textContent = label; links.append(a); };
+      if (gid) link(gutenberg(gid), L('Free download (Project Gutenberg)', 'Baixar grátis (Projeto Gutenberg)'));
+      else { link(library(search), L('Find in a library', 'Procurar numa biblioteca')); link(openlib(search), 'Open Library'); }
+      li.append(b, s, p, links); ul.append(li);
+    }
+    $('reading').append(h, ul);
+  }
+})();
+</script>
+</body>
+</html>
