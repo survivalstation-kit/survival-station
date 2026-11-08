@@ -141,7 +141,7 @@
   }
 
   // 1. the kit's own pages: emergency cards, radio, help (each section on its own)
-  const pages = [[dict._cards, t('nav.cards')], ['radio.html', t('tile.radio.t')], ['help.html', t('nav.help')]];
+  const pages = [[dict._cards, t('nav.cards')], ['radio.html', t('tile.radio.t')], ['privacy.html', t('tile.privacy.t')], ['help.html', t('nav.help')]];
   const sections = [];
   await Promise.all(pages.map(async ([url, name]) => {
     try {

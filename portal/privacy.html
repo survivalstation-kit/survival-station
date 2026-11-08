@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Private browsing</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="privacy">
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html">Survival <span>Station</span></a>
+  <nav class="links">
+    <a href="index.html" data-i18n="nav.home">Home</a>
+    <a href="chat.html" data-i18n="nav.chat">Ask AI</a>
+    <a href="map.html" data-i18n="nav.map">Map</a>
+    <a href="cards.html" data-cards data-i18n="nav.cards">Emergency</a>
+    <a href="search.html" data-i18n="nav.search">Search</a>
+    <a href="help.html" data-i18n="nav.help">Help</a>
+  </nav>
+  <select class="lang-select" aria-label="Language / Idioma"></select>
+  <button class="theme-btn" type="button" data-i18n="theme">Theme</button>
+</div></header>
+
+<main class="wrap help">
+
+<!-- ======================================================= English -->
+<article data-for="en">
+  <h1>Private browsing: Tor Browser and a free VPN</h1>
+  <p class="lede">For when there is still some internet: how to browse without showing your location, and how to reach websites that are blocked. Both need an internet connection; nothing on this page works offline.</p>
+  <p class="notice"><b>Install and try them now, while the internet is normal.</b> In a crisis, the download sites may be slow or blocked. <b>Nothing makes you completely untraceable.</b> These tools hide <i>where</i> you connect from; what you type, the accounts you log into and the phone itself can still identify you.</p>
+
+  <nav class="toc">
+    <a href="#which">Which one?</a><a href="#tor">Tor Browser</a><a href="#tor-blocked">If Tor is blocked</a>
+    <a href="#tor-phone">Tor on phones</a><a href="#vpn">Proton VPN Free</a><a href="#habits">Safe habits</a>
+  </nav>
+
+  <section class="card" id="which">
+    <h2>Which one should I use?</h2>
+    <table>
+      <tr><th>Tor Browser</th><td>Free, no account, runs from a folder or USB stick with nothing installed. Hides your location from websites and hides which websites you visit from your internet provider. Gets around many blocks. <b>Slower</b>, and only protects what you do inside Tor Browser.</td></tr>
+      <tr><th>Proton VPN Free</th><td>Free, no data limit, no ads, does not log what you do. Protects <b>every app</b> on the device (messaging apps too), and is faster than Tor. Needs an <b>account</b> (an email) and must be <b>installed</b>; the free plan is for <b>one device</b>, and you cannot pick the country.</td></tr>
+    </table>
+    <p><b>In short:</b> to read news or blocked sites without being seen, use <b>Tor Browser</b>. To protect all your apps on a public or untrusted Wi-Fi, use the <b>VPN</b>. Do not log into your personal accounts in Tor if you want to stay anonymous.</p>
+    <p class="muted">Rules differ between countries: in a few, Tor or VPNs are blocked or restricted. Know your local law.</p>
+  </section>
+
+  <section class="card" id="tor">
+    <h2>Tor Browser on a computer</h2>
+    <ol>
+      <li><b>Download</b> only from the official site: <b>torproject.org/download</b> (Windows, Mac, Linux). Avoid copies from other sites.</li>
+      <li><b>Windows:</b> run the downloaded file and choose a folder to install to. You can choose your USB stick: it then runs from the stick on any Windows computer, leaving nothing behind. <b>Mac:</b> open the .dmg and drag Tor Browser to Applications. <b>Linux:</b> unpack it and run <code>start-tor-browser.desktop</code>.</li>
+      <li><b>Open Tor Browser</b> and click <b>Connect</b>. The first connection can take a minute. If it fails, see <a href="#tor-blocked">If Tor is blocked</a>.</li>
+      <li>Browse as usual, in that window only. Other browsers and apps on the computer are <b>not</b> protected.</li>
+      <li><b>Security level:</b> the shield / settings menu → <i>Security Level</i>: <b>Standard</b> (everything works), <b>Safer</b> (turns off risky features on many sites) or <b>Safest</b> (text-only sites; most protective). The browser restarts to apply it.</li>
+      <li><b>New Identity</b> (menu ≡ → <i>New identity</i>): closes every tab and starts fresh, so the next sites can't connect you to the previous ones.</li>
+      <li>When you close Tor Browser, it forgets your history and cookies. Keep the addresses you want to return to in the kit's <a href="favorites.html">Private favorites</a>, locked with a password, and copy them into Tor Browser.</li>
+    </ol>
+  </section>
+
+  <section class="card" id="tor-blocked">
+    <h2>If Tor is blocked: bridges</h2>
+    <p>Some networks and countries block Tor. <b>Bridges</b> are hidden entry points that get around that.</p>
+    <ol>
+      <li>On the first screen click <b>Configure Connection</b>; if Tor Browser is already open: menu ≡ → <b>Settings</b> → <b>Connection</b>.</li>
+      <li>Under <b>Bridges</b>, choose the <b>built-in bridges</b> option → <b>Select a Built-In Bridge</b>.</li>
+      <li>Try them in this order: <b>obfs4</b>, <b>webtunnel</b>, <b>snowflake</b>, <b>meek</b>. Click Connect after each, until one works.</li>
+      <li>If none work, <b>ask for a bridge</b>: in the same Bridges section (request a bridge from torproject.org), or at <b>bridges.torproject.org</b> from another device, or through the Tor Project's Telegram bot <b>@GetBridgesBot</b>. Then choose to add a bridge manually and paste the lines you received.</li>
+    </ol>
+    <p class="muted">If the torproject.org site itself is blocked, the Tor Project's <b>GetTor</b> service sends download links by email or Telegram; see the official support pages at support.torproject.org.</p>
+  </section>
+
+  <section class="card" id="tor-phone">
+    <h2>Tor on phones</h2>
+    <ul>
+      <li><b>Android:</b> install <b>Tor Browser</b> by <i>The Tor Project</i> from Google Play, or the APK from torproject.org/download. Open it and tap <b>Connect</b>. Bridges: in its settings, under the Tor connection options. Security level: menu ⋮ → <i>Privacy and security</i> → <b>Security Level</b> → choose → <i>Save and restart</i>.</li>
+      <li><b>iPhone / iPad:</b> there is no Tor Browser; the Tor Project recommends <b>Onion Browser</b> from the App Store.</li>
+      <li>Beware of fake "Tor" apps: check that the developer is The Tor Project (Android) or Onion Browser's own team (iPhone).</li>
+    </ul>
+  </section>
+
+  <section class="card" id="vpn">
+    <h2>Proton VPN Free</h2>
+    <p>Made by Proton AG (Switzerland), the makers of Proton Mail. The free plan has <b>no data or time limit and no ads</b>, and Proton says it <b>does not log your activity</b>. It works on Windows, Mac, Linux, Android and iPhone.</p>
+    <ol>
+      <li>Go to <b>protonvpn.com</b>, choose the <b>Free</b> plan and create an account (an email address and a password).</li>
+      <li>Download the app for the device (from protonvpn.com, Google Play or the App Store) and install it.</li>
+      <li>Open it, sign in, and press <b>Connect</b> (Quick Connect). On the free plan, the server is picked for you.</li>
+      <li>When it says <b>Connected</b>, every app on the device goes through the VPN.</li>
+      <li>Turn on the <b>Kill Switch</b> in its settings: if the VPN drops, the internet stops instead of leaking your real address.</li>
+      <li><b>If the network blocks VPNs</b>, change the protocol to <b>Stealth</b> in the app's settings (where available).</li>
+    </ol>
+    <ul>
+      <li>The free plan works on <b>one device at a time</b>; peak times can be slower.</li>
+      <li>Write the account email and password on your <a href="plan.html">family plan</a> or keep them in the kit's private documents: you'll need them on a new phone.</li>
+      <li><b>Avoid unknown "free VPN" apps</b>: many make money by selling what you do online.</li>
+      <li>A VPN hides your activity from the local network and your provider, but the VPN company could see it: that's why a no-logs provider matters.</li>
+    </ul>
+  </section>
+
+  <section class="card" id="habits">
+    <h2>Safe habits</h2>
+    <ul>
+      <li>Logging into your email or social media <b>identifies you</b>, even through Tor or a VPN.</li>
+      <li>Don't open files downloaded through Tor while connected (documents and PDFs can contact the internet and reveal your address).</li>
+      <li>Keep the phone's location, Bluetooth and Wi-Fi off when you don't need them.</li>
+      <li>Keep apps and Tor Browser updated: old versions have known flaws.</li>
+      <li>Use the <b>Signal</b> app for private messages and calls; it works well over Tor-friendly networks and VPNs.</li>
+      <li>Check important news from more than one source: in a crisis, false information spreads fast.</li>
+    </ul>
+    <p class="muted">Official guides: support.torproject.org and protonvpn.com/support. Tor Browser is free software by the Tor Project, a non-profit; Proton VPN is a service of Proton AG. Survival Station is not connected with either.</p>
+  </section>
+</article>
+
+<!-- ======================================================= Português -->
+<article data-for="pt-BR" lang="pt-BR">
+  <h1>Navegação privada: Tor Browser e uma VPN grátis</h1>
+  <p class="lede">Para quando ainda houver alguma internet: como navegar sem mostrar onde você está, e como abrir sites bloqueados. Os dois precisam de internet; nada nesta página funciona offline.</p>
+  <p class="notice"><b>Instale e teste agora, enquanto a internet está normal.</b> Numa crise, os sites para baixar podem ficar lentos ou bloqueados. <b>Nada deixa você totalmente impossível de rastrear.</b> Estas ferramentas escondem <i>de onde</i> você se conecta; o que você digita, as contas em que entra e o próprio celular ainda podem identificar você.</p>
+
+  <nav class="toc">
+    <a href="#qual">Qual usar?</a><a href="#tor-pt">Tor Browser</a><a href="#tor-bloqueado">Se o Tor for bloqueado</a>
+    <a href="#tor-celular">Tor no celular</a><a href="#vpn-pt">Proton VPN Free</a><a href="#cuidados">Cuidados</a>
+  </nav>
+
+  <section class="card" id="qual">
+    <h2>Qual usar?</h2>
+    <table>
+      <tr><th>Tor Browser</th><td>Grátis, sem conta, roda de uma pasta ou pendrive sem instalar nada. Esconde sua localização dos sites e esconde da operadora quais sites você visita. Passa por muitos bloqueios. É <b>mais lento</b> e só protege o que você faz dentro do Tor Browser.</td></tr>
+      <tr><th>Proton VPN Free</th><td>Grátis, sem limite de dados, sem anúncios, não registra o que você faz. Protege <b>todos os apps</b> do aparelho (inclusive os de mensagem) e é mais rápido que o Tor. Precisa de <b>conta</b> (um e-mail) e de <b>instalar</b>; o plano grátis é para <b>um aparelho</b>, e não dá para escolher o país.</td></tr>
+    </table>
+    <p><b>Resumindo:</b> para ler notícias ou sites bloqueados sem ser visto, use o <b>Tor Browser</b>. Para proteger todos os apps num Wi-Fi público ou desconhecido, use a <b>VPN</b>. Não entre nas suas contas pessoais pelo Tor se quiser ficar anônimo.</p>
+    <p class="muted">As regras mudam de país para país: em alguns, o Tor ou as VPNs são bloqueados ou restritos. Conheça a lei local.</p>
+  </section>
+
+  <section class="card" id="tor-pt">
+    <h2>Tor Browser no computador</h2>
+    <ol>
+      <li><b>Baixe</b> só do site oficial: <b>torproject.org/download</b> (Windows, Mac, Linux). Evite cópias de outros sites.</li>
+      <li><b>Windows:</b> rode o arquivo baixado e escolha uma pasta para instalar. Pode ser o seu pendrive: aí ele roda do pendrive em qualquer computador Windows, sem deixar nada para trás. <b>Mac:</b> abra o .dmg e arraste o Tor Browser para Aplicativos. <b>Linux:</b> descompacte e rode <code>start-tor-browser.desktop</code>.</li>
+      <li><b>Abra o Tor Browser</b> e clique em <b>Connect</b> (Conectar). A primeira conexão pode levar um minuto. Se falhar, veja <a href="#tor-bloqueado">Se o Tor for bloqueado</a>.</li>
+      <li>Navegue normalmente, só nessa janela. Os outros navegadores e apps do computador <b>não</b> ficam protegidos.</li>
+      <li><b>Nível de segurança:</b> menu do escudo / configurações → <i>Security Level</i>: <b>Standard</b> (tudo funciona), <b>Safer</b> (desliga recursos arriscados em muitos sites) ou <b>Safest</b> (sites só de texto; o mais protegido). O navegador reinicia para aplicar.</li>
+      <li><b>New Identity</b> (Nova identidade, no menu ≡): fecha todas as abas e começa do zero, para os próximos sites não ligarem você aos anteriores.</li>
+      <li>Ao fechar o Tor Browser, ele esquece o histórico e os cookies. Guarde os endereços aos quais quer voltar nos <a href="favorites.html">Favoritos privados</a> do kit, trancados com senha, e copie para o Tor Browser.</li>
+    </ol>
+  </section>
+
+  <section class="card" id="tor-bloqueado">
+    <h2>Se o Tor for bloqueado: pontes (bridges)</h2>
+    <p>Algumas redes e países bloqueiam o Tor. As <b>pontes</b> (bridges) são entradas escondidas que contornam isso.</p>
+    <ol>
+      <li>Na primeira tela clique em <b>Configure Connection</b>; com o Tor Browser já aberto: menu ≡ → <b>Settings</b> → <b>Connection</b>.</li>
+      <li>Em <b>Bridges</b>, escolha a opção de <b>pontes embutidas</b> (built-in) → <b>Select a Built-In Bridge</b>.</li>
+      <li>Tente nesta ordem: <b>obfs4</b>, <b>webtunnel</b>, <b>snowflake</b>, <b>meek</b>. Clique em Connect depois de cada uma, até alguma funcionar.</li>
+      <li>Se nenhuma funcionar, <b>peça uma ponte</b>: na mesma seção Bridges (pedir uma ponte ao torproject.org), ou em <b>bridges.torproject.org</b> de outro aparelho, ou pelo robô do Telegram do Tor Project <b>@GetBridgesBot</b>. Depois escolha adicionar uma ponte manualmente e cole as linhas recebidas.</li>
+    </ol>
+    <p class="muted">Se o próprio site torproject.org estiver bloqueado, o serviço <b>GetTor</b> do Tor Project manda links de download por e-mail ou Telegram; veja as páginas oficiais em support.torproject.org.</p>
+  </section>
+
+  <section class="card" id="tor-celular">
+    <h2>Tor no celular</h2>
+    <ul>
+      <li><b>Android:</b> instale o <b>Tor Browser</b> da <i>The Tor Project</i> pela Google Play, ou o APK em torproject.org/download. Abra e toque em <b>Connect</b>. Pontes: nas configurações dele, nas opções de conexão do Tor. Nível de segurança: menu ⋮ → <i>Privacy and security</i> → <b>Security Level</b> → escolha → <i>Save and restart</i>.</li>
+      <li><b>iPhone / iPad:</b> não existe Tor Browser; o Tor Project recomenda o <b>Onion Browser</b> da App Store.</li>
+      <li>Cuidado com apps falsos de "Tor": confira se o desenvolvedor é The Tor Project (Android) ou a equipe do próprio Onion Browser (iPhone).</li>
+    </ul>
+  </section>
+
+  <section class="card" id="vpn-pt">
+    <h2>Proton VPN Free</h2>
+    <p>Feita pela Proton AG (Suíça), a mesma do Proton Mail. O plano grátis <b>não tem limite de dados nem de tempo, nem anúncios</b>, e a Proton diz que <b>não registra sua atividade</b>. Funciona no Windows, Mac, Linux, Android e iPhone.</p>
+    <ol>
+      <li>Entre em <b>protonvpn.com</b>, escolha o plano <b>Free</b> e crie uma conta (um e-mail e uma senha).</li>
+      <li>Baixe o app do seu aparelho (pelo protonvpn.com, Google Play ou App Store) e instale.</li>
+      <li>Abra, entre na conta e aperte <b>Connect</b> (Quick Connect). No plano grátis, o servidor é escolhido automaticamente.</li>
+      <li>Quando aparecer <b>Connected</b>, todos os apps do aparelho passam pela VPN.</li>
+      <li>Ligue o <b>Kill Switch</b> nas configurações: se a VPN cair, a internet para em vez de mostrar seu endereço real.</li>
+      <li><b>Se a rede bloquear VPNs</b>, mude o protocolo para <b>Stealth</b> nas configurações do app (onde existir).</li>
+    </ol>
+    <ul>
+      <li>O plano grátis funciona em <b>um aparelho por vez</b>; em horários de pico pode ficar mais lento.</li>
+      <li>Anote o e-mail e a senha da conta no <a href="plan.html">plano da família</a> ou guarde nos documentos privados do kit: você vai precisar num celular novo.</li>
+      <li><b>Evite apps de "VPN grátis" desconhecidos</b>: muitos ganham dinheiro vendendo o que você faz na internet.</li>
+      <li>A VPN esconde sua atividade da rede local e da operadora, mas a empresa da VPN poderia ver: por isso importa ela não guardar registros.</li>
+    </ul>
+  </section>
+
+  <section class="card" id="cuidados">
+    <h2>Cuidados</h2>
+    <ul>
+      <li>Entrar no seu e-mail ou nas redes sociais <b>identifica você</b>, mesmo pelo Tor ou pela VPN.</li>
+      <li>Não abra arquivos baixados pelo Tor enquanto estiver conectado (documentos e PDFs podem acessar a internet e revelar seu endereço).</li>
+      <li>Deixe a localização, o Bluetooth e o Wi-Fi do celular desligados quando não precisar.</li>
+      <li>Mantenha os apps e o Tor Browser atualizados: versões antigas têm falhas conhecidas.</li>
+      <li>Use o app <b>Signal</b> para mensagens e ligações privadas.</li>
+      <li>Confira notícias importantes em mais de uma fonte: numa crise, informação falsa se espalha rápido.</li>
+    </ul>
+    <p class="muted">Guias oficiais (em inglês): support.torproject.org e protonvpn.com/support. O Tor Browser é software livre do Tor Project, uma organização sem fins lucrativos; a Proton VPN é um serviço da Proton AG. O Survival Station não tem ligação com nenhum dos dois.</p>
+  </section>
+</article>
+
+</main>
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+<script>
+  // show the text in the reader's language (both stay visible if scripts are off)
+  document.querySelectorAll('article[data-for]').forEach(a => { a.hidden = a.dataset.for !== SURVIVAL.lang; });
+  if (!document.querySelector('article[data-for]:not([hidden])')) document.querySelector('article[data-for="en"]').hidden = false;
+  document.title = SURVIVAL.t('tile.privacy.t');
+</script>
+</body>
+</html>

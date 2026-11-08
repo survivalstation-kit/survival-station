@@ -97,6 +97,18 @@ while ($true) {
       Send $ctx 200 @{ ok = $true } $origin
       Start-Process $PS -WindowStyle Hidden -ArgumentList ('-NoProfile -ExecutionPolicy Bypass -File "{0}" -Quiet' -f (Join-Path $PSScriptRoot 'stop-old-kit.ps1'))
     }
+    # private favorites: the page encrypts them with the user's password before sending; only that encrypted
+    # text is kept, at the top of the kit (outside portal\, so phones can never fetch the file)
+    elseif ($path -eq '/favorites' -and $origin) {
+      $vault = Join-Path $Root 'favorites.vault'
+      if ($req.HttpMethod -eq 'GET') { Send $ctx 200 @{ vault = $(if (Test-Path $vault) { [IO.File]::ReadAllText($vault) } else { $null }) } $origin }
+      elseif ($req.HttpMethod -eq 'POST') {
+        $b = Read-Body $req
+        if ("$($b.vault)" -notmatch '^\{"v":1,') { Send $ctx 400 @{ error = 'not an encrypted vault' } $origin }
+        else { [IO.File]::WriteAllText($vault, "$($b.vault)", (New-Object Text.UTF8Encoding $false)); Send $ctx 200 @{ ok = $true } $origin }
+      }
+      else { Send $ctx 405 @{ error = 'method' } $origin }
+    }
     # private documents (setup\private-docs.ps1) and the family plan; only the kit's own pages, on this computer
     elseif ($req.HttpMethod -eq 'POST' -and $path -like '/private/*' -and $origin) {
       $b = Read-Body $req

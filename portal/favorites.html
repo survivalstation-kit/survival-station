@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Private favorites</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="favorites">
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html">Survival <span>Station</span></a>
+  <nav class="links">
+    <a href="index.html" data-i18n="nav.home">Home</a>
+    <a href="chat.html" data-i18n="nav.chat">Ask AI</a>
+    <a href="map.html" data-i18n="nav.map">Map</a>
+    <a href="cards.html" data-cards data-i18n="nav.cards">Emergency</a>
+    <a href="search.html" data-i18n="nav.search">Search</a>
+    <a href="help.html" data-i18n="nav.help">Help</a>
+  </nav>
+  <select class="lang-select" aria-label="Language / Idioma"></select>
+  <button class="theme-btn" type="button" data-i18n="theme">Theme</button>
+</div></header>
+
+<main class="wrap favs">
+  <h1 id="title"></h1>
+  <p class="lede" id="lede"></p>
+
+  <div class="box" id="nosecure" hidden></div>
+
+  <!-- locked: create a password the first time, then unlock with it -->
+  <form class="box fav-lock" id="lock" hidden autocomplete="off">
+    <h2 id="lock-title"></h2>
+    <p class="muted" id="lock-hint"></p>
+    <input type="password" id="pw" required minlength="8" autocomplete="off">
+    <input type="password" id="pw2" minlength="8" autocomplete="off" hidden>
+    <p><button class="btn" type="submit" id="lock-go"></button> <span class="muted" id="lock-msg" role="alert"></span></p>
+  </form>
+
+  <!-- unlocked -->
+  <section id="open" hidden>
+    <p class="copy-row"><button class="btn" type="button" id="btn-lock"></button> <span class="muted" id="where"></span></p>
+    <form class="box fav-add" id="add" autocomplete="off">
+      <h2 id="add-title"></h2>
+      <label><span id="l-name"></span><input id="f-name" required maxlength="120"></label>
+      <label><span id="l-url"></span><input id="f-url" required maxlength="500" placeholder="https://… / http://….onion"></label>
+      <label><span id="l-note"></span><input id="f-note" maxlength="300"></label>
+      <p><button class="btn" type="submit" id="add-go"></button> <button class="btn ghost" type="button" id="add-cancel" hidden></button></p>
+    </form>
+    <ul class="fav-list" id="list"></ul>
+    <p class="muted" id="empty"></p>
+    <details class="box"><summary id="pw-change-t"></summary>
+      <form id="pw-change" autocomplete="off">
+        <input type="password" id="pw-new" minlength="8" required> <button class="btn" type="submit" id="pw-change-go"></button> <span class="muted" id="pw-change-msg"></span>
+      </form>
+    </details>
+  </section>
+
+  <p class="muted" id="note"></p>
+  <footer data-i18n="footer"></footer>
+</main>
+
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+<script>
+(() => {
+  const pt = SURVIVAL.lang === 'pt-BR';
+  const L = (en, p) => pt ? p : en;
+  const $ = id => document.getElementById(id);
+  const HELPER = 'http://localhost:8091';   // setup\kit-control.ps1: keeps the encrypted copy on the stick
+  const onKitComputer = SURVIVAL.served && /^(localhost|127\.)/.test(location.hostname);
+  const KEY = 'favorites-vault';
+  const LOCK_AFTER = 5 * 60 * 1000;   // lock by itself after 5 minutes without use
+
+  document.title = L('Private favorites', 'Favoritos privados');
+  $('title').textContent = '🔐 ' + L('Private favorites', 'Favoritos privados');
+  $('lede').textContent = L('Addresses to keep private, such as sites to open in Tor Browser, locked with your password. Copy an address and paste it into Tor Browser.',
+                            'Endereços para guardar em segredo, como sites para abrir no Tor Browser, trancados com a sua senha. Copie um endereço e cole no Tor Browser.');
+  $('note').textContent = L('The favorites are encrypted on this device with your password (AES-256) before they are saved; without the password nobody can read them, not even the kit. There is no way to recover a forgotten password, so write it down somewhere safe. Tor Browser cannot open the kit\'s pages, so use Copy and paste the address there. See Private browsing for how to use Tor.',
+                            'Os favoritos são criptografados neste aparelho com a sua senha (AES-256) antes de serem salvos; sem a senha ninguém consegue ler, nem o kit. Não há como recuperar uma senha esquecida, então anote num lugar seguro. O Tor Browser não abre as páginas do kit, então use Copiar e cole o endereço lá. Veja Navegação privada para usar o Tor.');
+
+  // ---- the browser's own encryption (needs a secure page: the kit computer, the https address, or a file)
+  if (!window.crypto?.subtle) {
+    $('nosecure').textContent = L('This browser only allows encryption on a secure address. Open this page on the computer running the kit, or on the phone at the kit\'s https address (port 8443, shown on the home page).',
+                                  'Este navegador só permite criptografia num endereço seguro. Abra esta página no computador que roda o kit, ou no celular pelo endereço https do kit (porta 8443, mostrado na página inicial).');
+    $('nosecure').hidden = false;
+    return;
+  }
+  const enc = new TextEncoder(), dec = new TextDecoder();
+  const b64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
+  const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  async function keyFrom(password, salt) {
+    const base = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: 310000, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  }
+  async function seal(items, password) {
+    const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await keyFrom(password, salt), enc.encode(JSON.stringify(items)));
+    return JSON.stringify({ v: 1, salt: b64(salt), iv: b64(iv), ct: b64(ct), saved: Date.now() });
+  }
+  async function unseal(vault, password) {
+    const v = JSON.parse(vault);
+    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(v.iv) }, await keyFrom(password, unb64(v.salt)), unb64(v.ct));
+    return JSON.parse(dec.decode(pt));
+  }
+
+  // ---- where the encrypted favorites live: this browser, and the stick when on the kit computer
+  const local = { get() { try { return localStorage.getItem(KEY); } catch { return null; } }, set(v) { try { localStorage.setItem(KEY, v); } catch { } } };
+  async function stickGet() {
+    if (!onKitComputer) return null;
+    try { const r = await fetch(HELPER + '/favorites'); return r.ok ? (await r.json()).vault : null; } catch { return null; }
+  }
+  async function stickSet(v) {
+    if (!onKitComputer) return false;
+    try { const r = await fetch(HELPER + '/favorites', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ vault: v }) }); return r.ok; } catch { return false; }
+  }
+  const savedAt = v => { try { return JSON.parse(v).saved || 0; } catch { return 0; } };
+  async function newestVault() {
+    const a = local.get(), b = await stickGet();
+    return savedAt(b) > savedAt(a) ? b : a;
+  }
+
+  let items = [], password = '', editing = -1, timer = 0;
+
+  async function save() {
+    const v = await seal(items, password);
+    local.set(v);
+    const onStick = await stickSet(v);
+    $('where').textContent = onStick ? L('Saved on this device and on the kit (encrypted).', 'Salvo neste aparelho e no kit (criptografado).')
+                                     : L('Saved on this device (encrypted).', 'Salvo neste aparelho (criptografado).');
+  }
+
+  function lock() {
+    items = []; password = ''; editing = -1;
+    $('list').replaceChildren(); $('open').hidden = true;
+    showLock();
+  }
+  function touch() { clearTimeout(timer); timer = setTimeout(lock, LOCK_AFTER); }
+  ['click', 'keydown', 'touchstart'].forEach(e => addEventListener(e, () => { if (password) touch(); }, { passive: true }));
+  document.addEventListener('visibilitychange', () => { if (document.hidden && password) timer = setTimeout(lock, 60000); });
+
+  let first = false;
+  async function showLock() {
+    first = !(await newestVault());
+    $('lock-title').textContent = first ? L('Create a password', 'Crie uma senha') : L('Locked', 'Trancado');
+    $('lock-hint').textContent = first ? L('At least 8 characters. Type it twice. There is no way to recover it if forgotten.', 'Pelo menos 8 caracteres. Digite duas vezes. Não há como recuperar se esquecer.')
+                                       : L('Type your password to see your favorites.', 'Digite sua senha para ver seus favoritos.');
+    $('pw').placeholder = L('Password', 'Senha'); $('pw2').placeholder = L('Type it again', 'Digite de novo');
+    $('pw2').hidden = !first; $('pw2').required = first;
+    $('lock-go').textContent = first ? L('Create', 'Criar') : L('🔓 Unlock', '🔓 Abrir');
+    $('lock-msg').textContent = ''; $('pw').value = ''; $('pw2').value = '';
+    $('lock').hidden = false; $('pw').focus();
+  }
+
+  $('lock').onsubmit = async e => {
+    e.preventDefault();
+    const pw = $('pw').value;
+    if (first) {
+      if (pw !== $('pw2').value) { $('lock-msg').textContent = L('The two passwords are different.', 'As duas senhas são diferentes.'); return; }
+      password = pw; items = []; await save();
+    } else {
+      $('lock-msg').textContent = L('Opening…', 'Abrindo…');
+      try { items = await unseal(await newestVault(), pw); password = pw; }
+      catch { $('lock-msg').textContent = L('Wrong password.', 'Senha errada.'); $('pw').select(); return; }
+    }
+    $('lock').hidden = true; $('open').hidden = false; render(); touch();
+    if (!$('where').textContent) $('where').textContent = onKitComputer ? L('Kept on this device and on the kit (encrypted).', 'Guardado neste aparelho e no kit (criptografado).') : L('Kept on this device (encrypted).', 'Guardado neste aparelho (criptografado).');
+  };
+
+  function render() {
+    const ul = $('list'); ul.replaceChildren();
+    $('empty').textContent = items.length ? '' : L('No favorites yet: add the first one above.', 'Nenhum favorito ainda: adicione o primeiro acima.');
+    items.forEach((f, i) => {
+      const li = document.createElement('li');
+      const h = document.createElement('b'); h.textContent = f.name;
+      const u = document.createElement('code'); u.textContent = f.url;
+      const n = document.createElement('span'); n.className = 'muted'; n.textContent = f.note || '';
+      const row = document.createElement('span'); row.className = 'copy-row';
+      const btn = (label, fn, cls = 'btn') => { const b = document.createElement('button'); b.type = 'button'; b.className = cls; b.textContent = label; b.onclick = fn; row.append(b); return b; };
+      const copy = btn(L('📋 Copy', '📋 Copiar'), async () => {
+        try { await navigator.clipboard.writeText(f.url); copy.textContent = L('✓ Copied: paste it in Tor Browser', '✓ Copiado: cole no Tor Browser'); setTimeout(() => copy.textContent = L('📋 Copy', '📋 Copiar'), 3000); }
+        catch { getSelection().selectAllChildren(u); }
+      });
+      btn(L('Open here', 'Abrir aqui'), () => { if (confirm(L('This opens it in this browser, NOT privately. For privacy, copy it into Tor Browser instead. Open anyway?', 'Isto abre neste navegador, SEM privacidade. Para ter privacidade, copie para o Tor Browser. Abrir mesmo assim?'))) window.open(f.url, '_blank', 'noopener,noreferrer'); }, 'btn ghost');
+      btn(L('Edit', 'Editar'), () => { editing = i; $('f-name').value = f.name; $('f-url').value = f.url; $('f-note').value = f.note || ''; setAddMode(); $('f-name').focus(); }, 'btn ghost');
+      btn(L('Delete', 'Apagar'), async () => { if (confirm(L(`Delete "${f.name}"?`, `Apagar "${f.name}"?`))) { items.splice(i, 1); await save(); render(); } }, 'btn ghost');
+      li.append(h, u, n, row); ul.append(li);
+    });
+  }
+  function setAddMode() {
+    $('add-title').textContent = editing < 0 ? L('Add a favorite', 'Adicionar favorito') : L('Edit favorite', 'Editar favorito');
+    $('add-go').textContent = editing < 0 ? L('➕ Add', '➕ Adicionar') : L('💾 Save', '💾 Salvar');
+    $('add-cancel').hidden = editing < 0;
+  }
+  $('add').onsubmit = async e => {
+    e.preventDefault();
+    const f = { name: $('f-name').value.trim(), url: $('f-url').value.trim(), note: $('f-note').value.trim() };
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(f.url)) f.url = 'https://' + f.url;
+    if (editing < 0) items.push(f); else items[editing] = f;
+    editing = -1; $('add').reset(); setAddMode();
+    await save(); render();
+  };
+  $('add-cancel').onclick = () => { editing = -1; $('add').reset(); setAddMode(); };
+  $('btn-lock').onclick = lock;
+  $('pw-change').onsubmit = async e => {
+    e.preventDefault();
+    password = $('pw-new').value; await save(); $('pw-new').value = '';
+    $('pw-change-msg').textContent = L('Password changed.', 'Senha trocada.');
+  };
+
+  $('btn-lock').textContent = L('🔒 Lock now', '🔒 Trancar agora');
+  $('l-name').textContent = L('Name', 'Nome'); $('l-url').textContent = L('Address', 'Endereço'); $('l-note').textContent = L('Note (optional)', 'Observação (opcional)');
+  $('add-cancel').textContent = L('Cancel', 'Cancelar');
+  $('pw-change-t').textContent = L('Change the password', 'Trocar a senha');
+  $('pw-new').placeholder = L('New password (8+ characters)', 'Nova senha (8+ caracteres)'); $('pw-change-go').textContent = L('Change', 'Trocar');
+  setAddMode();
+  showLock();
+})();
+</script>
+</body>
+</html>

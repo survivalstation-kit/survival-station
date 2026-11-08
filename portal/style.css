@@ -239,3 +239,13 @@ p.warn { color: var(--warn); font-weight: 600; }
   .card { break-inside: avoid; border-color: #999; }
   body { background: #fff; color: #000; }
 }
+
+/* private favorites (favorites.html) */
+.favs .box { margin: 12px 0; }
+.favs input { font: inherit; font-size: 15px; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 0; width: 100%; box-sizing: border-box; margin: 4px 0; }
+.fav-lock { max-width: 420px; }
+.fav-add label { display: flex; flex-direction: column; gap: 2px; font-size: 14px; color: var(--muted); margin: 6px 0; }
+.fav-list { list-style: none; padding: 0; margin: 12px 0; display: flex; flex-direction: column; gap: 10px; }
+.fav-list li { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+.fav-list code { overflow-wrap: anywhere; font-size: 14px; }
+.fav-list .copy-row .btn { padding: 6px 12px; font-size: 14px; }

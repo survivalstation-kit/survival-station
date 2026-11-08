@@ -12,6 +12,17 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.26.0 (2026-11-08)
+
+- **Private browsing page** (new tile 🕶️, English and Portuguese): how to use **Tor Browser** and **Proton VPN Free** when some internet is left, checked against the Tor Project's and Proton's own pages:
+  - which one to use, and what they do not protect (nothing makes you untraceable);
+  - Tor Browser on a computer (download, install to a USB stick, connect, security levels, New Identity);
+  - when Tor is blocked: built-in bridges (obfs4, webtunnel, snowflake, meek) and how to ask for one;
+  - Tor on Android, and Onion Browser on iPhone;
+  - Proton VPN Free step by step (account, app, Quick Connect, Kill Switch, Stealth protocol), its limits, and why to avoid unknown free VPNs;
+  - safe habits.
+- **Private favorites** (new tile 🔐): addresses to keep secret, such as sites to open in Tor Browser, **encrypted with your password** in the browser (AES-256, PBKDF2) before they are saved. On the computer running the kit, the encrypted copy is also kept on the stick (avorites.vault, outside the pages phones can reach), so it travels with the kit. **Copy** puts an address on the clipboard to paste into Tor Browser (which cannot open the kit's pages); it locks itself after 5 minutes without use. A forgotten password cannot be recovered.
+- The Help page and the kit-wide search include both.
 ## 1.25.0 (2026-11-08)
 
 - **A clear shutdown bar on the home page**, on the computer running the kit: a red **⏻ Shut down the kit** button with the reminder that closing the browser does NOT stop the kit (the AI, library and maps keep running and using the battery). The start window says the same.
