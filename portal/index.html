@@ -62,7 +62,7 @@
     <a class="tile" href="radio.html">
       <div class="ico">📡</div><h3 data-i18n="tile.radio.t"></h3><p data-i18n="tile.radio.p"></p>
     </a>
-    <a class="tile" href="survival-data/index.html" target="_blank" rel="noopener">
+    <a class="tile" id="tile-sd" href="survival-data/index.html" target="_blank" rel="noopener">
       <div class="ico">📻</div><h3 data-i18n="tile.sd.t"></h3><p data-i18n="tile.sd.p"></p>
     </a>
     <a class="tile" href="kit.html">
@@ -126,6 +126,9 @@
       $('docs').replaceChildren(ul);
     }
   } catch { /* opened as a file, or no index yet: keep the hint */ }
+
+  // Survival-Data is optional (not on every kit): no tile pointing at a missing page
+  if (SURVIVAL.served) fetch('survival-data/index.html', { method: 'HEAD' }).then(r => { if (!r.ok) $('tile-sd').hidden = true; }).catch(() => {});
 
   // low power switch, and the battery where the browser tells it (on the computer itself)
   const power = () => {

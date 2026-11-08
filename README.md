@@ -7,7 +7,7 @@ An offline survival kit that runs from a USB drive. Plug it into a computer, dou
 - **A local AI assistant**: llama.cpp with Qwen3 / Llama models, running on the computer's CPU. No GPU and no internet needed. Before it answers, it **looks the question up in the offline library**, then shows the articles it used as numbered, clickable sources.
 - **An offline library**: Kiwix archives of medical encyclopedias, water and food guides, post-disaster manuals, knots, Appropedia, iFixit and Wikipedia, in English and/or Portuguese.
 - **Offline maps**: a world overview on every drive, plus street-level maps of the regions you pick. Tap anywhere to get coordinates to read out to rescuers.
-- **[Survival-Data](https://github.com/PR0M3TH3AN/Survival-Data)**: preparedness, radio and emergency medical reference.
+- **[Survival-Data](https://github.com/PR0M3TH3AN/Survival-Data)** (optional, not ticked by default): preparedness, radio and emergency medical PDFs. Its repository states no licence and includes commercial books, so whether to add and share it is your decision (see `THIRD-PARTY-NOTICES.md`).
 - **Emergency cards**: CPR, bleeding, burns, water purification, signals and radio. They are plain HTML pages, so they open even if nothing else starts, and they print well. The Portuguese version adds Brazil-specific cards: snakebites, leptospirosis, landslides, and the local emergency numbers.
 - **Languages**: English and Português (Brasil). The interface, AI answers, emergency cards, library search and map labels all switch together. The phone or computer's language is picked automatically, and you can change it from the menu at the top.
 - **Family plan, print pack and private documents**: a family emergency plan to fill in and print, a one-click print pack (cards, radio, plan, start instructions), and a `private/` folder for IDs and insurance papers that phones never see, locked with a password by `PRIVATE-DOCS.bat` (OpenSSL format: Mac/Linux use `bash launch/private-docs.sh`, or `openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -md sha256`).
@@ -19,6 +19,8 @@ An offline survival kit that runs from a USB drive. Plug it into a computer, dou
 **For the people using the kit:** the portal has a built-in **Help** page (`portal/help.html`, English and Português). It covers starting the kit, every feature, phone access, and a troubleshooting table. It opens even when nothing is running. This README is for whoever builds the drive.
 
 It works like Project N.O.M.A.D., but it's portable. N.O.M.A.D. is a server you install on a Linux box. This needs nothing installed: everything lives on the stick.
+
+> **Important:** Survival Station is a reference tool, not a substitute for emergency services, doctors or official instructions. The AI can be wrong, and the library and guides may be out of date or not fit your situation. Always call for professional help when you can, follow the authorities' instructions, and check anything medical against the emergency cards and a qualified person. Use radio transmitters only as your country's law allows. It is provided "as is", without warranty of any kind (see `LICENSE`).
 
 ## 1. Build the drive (do this now, while you have internet)
 
@@ -133,3 +135,16 @@ launch/        start-unix.sh (shared Mac/Linux launcher)
 - Linux builds expect a fairly recent distro (Ubuntu 22.04+). If a program won't run from the drive, the launcher copies it to `/tmp` and runs it from there.
 - Map search finds towns worldwide and, in the countries with a street map on the kit, neighbourhoods, hospitals, airports, mountains, lakes and parks (GeoNames). Streets and house numbers can't be searched. The GPS "locate me" button only works on the computer running the kit, because browsers block GPS on plain-http network addresses. On phones, Organic Maps does GPS offline, but download its region map in the app ahead of time.
 - Keep printed copies of the emergency cards, plus a spare drive.
+
+## Licence
+
+Survival Station's own code and pages: **MIT** (`LICENSE`). Free to use, copy, change and share, including in
+community and relief work.
+
+The programs, AI models, books, maps and data the builder downloads keep their own licences, listed in
+[`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md), which goes onto every kit. When you share a kit, these travel
+with it. In particular:
+- **Llama 3.2** and **Gemma 3** come with their makers' terms and use policies.
+- **kiwix-serve** is GPL-3.0; its source is linked in the notices.
+- **iFixit** guides are non-commercial: don't sell kits that contain them.
+- **Survival-Data** is optional, because its rights are unclear.

@@ -320,7 +320,9 @@ function In-Tier($item) {
 }
 # with -Items, exactly the listed ids; otherwise the tier and languages decide
 function Wanted($item, $id) { if ($ItemSet) { $ItemSet -contains $id } else { In-Tier $item } }
-$WantSD = -not $ItemSet -or $ItemSet -contains 'survival-data'
+# Survival-Data only when asked for (ticked, or already on the kit): its repository states no licence and it
+# includes commercial books, so the user decides (see THIRD-PARTY-NOTICES.md)
+$WantSD = $ItemSet -contains 'survival-data'
 $WantApps = -not $ItemSet -or $ItemSet -contains 'apps'
 $WantVoice = -not $ItemSet -or $ItemSet -contains 'voice'
 # Voice: whisper.cpp's server turns speech into text for the chat (Windows and Linux builds; none for Mac).
@@ -390,7 +392,8 @@ function Norm-Path($p) { $p.TrimEnd('\').ToLower() }
 
 # The app itself: start files, portal pages, launchers and this builder. MAKE-USB.bat and COPY-KIT.bat
 # go on the kit too, so it can update itself and be copied without the project folder.
-$AppRootFiles = 'START-WINDOWS.bat', 'START-MAC.command', 'START-LINUX.sh', 'MAKE-USB.bat', 'COPY-KIT.bat', 'PRIVATE-DOCS.bat', 'README.md', 'LEIA-ME.md', 'CHANGELOG.md'
+# (LICENSE and THIRD-PARTY-NOTICES.md go on every kit: a shared kit carries the licences of what is on it)
+$AppRootFiles = 'START-WINDOWS.bat', 'START-MAC.command', 'START-LINUX.sh', 'MAKE-USB.bat', 'COPY-KIT.bat', 'PRIVATE-DOCS.bat', 'README.md', 'LEIA-ME.md', 'CHANGELOG.md', 'LICENSE', 'THIRD-PARTY-NOTICES.md'
 function Get-AppFiles {   # relative paths of every app file in the project (not the drive's data folders)
   foreach ($f in $AppRootFiles) { if (Test-Path (Join-Path $Root $f)) { $f } }
   foreach ($d in 'portal', 'launch', 'setup') {
@@ -1373,7 +1376,7 @@ if ($Catalog) {
                          file = "library/$($f.File)"; size = Get-RemoteSize $f.Url }
   }
   $apps = @(Get-AppList)
-  $list += [ordered]@{ id = 'survival-data'; group = 'extra'; name = 'Survival-Data: preparedness, radio, medical PDFs'; file = 'portal/survival-data/index.html'; size = 1500MB }
+  $list += [ordered]@{ id = 'survival-data'; group = 'extra'; name = 'Survival-Data: preparedness, radio, medical PDFs (third-party books with no stated licence: your choice)'; file = 'portal/survival-data/index.html'; size = 1500MB }
   $list += [ordered]@{ id = 'voice'; group = 'extra'; name = 'Voice: speak questions to the AI, also on phones (Windows, Linux)'; file = ($WhisperModelFile -replace '\\', '/'); size = (Get-RemoteSize $WhisperModel) + 210MB }   # + speech servers (~20 MB) and Caddy (~50 MB) per system
   $list += [ordered]@{ id = 'apps'; group = 'extra'; name = 'Android apps: Kiwix, PocketPal AI, Organic Maps'; file = 'apps/android/Kiwix.apk'; size = [int64]($apps | ForEach-Object { $_.Size } | Measure-Object -Sum).Sum }
   $world = 0

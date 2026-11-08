@@ -12,6 +12,21 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.18.0 (2026-11-07)
+
+Ready to publish as open source.
+
+- **MIT licence** (`LICENSE`) for Survival Station's own code and pages.
+- **`THIRD-PARTY-NOTICES.md`**: every program, AI model, book collection, map and data source the builder downloads, with its licence and source:
+  - the Llama 3.2 and Gemma 3 terms and use policies, with "Built with Llama";
+  - kiwix-serve's GPL-3.0 source offer;
+  - iFixit's non-commercial licence;
+  - OpenStreetMap and GeoNames credits.
+
+  It and the licence go onto every kit, so a shared kit carries them.
+- **Survival-Data is now optional and not ticked by default.** Its repository states no licence and includes commercial books still under copyright. The builder downloads it only when ticked, its name in the list says why, and kits that already have it keep it. The home page hides its tile when it isn't on the kit.
+- **Safety disclaimer** in the README, LEIA-ME and a new "About this kit" section of the Help page: a reference tool, not a substitute for emergency services, doctors or official instructions; radio only as the law allows; provided "as is".
+
 ## 1.17.0 (2026-11-02)
 
 - **Copy kit estimates how long the copy will take**, from the real speed of both drives.

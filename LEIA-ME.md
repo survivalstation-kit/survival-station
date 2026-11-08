@@ -8,12 +8,14 @@ Um kit de sobrevivência que roda direto de um pendrive, **sem internet e sem in
 - **Biblioteca offline** (Kiwix), com Wikipédia em português, Wikipédia médica, Wikilivros e Wikiviagem, além dos guias em inglês de água, alimentos, desastres e primeiros socorros.
 - **Mapas offline**: o mundo todo, mais ruas do Brasil ou do seu estado. Toque em qualquer ponto para ver as coordenadas e passar ao resgate.
 - **Cartões de emergência em português**: RCP, sangramento, queimaduras, picada de cobra, leptospirose, enchente, deslizamento, água potável e telefones (SAMU 192, Bombeiros 193, Defesa Civil 199). Imprima e guarde junto com o pendrive.
-- **Survival-Data**: manuais e PDFs de preparação, rádio e medicina, em inglês.
+- **Survival-Data** (opcional, desmarcado por padrão): manuais e PDFs de preparação, rádio e medicina, em inglês. O repositório não informa licença e inclui livros comerciais, então adicionar e compartilhar é decisão sua (veja `THIRD-PARTY-NOTICES.md`).
 - **Celular**: qualquer celular conectado ao mesmo Wi-Fi ou roteador do celular acessa tudo pelo navegador.
 
 **Para quem vai usar o kit:** o portal tem uma página de **Ajuda** (`portal/help.html`) que explica como iniciar, cada função, o uso no celular e o que fazer quando algo dá errado. Ela abre mesmo sem nada rodando. Este LEIA-ME é para quem monta o pendrive.
 
 O idioma é escolhido automaticamente pelo idioma do aparelho. Para trocar, use o menu no topo da página.
+
+> **Importante:** o Survival Station é uma ferramenta de consulta, não substitui o socorro, os médicos nem as orientações oficiais. A IA pode errar, e a biblioteca e os guias podem estar desatualizados ou não servir para o seu caso. Sempre que puder, chame ajuda profissional (SAMU 192, Bombeiros 193, Defesa Civil 199), siga as autoridades e confira assuntos de saúde nos cartões de emergência e com alguém qualificado. Use transmissores de rádio só como a lei permite. É fornecido "no estado em que se encontra", sem garantia de nenhum tipo (veja `LICENSE`).
 
 ## 1. Montar o pendrive (faça agora, enquanto tem internet)
 
@@ -61,3 +63,16 @@ O programa mostra o tamanho de tudo e pergunta antes de baixar. Se a internet ca
 - Faça um curso de primeiros socorros enquanto pode.
 - Cadastre-se nos alertas da Defesa Civil: envie seu **CEP por SMS para 40199**.
 - Guarde uma cópia impressa dos cartões e, se puder, um pendrive reserva.
+
+## Licença
+
+O código e as páginas do Survival Station: **MIT** (`LICENSE`). Livre para usar, copiar, alterar e compartilhar,
+inclusive em trabalho comunitário e de socorro.
+
+Os programas, modelos de IA, livros, mapas e dados que o construtor baixa têm as próprias licenças, listadas em
+[`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md), que vai em todo kit. Ao compartilhar um kit, elas vão junto.
+Em especial:
+- **Llama 3.2** e **Gemma 3** têm os termos e políticas de uso dos fabricantes.
+- O **kiwix-serve** é GPL-3.0; o código-fonte está indicado no arquivo.
+- Os guias do **iFixit** são não comerciais: não venda kits com eles.
+- O **Survival-Data** é opcional, porque os direitos não estão claros.

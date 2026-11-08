@@ -360,7 +360,7 @@ function Apply-Tier($tier) {
     switch ($i.group) {
       'model' { $n.Checked = $TierRank[$i.tier] -le $TierRank[$tier] }
       'zim' { $n.Checked = $TierRank[$i.tier] -le $TierRank[$tier] -and ("$($i.notIn)".Split(',') -notcontains $tier) -and $langs -contains $i.lang -and -not $i.opt }
-      'extra' { $n.Checked = $true }
+      'extra' { $n.Checked = $i.id -ne 'survival-data' }   # Survival-Data is opt-in: third-party books, rights unclear
     }
   }
   $script:updating = $false
