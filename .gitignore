@@ -11,3 +11,6 @@ private/
 .claude/
 __pycache__/
 *.pyc
+# the user's own data, if the project folder is ever used as a kit: lists, supplies, map pins, encrypted favorites
+my-data/
+favorites.vault

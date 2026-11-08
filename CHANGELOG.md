@@ -12,6 +12,10 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.29.1 (2026-11-08)
+
+- The user's own data (`my-data\`: checklists, supplies, shared map pins; `favorites.vault`) can never be committed to the repository, even if the project folder is used as a kit.
+
 ## 1.29.0 (2026-11-08)
 
 - **Shared map pins**: tap a spot on the map, then **📍 Pin it for everyone**, and choose water, shelter, meeting point, danger, medical help, food, power or other, with a name and a note. Everyone connected to the kit, on the computer and on phones, sees the pins (refreshed every 15 seconds); tap a pin for its details or to remove it.
