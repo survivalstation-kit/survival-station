@@ -48,6 +48,7 @@ powershell -ExecutionPolicy Bypass -File setup\build-drive.ps1 -Drive E: -Tier L
 
 - Troque `E:` pela letra do seu pendrive.
 - `-Map brazil` traz as ruas do Brasil todo (6,1 GB). Para economizar espaço, use só o seu estado: `-Map rio-grande-do-sul`, `santa-catarina`, `parana`, `sao-paulo`, `rio-de-janeiro`, `minas-gerais`, `bahia` ou `pernambuco`. Também dá para usar `-MapMaxZoom 14` (menos detalhe, metade do tamanho).
+- **Pendrive inicializável (opcional):** o `MAKE-BOOTABLE.bat` (Windows) adiciona o Ventoy e o Linux Mint, para o pendrive iniciar um computador cujo disco ou Windows falhou, rodar o kit e salvar arquivos. Ele apaga o pendrive na primeira vez: copie o kit antes e depois com o `COPY-KIT.bat`.
 - `-Tier Standard`, com um pendrive de 64 GB, inclui a Wikipédia em português completa (só texto), uma IA mais inteligente e mais livros.
 - Com o inglês marcado, o Standard e o Full também trazem perguntas e respostas de especialistas (cozinha, horta, marcenaria, artesanato, vida ao ar livre, radioamador, animais, consertos da casa e do carro), a Wikipédia em inglês simples e o PhET para crianças, os Wikibooks e livros antigos sobre agricultura (Gutenberg).
 

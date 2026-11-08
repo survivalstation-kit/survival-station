@@ -12,6 +12,13 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.33.0 (2026-11-08)
+
+- **Bootable stick (optional): `MAKE-BOOTABLE.bat`** (Windows). Makes a USB drive able to start a computer whose own disk or Windows has failed, into **Linux Mint XFCE**, where the whole kit runs (`bash START-LINUX.sh`) and files can be copied from the computer's disk to safety.
+  - Installs **Ventoy** (free, open source): a small boot section plus the normal exFAT partition, so the kit works on Windows, Mac and Linux exactly as before. Downloads the newest **Linux Mint XFCE** (~2.9 GB) into `ISO\`. Both are checked against their official SHA-256 checksums (Ventoy's program is not code-signed). Ventoy only looks in `ISO\`, so its start menu stays fast even with a big kit.
+  - Safety: only USB drives are offered (never the computer's own or system disks); it shows the drive's name, size and whether it holds a kit, and needs **ERASE** typed to continue. It runs from a copy in TEMP, so it works even when started from the stick it erases. On a stick that is already bootable it erases nothing and only adds or updates Linux Mint.
+  - It erases the stick the first time: copy the kit to the computer with COPY-KIT (This computer) first, and back afterwards. Ventoy's non-destructive install can't be used, because it does not support exFAT on Windows.
+  - Help (new section "Starting a computer from the stick"), README, LEIA-ME, `ISO\READ-ME.txt` on the stick, and `THIRD-PARTY-NOTICES.md` (Ventoy GPL-3.0, Linux Mint).
 ## 1.32.0 (2026-11-08)
 
 - **Two new emergency cards**, English and Portuguese, from Ready.gov and CDC guidance: **Nuclear explosion or radiation** (drop and cover from a flash, get inside, stay inside 24 hours, stay tuned, removing contamination, potassium iodide only when told) and **Chemical leak, toxic gas or chemical attack** (upwind and uphill, sheltering in place, removing and washing off contamination; Brazil: 192, 193 and Disque-Intoxicação 0800 722 6001). The AI finds them like the other cards.

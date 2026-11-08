@@ -42,6 +42,7 @@ An offline survival kit that runs from a USB drive. Plug it into a computer, dou
 - **Weather page**: when some connection is left (even a phone's data), a 7-day forecast from Open-Meteo, official US alerts, and the last forecast saved for when the connection goes; plus tips for reading the weather without internet.
 - **Private browsing and private favorites**: guides to Tor Browser and Proton VPN Free for when some internet is left, and a list of private addresses (for Tor Browser) encrypted with your password.
 - **Checklists, supplies, psychological first aid and a phrasebook**: tick-off preparation lists, stored supplies with expiry warnings, the WHO's psychological first aid in short, and picture cards in English, Portuguese and Spanish.
+- **Bootable stick (optional)**: `MAKE-BOOTABLE.bat` (Windows) adds Ventoy and Linux Mint, so the stick can start a computer whose own disk or Windows has failed, run the kit there and rescue files. It erases the stick the first time, so copy the kit off and back with `COPY-KIT.bat`.
 - **Radio page**: emergency frequencies, how to call for help, and how to set up a Baofeng UV-5R or TIDRADIO TD-H3 PLUS, with a CHIRP channel file (`portal/radio/survival-channels.csv`); plus how to set up Meshtastic LoRa devices to text with no phone network.
 - **Phone access**: phones on the same hotspot or Wi-Fi open the computer's address in a browser.
 - **Android apps** to install ahead of time: Kiwix, PocketPal AI (runs the AI on the phone), Organic Maps and Meshtastic (LoRa mesh texting).

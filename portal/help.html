@@ -32,7 +32,7 @@
   <nav class="toc">
     <a href="#what">What's inside</a><a href="#start">Starting it</a><a href="#cards-en">Emergency cards</a><a href="#ai">Ask the AI</a>
     <a href="#library">Library</a><a href="#map-en">Map</a><a href="#phone">Phones</a><a href="#docs-en">Documents</a>
-    <a href="#kit-en">My kit</a><a href="#trouble">Problems?</a><a href="#stop">Shutting down</a><a href="#build">Updating the drive</a><a href="#about">About / licence</a>
+    <a href="#kit-en">My kit</a><a href="#trouble">Problems?</a><a href="#stop">Shutting down</a><a href="#boot">Start from the stick</a><a href="#build">Updating the drive</a><a href="#about">About / licence</a>
   </nav>
 
   <section class="card" id="what">
@@ -193,6 +193,24 @@
     </ul>
   </section>
 
+  <section class="card" id="boot">
+    <h2>Starting a computer from the stick (if its disk fails)</h2>
+    <p>A kit made bootable with <code>MAKE-BOOTABLE.bat</code> (Windows) can start almost any PC, even one whose own disk or Windows no longer works, into <b>Linux Mint</b>, a free system that runs from the stick. From there you can use the whole kit and copy your files from the computer's disk to safety. Nothing is installed or changed on the computer.</p>
+    <h3>Make the stick bootable (once)</h3>
+    <ol>
+      <li><b>It erases the stick.</b> If it already has a kit, first copy the kit to the computer with <code>COPY-KIT.bat</code> → <i>This computer</i>.</li>
+      <li>Double-click <code>MAKE-BOOTABLE.bat</code>, allow administrator rights, type the stick's letter, then type <b>ERASE</b>. It installs Ventoy (free, open source) and downloads Linux Mint XFCE (~2.9 GB), checking both against their official checksums.</li>
+      <li>Copy the kit back onto the stick with <code>COPY-KIT.bat</code> (or build it with <code>MAKE-USB.bat</code>). The kit works on Windows, Mac and Linux exactly as before. Run <code>MAKE-BOOTABLE.bat</code> again later to update Linux Mint; once the stick is bootable, it erases nothing.</li>
+    </ol>
+    <h3>Start a computer from it</h3>
+    <ol>
+      <li>Plug in the stick, turn the computer on and keep pressing its <b>boot-menu key</b>: usually <b>F12</b>, F11, F9, F8 or Esc (it often shows briefly on screen). Choose the USB stick.</li>
+      <li>In the Ventoy menu choose <b>linuxmint…</b>, then <b>Boot in normal mode</b>. The first time on a computer with Secure Boot, Ventoy asks to enroll its key: follow its screens once.</li>
+      <li>Linux Mint starts in a minute or two. Open the <b>file manager</b>, open the <b>SURVIVAL</b> drive, right-click in the folder → <i>Open in Terminal</i>, and type <code>bash START-LINUX.sh</code>. The kit opens in Firefox.</li>
+      <li><b>Rescue your files:</b> the computer's own disk appears in the file manager (if it still works); copy what matters to the stick or another drive.</li>
+    </ol>
+    <p class="muted">Works on most PCs and Intel Macs (hold Option at start-up). Apple computers with M1 or newer chips can't start Linux from a stick this way. Changes made inside Linux Mint (settings, Wi-Fi passwords) are forgotten when it shuts down; files you save onto the SURVIVAL drive are kept.</p>
+  </section>
   <section class="card" id="share">
     <h2>Sharing the kit (no internet needed)</h2>
     <p>Give a copy to family, neighbours or a shelter. On a Windows computer, double-click <code>COPY-KIT.bat</code> on the drive.</p>
@@ -225,7 +243,7 @@
   <nav class="toc">
     <a href="#o-que">O que tem</a><a href="#iniciar">Como iniciar</a><a href="#cartoes">Cartões</a><a href="#ia">Perguntar à IA</a>
     <a href="#biblioteca">Biblioteca</a><a href="#mapa">Mapa</a><a href="#celular">Celulares</a><a href="#documentos">Documentos</a>
-    <a href="#kit-pt">Meu kit</a><a href="#problemas">Problemas?</a><a href="#desligar">Desligar</a><a href="#atualizar">Atualizar o pendrive</a><a href="#sobre">Sobre / licença</a>
+    <a href="#kit-pt">Meu kit</a><a href="#problemas">Problemas?</a><a href="#desligar">Desligar</a><a href="#boot-pt">Iniciar pelo pendrive</a><a href="#atualizar">Atualizar o pendrive</a><a href="#sobre">Sobre / licença</a>
   </nav>
 
   <section class="card" id="o-que">
@@ -386,6 +404,24 @@
     </ul>
   </section>
 
+  <section class="card" id="boot-pt">
+    <h2>Iniciar um computador pelo pendrive (se o disco dele falhar)</h2>
+    <p>Um kit tornado inicializável com o <code>MAKE-BOOTABLE.bat</code> (Windows) consegue iniciar quase qualquer PC, mesmo um cujo disco ou Windows não funciona mais, no <b>Linux Mint</b>, um sistema gratuito que roda do pendrive. Daí dá para usar o kit inteiro e copiar seus arquivos do disco do computador para um lugar seguro. Nada é instalado nem alterado no computador.</p>
+    <h3>Tornar o pendrive inicializável (uma vez)</h3>
+    <ol>
+      <li><b>Isso apaga o pendrive.</b> Se ele já tem um kit, copie antes o kit para o computador com o <code>COPY-KIT.bat</code> → <i>Este computador</i>.</li>
+      <li>Clique duas vezes no <code>MAKE-BOOTABLE.bat</code>, permita o acesso de administrador, digite a letra do pendrive e depois digite <b>ERASE</b>. Ele instala o Ventoy (gratuito, de código aberto) e baixa o Linux Mint XFCE (~2,9 GB), conferindo os dois com os checksums oficiais.</li>
+      <li>Copie o kit de volta para o pendrive com o <code>COPY-KIT.bat</code> (ou monte com o <code>MAKE-USB.bat</code>). O kit funciona no Windows, Mac e Linux exatamente como antes. Rode o <code>MAKE-BOOTABLE.bat</code> de novo mais tarde para atualizar o Linux Mint; com o pendrive já inicializável, ele não apaga nada.</li>
+    </ol>
+    <h3>Iniciar um computador por ele</h3>
+    <ol>
+      <li>Conecte o pendrive, ligue o computador e fique apertando a <b>tecla do menu de boot</b>: geralmente <b>F12</b>, F11, F9, F8 ou Esc (costuma aparecer rapidinho na tela). Escolha o pendrive.</li>
+      <li>No menu do Ventoy escolha <b>linuxmint…</b> e depois <b>Boot in normal mode</b>. Na primeira vez num computador com Secure Boot, o Ventoy pede para registrar a chave: siga as telas uma vez.</li>
+      <li>O Linux Mint inicia em um ou dois minutos. Abra o <b>gerenciador de arquivos</b>, abra o pendrive <b>SURVIVAL</b>, clique com o botão direito na pasta → <i>Abrir no Terminal</i> e digite <code>bash START-LINUX.sh</code>. O kit abre no Firefox.</li>
+      <li><b>Salvar seus arquivos:</b> o disco do computador aparece no gerenciador de arquivos (se ainda funcionar); copie o que importa para o pendrive ou outro disco.</li>
+    </ol>
+    <p class="muted">Funciona na maioria dos PCs e nos Macs Intel (segure Option ao ligar). Computadores Apple com chip M1 ou mais novo não iniciam Linux por pendrive desse jeito. O que você muda dentro do Linux Mint (configurações, senhas de Wi-Fi) é esquecido ao desligar; os arquivos salvos no pendrive SURVIVAL ficam.</p>
+  </section>
   <section class="card" id="compartilhar">
     <h2>Compartilhar o kit (sem internet)</h2>
     <p>Dê uma cópia para a família, os vizinhos ou um abrigo. Num computador Windows, clique duas vezes em <code>COPY-KIT.bat</code> no pendrive.</p>

@@ -29,6 +29,8 @@ material, which is the responsibility of its publishers and of whoever builds or
 | Protomaps basemaps (map style) | BSD-3-Clause (code) | https://github.com/protomaps/basemaps |
 | Protomaps basemaps-assets (fonts and icons) | fonts: SIL Open Font License; see the repository | https://github.com/protomaps/basemaps-assets |
 | qrcode-generator (QR code on the home page) | MIT | https://github.com/kazuhikoarase/qrcode-generator |
+| Ventoy (boot section, installed only by `MAKE-BOOTABLE.bat`) | **GPL-3.0** | https://github.com/ventoy/Ventoy |
+| Linux Mint XFCE (`ISO/` on a bootable kit, downloaded by `MAKE-BOOTABLE.bat`) | Free software, mostly GPL; the Linux Mint name and logo are trademarks | https://linuxmint.com |
 
 **GPL-3.0 (kiwix-serve):** the program is passed on unchanged. Its complete source code is available at the
 address above, for the version on the kit (see the Kiwix releases page); this notice is the offer of source.
