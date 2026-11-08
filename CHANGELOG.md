@@ -12,6 +12,15 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.30.0 (2026-11-08)
+
+- **More practical knowledge in the library** (English), chosen to fill gaps the kit didn't cover, with nothing duplicated:
+  - **Standard** (+~3 GB): expert questions and answers from Stack Exchange on cooking and food preserving, homebrewing, gardening and growing food, woodworking, arts and crafts, the outdoors, amateur radio, pets and sustainable living; **Simple English Wikipedia** (no pictures) and **PhET** interactive science and maths, for children and learners.
+  - **Full** (+~10 GB): home improvement and repair, motor vehicle repair and engineering Q&A; **English Wikibooks** (how-to books and the Cookbook, no pictures); the old **Project Gutenberg books on farming** (crops, livestock, beekeeping, forestry).
+  - **Optional** (tick by hand, 12 GB): the old Gutenberg books on **trades**: building, machines, metalwork, crafts, cooking and preserving.
+  - The complete Gutenberg collection already contains both subject sets, so a kit with it never downloads them again.
+  - Left out on purpose: outdated medicine books, medical Q&A, and sites without a clear licence.
+- THIRD-PARTY-NOTICES.md, README and LEIA-ME list them.
 ## 1.29.1 (2026-11-08)
 
 - The user's own data (`my-data\`: checklists, supplies, shared map pins; `favorites.vault`) can never be committed to the repository, even if the project folder is used as a kit.

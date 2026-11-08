@@ -53,8 +53,11 @@ The model files are the GGUF conversions published on Hugging Face (bartowski, g
 |---|---|
 | Wikipedia, Wikivoyage, Wikibooks, Wiktionary, Wikiversity (via Kiwix) | CC BY-SA (text); images under their own licences. Credits are inside each book. |
 | Appropedia, MDWiki, Energypedia | CC BY-SA |
+| Stack Exchange questions and answers (cooking, homebrewing, gardening, woodworking, crafts, the outdoors, amateur radio, pets, sustainability, home improvement, motor vehicles, engineering; via Kiwix) | CC BY-SA 4.0. Each post's author is credited inside the book. https://stackexchange.com |
+| Simple English Wikipedia, English Wikibooks (via Kiwix) | CC BY-SA |
+| PhET Interactive Simulations, University of Colorado Boulder (via Kiwix) | CC BY 4.0. https://phet.colorado.edu |
 | **iFixit** guides | **CC BY-NC-SA: non-commercial** — don't sell kits that contain them. |
-| Project Gutenberg | Public domain in the USA; the "Project Gutenberg" name is a trademark with its own terms. Check your country's copyright rules. |
+| Project Gutenberg (also its subject sets: agriculture, technology) | Public domain in the USA; the "Project Gutenberg" name is a trademark with its own terms. Check your country's copyright rules. |
 | "zimgit" collections (medicine, water, food, post-disaster, knots) | Collections of documents by many publishers; each document keeps its publisher's terms. |
 | Maps: OpenStreetMap data, cut from Protomaps builds | ODbL — © OpenStreetMap contributors (shown on the map). https://www.openstreetmap.org/copyright |
 | Place names for the map search: GeoNames | CC BY 4.0 — https://www.geonames.org (credited on the map). |

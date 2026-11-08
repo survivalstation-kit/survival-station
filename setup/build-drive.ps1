@@ -167,6 +167,25 @@ $Zims = @(
   @{ Lang = 'en'; Tier = 'Standard'; Dir = 'wikipedia'; Prefix = 'wikipedia_en_all_mini'; NotIn = 'Full'; Name = 'Wikipedia: every article, intro only' }
   @{ Lang = 'en'; Tier = 'Full'; Dir = 'wikipedia'; Prefix = 'wikipedia_en_all_maxi'; Name = 'Wikipedia: complete, with pictures' }
   @{ Lang = 'en'; Tier = 'Lite'; Dir = 'gutenberg'; Prefix = 'gutenberg_en_all'; Opt = $true; Name = 'Project Gutenberg: 70,000 books' }
+  # practical skills the encyclopedias cover thinly: expert questions and answers (Stack Exchange, CC BY-SA),
+  # how-to books, children's learning, and the old public-domain books on farming and trades by subject
+  @{ Lang = 'en'; Tier = 'Standard'; Dir = 'stack_exchange'; Prefix = 'cooking.stackexchange.com_en_all'; Name = 'Cooking Q&A: food, preserving, safety' }
+  @{ Lang = 'en'; Tier = 'Standard'; Dir = 'stack_exchange'; Prefix = 'homebrew.stackexchange.com_en_all'; Name = 'Homebrewing Q&A: fermenting, brewing' }
+  @{ Lang = 'en'; Tier = 'Standard'; Dir = 'stack_exchange'; Prefix = 'gardening.stackexchange.com_en_all'; Name = 'Gardening and growing food Q&A' }
+  @{ Lang = 'en'; Tier = 'Standard'; Dir = 'stack_exchange'; Prefix = 'woodworking.stackexchange.com_en_all'; Name = 'Woodworking Q&A' }
+  @{ Lang = 'en'; Tier = 'Standard'; Dir = 'stack_exchange'; Prefix = 'crafts.stackexchange.com_en_all'; Name = 'Arts and crafts Q&A: sewing, leather, making' }
+  @{ Lang = 'en'; Tier = 'Standard'; Dir = 'stack_exchange'; Prefix = 'outdoors.stackexchange.com_en_all'; Name = 'The great outdoors Q&A: camping, navigation, wild food' }
+  @{ Lang = 'en'; Tier = 'Standard'; Dir = 'stack_exchange'; Prefix = 'ham.stackexchange.com_en_all'; Name = 'Amateur radio Q&A' }
+  @{ Lang = 'en'; Tier = 'Standard'; Dir = 'stack_exchange'; Prefix = 'pets.stackexchange.com_en_all'; Name = 'Pets and animals Q&A' }
+  @{ Lang = 'en'; Tier = 'Standard'; Dir = 'stack_exchange'; Prefix = 'sustainability.stackexchange.com_en_all'; Name = 'Sustainable living Q&A' }
+  @{ Lang = 'en'; Tier = 'Standard'; Dir = 'wikipedia'; Prefix = 'wikipedia_en-simple_all_nopic'; Name = 'Simple English Wikipedia: plain words, for children and learners' }
+  @{ Lang = 'en'; Tier = 'Standard'; Dir = 'phet'; Prefix = 'phet_en_all'; Name = 'PhET: interactive science and maths for children' }
+  @{ Lang = 'en'; Tier = 'Full'; Dir = 'stack_exchange'; Prefix = 'diy.stackexchange.com_en_all'; Name = 'Home improvement and repair Q&A: building, plumbing, wiring' }
+  @{ Lang = 'en'; Tier = 'Full'; Dir = 'stack_exchange'; Prefix = 'mechanics.stackexchange.com_en_all'; Name = 'Motor vehicle repair Q&A' }
+  @{ Lang = 'en'; Tier = 'Full'; Dir = 'stack_exchange'; Prefix = 'engineering.stackexchange.com_en_all'; Name = 'Engineering Q&A: machines, structures' }
+  @{ Lang = 'en'; Tier = 'Full'; Dir = 'wikibooks'; Prefix = 'wikibooks_en_all_nopic'; Name = 'Wikibooks: how-to books and the Cookbook, no pictures' }
+  @{ Lang = 'en'; Tier = 'Full'; Dir = 'gutenberg'; Prefix = 'gutenberg_en_lcc-s'; Name = 'Old books on farming: crops, livestock, bees, forestry (Gutenberg)' }
+  @{ Lang = 'en'; Tier = 'Full'; Dir = 'gutenberg'; Prefix = 'gutenberg_en_lcc-t'; Opt = $true; Name = 'Old books on trades: building, machines, crafts, cooking (Gutenberg, 12 GB)' }
 
   @{ Lang = 'pt'; Tier = 'Lite'; Dir = 'wikipedia'; Prefix = 'wikipedia_pt_medicine_maxi'; Name = 'Wikipédia: medicina' }
   @{ Lang = 'pt'; Tier = 'Lite'; Dir = 'wikibooks'; Prefix = 'wikibooks_pt_all_maxi'; Name = 'Wikilivros: livros e manuais' }
@@ -259,6 +278,7 @@ $Contains = [ordered]@{
   'wikipedia_en_all_maxi'  = 'wikipedia_en_all_mini', 'wikipedia_en_medicine_maxi'
   'wikipedia_pt_all_maxi'  = 'wikipedia_pt_all_nopic', 'wikipedia_pt_all_mini', 'wikipedia_pt_medicine_maxi'
   'wikipedia_pt_all_nopic' = 'wikipedia_pt_all_mini'
+  'gutenberg_en_all'       = 'gutenberg_en_lcc-s', 'gutenberg_en_lcc-t'   # the subject sets are parts of the full Gutenberg
 }
 # the chosen item that already includes $id, if any
 function Get-Container($id, $chosen) { foreach ($k in $Contains.Keys) { if ($chosen -contains $k -and @($Contains[$k]) -contains $id) { return $k } } }

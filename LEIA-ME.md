@@ -49,6 +49,7 @@ powershell -ExecutionPolicy Bypass -File setup\build-drive.ps1 -Drive E: -Tier L
 - Troque `E:` pela letra do seu pendrive.
 - `-Map brazil` traz as ruas do Brasil todo (6,1 GB). Para economizar espaço, use só o seu estado: `-Map rio-grande-do-sul`, `santa-catarina`, `parana`, `sao-paulo`, `rio-de-janeiro`, `minas-gerais`, `bahia` ou `pernambuco`. Também dá para usar `-MapMaxZoom 14` (menos detalhe, metade do tamanho).
 - `-Tier Standard`, com um pendrive de 64 GB, inclui a Wikipédia em português completa (só texto), uma IA mais inteligente e mais livros.
+- Com o inglês marcado, o Standard e o Full também trazem perguntas e respostas de especialistas (cozinha, horta, marcenaria, artesanato, vida ao ar livre, radioamador, animais, consertos da casa e do carro), a Wikipédia em inglês simples e o PhET para crianças, os Wikibooks e livros antigos sobre agricultura (Gutenberg).
 
 O programa mostra o tamanho de tudo e pergunta antes de baixar. Se a internet cair, rode de novo: ele continua de onde parou.
 

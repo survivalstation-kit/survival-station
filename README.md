@@ -66,8 +66,8 @@ powershell -ExecutionPolicy Bypass -File setup\build-drive.ps1 -Drive E: -Tier L
 | Tier | Drive | Contents (English) | Approx. download |
 |---|---|---|---|
 | `Lite` | 16 GB | Qwen3-4B + Llama-3.2-1B AI, medicine, water, food, post-disaster, knots, Appropedia, Wikivoyage, Wikipedia medical | ~9 GB |
-| `Standard` | 64 GB | Lite, plus Qwen3-8B, Wikipedia "mini" (intro of every article), iFixit, MDWiki, Energypedia | ~33 GB |
-| `Full` | 256 GB | Standard, but full Wikipedia with images (~119 GB) instead of mini | ~139 GB |
+| `Standard` | 64 GB | Lite, plus Qwen3-8B, Wikipedia "mini" (intro of every article), iFixit, MDWiki, Energypedia, expert Q&A on cooking, brewing, gardening, woodworking, crafts, the outdoors, ham radio, pets and sustainable living, Simple English Wikipedia and PhET science for children | ~36 GB |
+| `Full` | 256 GB | Standard, but full Wikipedia with images (~119 GB) instead of mini, plus home repair, vehicle repair and engineering Q&A, English Wikibooks (how-to books, the Cookbook) and the old Gutenberg books on farming, livestock and beekeeping | ~152 GB |
 
 **Options**
 
