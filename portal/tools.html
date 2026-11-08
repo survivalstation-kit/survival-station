@@ -136,6 +136,17 @@
       <li data-t="mo.r2"></li>
       <li data-t="mo.r3"></li>
     </ol>
+    <h3 data-t="mo.encode"></h3>
+    <div class="form">
+      <label><span data-t="mo.encode.in"></span> <input type="text" id="mo-txt" maxlength="200" autocomplete="off"></label>
+    </div>
+    <p class="result morse-code morse-out" id="mo-dots"></p>
+    <div class="buttons">
+      <button class="btn ghost" type="button" id="mo-copy" data-t="mo.encode.copy"></button>
+      <button class="btn ghost" type="button" id="mo-tflash" data-t="sig.mflash"></button>
+      <button class="btn ghost" type="button" id="mo-tbeep" data-t="sig.mbeep"></button>
+    </div>
+    <p class="muted" id="mo-skip"></p>
     <h3 data-t="mo.decode"></h3>
     <div class="form">
       <label><span data-t="mo.decode.in"></span> <input type="text" id="mo-in" maxlength="200" placeholder="... --- ...  /  .... . .-.. .--." autocomplete="off" spellcheck="false"></label>
@@ -237,6 +248,8 @@
       'mo.r1': 'Write down what you see or hear: a dot for each short signal and a dash for each long one, a space when there is a pause between letters, and a / for a longer pause between words.',
       'mo.r2': 'Look each group up in the chart above, or type it in the translator below.',
       'mo.r3': 'Answer with R (received) or ? (repeat). Repeated groups of three (three flashes, three blasts) mean distress.',
+      'mo.encode': 'Translator: text to dots and dashes', 'mo.encode.in': 'Your message', 'mo.encode.copy': '📋 Copy',
+      'mo.encode.copied': '✓ Copied', 'mo.encode.skip': 'Left out (no Morse code): {c}',
       'mo.decode': 'Translator: dots and dashes to text', 'mo.decode.in': 'Dots and dashes (space between letters, / between words)',
       'mo.decode.unknown': 'unknown code',
       'mo.practice': 'Practice by ear', 'mo.practice.how': 'Press Play, listen to a letter, say what you think it is, then show the answer. Learning the sound of each letter (not counting dots) is the fastest way.',
@@ -309,6 +322,8 @@
       'mo.r1': 'Anote o que vê ou ouve: um ponto para cada sinal curto e um traço para cada longo, um espaço quando houver pausa entre letras e uma / para a pausa maior entre palavras.',
       'mo.r2': 'Procure cada grupo na tabela acima, ou digite no tradutor abaixo.',
       'mo.r3': 'Responda com R (recebido) ou ? (repita). Grupos de três repetidos (três piscadas, três apitos) significam socorro.',
+      'mo.encode': 'Tradutor: texto para pontos e traços', 'mo.encode.in': 'Sua mensagem', 'mo.encode.copy': '📋 Copiar',
+      'mo.encode.copied': '✓ Copiado', 'mo.encode.skip': 'Ficou de fora (sem código Morse): {c}',
       'mo.decode': 'Tradutor: pontos e traços para texto', 'mo.decode.in': 'Pontos e traços (espaço entre letras, / entre palavras)',
       'mo.decode.unknown': 'código desconhecido',
       'mo.practice': 'Treinar de ouvido', 'mo.practice.how': 'Aperte Tocar, escute uma letra, diga qual acha que é e veja a resposta. Aprender o som de cada letra (sem contar pontos) é o jeito mais rápido.',
@@ -503,6 +518,25 @@
     const td2 = document.createElement('td'); td2.textContent = tt(key);
     tr.append(th, td1, td2); $('mo-sig').append(tr);
   }
+  // text to dots and dashes: letters separated by a space, words by " / " (accents are dropped: á -> a)
+  const plain = s => s.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '');
+  const encode = () => {
+    const text = plain($('mo-txt').value);
+    const skipped = new Set([...text].filter(c => !/\s/.test(c) && !MORSE[c]));
+    $('mo-dots').textContent = text.split(/\s+/).filter(Boolean).map(w => [...w].map(c => MORSE[c]).filter(Boolean).map(pretty).join(' ')).filter(Boolean).join('  /  ');
+    $('mo-skip').textContent = skipped.size ? tt('mo.encode.skip', { c: [...skipped].join(' ') }) : '';
+  };
+  $('mo-txt').addEventListener('input', encode);
+  $('mo-copy').onclick = async () => {
+    // copied with plain . and - so it pastes anywhere (messages, radio apps, the translator below)
+    const s = $('mo-dots').textContent.replace(/·/g, '.').replace(/–/g, '-');
+    if (!s) return;
+    try { await navigator.clipboard.writeText(s); $('mo-copy').textContent = tt('mo.encode.copied'); setTimeout(() => $('mo-copy').textContent = tt('mo.encode.copy'), 2000); }
+    catch { getSelection().selectAllChildren($('mo-dots')); }
+  };
+  $('mo-tflash').onclick = e => play(morseSteps($('mo-txt').value), 300, true, e.currentTarget, 14);
+  $('mo-tbeep').onclick = e => play(morseSteps($('mo-txt').value), 120, false, e.currentTarget, 14);
+
   // dots and dashes to text (also accepts · – _ and the long dash)
   const BACK = Object.fromEntries(Object.entries(MORSE).map(([k, v]) => [v, k.toUpperCase()]));
   const decode = () => {

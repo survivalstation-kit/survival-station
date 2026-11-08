@@ -256,3 +256,4 @@ p.warn { color: var(--warn); font-weight: 600; }
 .morse-chart span, .morse-code { font-family: var(--mono); font-size: 17px; letter-spacing: .05em; font-weight: 700; white-space: nowrap; }
 .morse-sig th { white-space: nowrap; }
 @media print { .morse-chart div { border: 1px solid #999; } }
+.morse-out { white-space: normal; overflow-wrap: anywhere; word-spacing: .3em; min-height: 1.4em; }
