@@ -1,4 +1,4 @@
-﻿# Survival Station
+# Survival Station
 
 *[Português (Brasil): LEIA-ME.md](LEIA-ME.md)*
 
@@ -39,6 +39,7 @@ An offline survival kit that runs from a USB drive. Plug it into a computer, dou
 - **Languages**: English and Português (Brasil). The interface, AI answers, emergency cards, library search and map labels all switch together. The phone or computer's language is picked automatically, and you can change it from the menu at the top.
 - **Family plan, print pack and private documents**: a family emergency plan to fill in and print, a one-click print pack (cards, radio, plan, start instructions), and a `private/` folder for IDs and insurance papers that phones never see, locked with a password by `PRIVATE-DOCS.bat` (OpenSSL format: Mac/Linux use `bash launch/private-docs.sh`, or `openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -md sha256`).
 - **Search**: one box searches the emergency cards and kit pages, the Survival Data guides (including the text inside the PDFs, opening at the right page), your documents and the full text of the library.
+- **Weather page**: when some connection is left (even a phone's data), a 7-day forecast from Open-Meteo, official US alerts, and the last forecast saved for when the connection goes; plus tips for reading the weather without internet.
 - **Radio page**: emergency frequencies, how to call for help, and how to set up a Baofeng UV-5R or TIDRADIO TD-H3 PLUS, with a CHIRP channel file (`portal/radio/survival-channels.csv`).
 - **Phone access**: phones on the same hotspot or Wi-Fi open the computer's address in a browser.
 - **Android apps** to install ahead of time: Kiwix, PocketPal AI (runs the AI on the phone) and Organic Maps.

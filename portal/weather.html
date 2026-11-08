@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weather</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="weather">
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html">Survival <span>Station</span></a>
+  <nav class="links">
+    <a href="index.html" data-i18n="nav.home">Home</a>
+    <a href="chat.html" data-i18n="nav.chat">Ask AI</a>
+    <a href="map.html" data-i18n="nav.map">Map</a>
+    <a href="cards.html" data-cards data-i18n="nav.cards">Emergency</a>
+    <a href="search.html" data-i18n="nav.search">Search</a>
+    <a href="help.html" data-i18n="nav.help">Help</a>
+  </nav>
+  <select class="lang-select" aria-label="Language / Idioma"></select>
+  <button class="theme-btn" type="button" data-i18n="theme">Theme</button>
+</div></header>
+
+<main class="wrap help tools weather">
+  <h1 data-t="title"></h1>
+  <p class="lede" data-t="lede"></p>
+
+  <section class="card">
+    <h2 data-t="where"></h2>
+    <form class="form" id="find">
+      <label><span data-t="place"></span> <input type="text" id="place" autocomplete="off" data-t-ph="place.ph"></label>
+      <label><span>&nbsp;</span><button class="btn" type="submit" data-t="find"></button></label>
+    </form>
+    <ul class="hits" id="places"></ul>
+    <div class="buttons">
+      <button class="btn ghost" type="button" id="b-map" hidden></button>
+      <button class="btn ghost" type="button" id="b-gps" data-t="gps" hidden></button>
+    </div>
+    <p class="muted" id="where-now"></p>
+    <p class="muted small" data-t="privacy"></p>
+  </section>
+
+  <div id="status" class="notice" hidden></div>
+  <section class="card" id="alerts" hidden></section>
+  <section class="card" id="now" hidden></section>
+  <section class="card" id="days" hidden></section>
+  <section class="card" id="hours" hidden></section>
+
+  <section class="card">
+    <h2 data-t="off.h"></h2>
+    <ul>
+      <li data-t-html="off.radio"></li>
+      <li data-t="off.am"></li>
+      <li data-t="off.thunder"></li>
+      <li data-t="off.flood"></li>
+      <li data-t="off.signs"></li>
+    </ul>
+    <h3 data-t="official"></h3>
+    <ul>
+      <li><a href="https://www.weather.gov/" target="_blank" rel="noopener">weather.gov</a> — <span data-t="official.us"></span></li>
+      <li><a href="https://weather.gc.ca/" target="_blank" rel="noopener">weather.gc.ca</a> — <span data-t="official.ca"></span></li>
+      <li><a href="https://alertas2.inmet.gov.br/" target="_blank" rel="noopener">alertas2.inmet.gov.br</a> — <span data-t="official.br"></span></li>
+      <li><a href="https://www.meteoalarm.org/" target="_blank" rel="noopener">meteoalarm.org</a> — <span data-t="official.eu"></span></li>
+    </ul>
+    <p class="muted small" data-t="credit"></p>
+  </section>
+</main>
+
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+<script>
+(() => {
+  const TXT = {
+    en: {
+      title: 'Weather forecast', lede: 'When this device still has some internet (mobile data on a phone, or a connection on the computer), get the forecast and any official alerts here. The last forecast stays saved on this device, so you can still read it after the connection drops.',
+      where: 'Where', place: 'Town or place', 'place.ph': 'e.g. Chicago', find: 'Find', gps: '📍 Use this device\'s GPS', usemap: '🗺️ Use the last point on the Map: {p}',
+      privacy: 'Getting a forecast sends the place\'s coordinates to open-meteo.com (and, in the USA, to weather.gov). Nothing else leaves the kit.',
+      noplace: 'No place found (finding a place by name needs internet too).', at: 'Forecast for {p}',
+      loading: 'Getting the forecast…', online: 'Forecast updated {t}.',
+      offline: 'No internet connection right now. Showing the last forecast saved on this device, from {t}. It gets less reliable after a day or two.',
+      offnone: 'No internet connection right now, and no forecast saved on this device yet. Get one while you have a connection; see below for weather without internet.',
+      'now.h': 'Now', feels: 'feels like {t}', wind: 'wind {w}, gusts {g}', humidity: 'humidity {h}%',
+      'days.h': 'Next 7 days', 'hours.h': 'Next 24 hours', rain: 'rain', gusts: 'gusts', uv: 'UV',
+      'alerts.h': 'Official alerts', 'alerts.none': 'No active official alerts from the US National Weather Service for this place.', 'alerts.until': 'until {t}',
+      'flags.h': 'From the forecast (not official warnings)', 'flag.rain': 'Heavy rain ({v}): flooding possible', 'flag.wind': 'Strong wind gusts ({v})', 'flag.storm': 'Thunderstorms',
+      'flag.heat': 'Extreme heat ({v})', 'flag.cold': 'Extreme cold ({v})', 'flag.ice': 'Freezing rain or ice', 'flag.snow': 'Heavy snow ({v})',
+      'off.h': 'Weather without internet',
+      'off.radio': 'North America: <b>weather radio</b> on 162.400–162.550 MHz broadcasts forecasts and warnings around the clock. Most handheld radios can receive it; see the <a href="radio.html">Radio page</a>.',
+      'off.am': 'Ordinary AM/FM radio stations broadcast official warnings. AM reaches farther at night.',
+      'off.thunder': 'When thunder roars, go indoors, and wait 30 minutes after the last thunder before going out again.',
+      'off.flood': 'Water rising fast, or a roaring sound upstream: move to higher ground now. Never walk or drive through floodwater.',
+      'off.signs': 'Signs of worsening weather: clouds building tall and dark, a sudden drop in temperature, wind changing direction or strengthening, a ring (halo) around the sun or moon (rain is often on the way).',
+      official: 'Official forecasts and warnings (online)', 'official.us': 'USA', 'official.ca': 'Canada', 'official.br': 'Brasil: alertas do INMET', 'official.eu': 'Europe',
+      credit: 'Weather data by Open-Meteo.com (CC BY 4.0). Alerts in the USA: National Weather Service. These forecasts are computer predictions: always follow official warnings.',
+      units: '°C / °F', days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], today: 'Today',
+      codes: { 0: 'Clear', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast', 45: 'Fog', 48: 'Freezing fog', 51: 'Light drizzle', 53: 'Drizzle', 55: 'Heavy drizzle', 56: 'Freezing drizzle', 57: 'Freezing drizzle', 61: 'Light rain', 63: 'Rain', 65: 'Heavy rain', 66: 'Freezing rain', 67: 'Heavy freezing rain', 71: 'Light snow', 73: 'Snow', 75: 'Heavy snow', 77: 'Snow grains', 80: 'Showers', 81: 'Heavy showers', 82: 'Violent showers', 85: 'Snow showers', 86: 'Heavy snow showers', 95: 'Thunderstorm', 96: 'Thunderstorm with hail', 99: 'Severe thunderstorm with hail' },
+    },
+    'pt-BR': {
+      title: 'Previsão do tempo', lede: 'Quando este aparelho ainda tiver alguma internet (dados móveis no celular, ou conexão no computador), veja aqui a previsão e os alertas oficiais. A última previsão fica salva neste aparelho, para você ler mesmo depois que a conexão cair.',
+      where: 'Onde', place: 'Cidade ou lugar', 'place.ph': 'ex.: Petrópolis', find: 'Buscar', gps: '📍 Usar o GPS deste aparelho', usemap: '🗺️ Usar o último ponto do Mapa: {p}',
+      privacy: 'Ver a previsão envia as coordenadas do lugar para open-meteo.com (e, nos EUA, para weather.gov). Nada mais sai do kit.',
+      noplace: 'Nenhum lugar encontrado (buscar um lugar pelo nome também precisa de internet).', at: 'Previsão para {p}',
+      loading: 'Buscando a previsão…', online: 'Previsão atualizada {t}.',
+      offline: 'Sem internet agora. Mostrando a última previsão salva neste aparelho, de {t}. Ela fica menos confiável depois de um ou dois dias.',
+      offnone: 'Sem internet agora, e ainda não há previsão salva neste aparelho. Busque uma enquanto tiver conexão; veja abaixo como acompanhar o tempo sem internet.',
+      'now.h': 'Agora', feels: 'sensação de {t}', wind: 'vento {w}, rajadas {g}', humidity: 'umidade {h}%',
+      'days.h': 'Próximos 7 dias', 'hours.h': 'Próximas 24 horas', rain: 'chuva', gusts: 'rajadas', uv: 'UV',
+      'alerts.h': 'Alertas oficiais', 'alerts.none': 'Nenhum alerta oficial ativo do Serviço Nacional de Meteorologia dos EUA para este lugar.', 'alerts.until': 'até {t}',
+      'flags.h': 'Pela previsão (não são alertas oficiais)', 'flag.rain': 'Chuva forte ({v}): risco de alagamento', 'flag.wind': 'Rajadas de vento fortes ({v})', 'flag.storm': 'Tempestades com raios',
+      'flag.heat': 'Calor extremo ({v})', 'flag.cold': 'Frio extremo ({v})', 'flag.ice': 'Chuva congelante ou gelo', 'flag.snow': 'Neve forte ({v})',
+      'off.h': 'O tempo sem internet',
+      'off.radio': 'No Brasil, acompanhe os <b>alertas da Defesa Civil</b> pelas rádios AM/FM e por SMS (envie seu CEP para 40199 enquanto há sinal). Na América do Norte, o <b>rádio do tempo</b> em 162.400–162.550 MHz transmite previsões e alertas o dia todo; veja a <a href="radio.html">página Rádio</a>.',
+      'off.am': 'As rádios AM/FM comuns transmitem os alertas oficiais. O AM alcança mais longe à noite.',
+      'off.thunder': 'Ouviu trovão, entre num abrigo, e espere 30 minutos depois do último trovão antes de sair de novo.',
+      'off.flood': 'Água subindo rápido, ou um barulho forte vindo de rio acima: vá para um lugar alto agora. Nunca atravesse água de enchente a pé ou de carro.',
+      'off.signs': 'Sinais de piora no tempo: nuvens altas e escuras crescendo, queda repentina de temperatura, vento mudando de direção ou ficando mais forte, um anel (halo) em volta do sol ou da lua (muitas vezes vem chuva).',
+      official: 'Previsões e alertas oficiais (online)', 'official.us': 'EUA', 'official.ca': 'Canadá', 'official.br': 'Brasil: alertas do INMET', 'official.eu': 'Europa',
+      credit: 'Dados do tempo: Open-Meteo.com (CC BY 4.0). Alertas nos EUA: National Weather Service. Estas previsões são cálculos de computador: siga sempre os alertas oficiais.',
+      units: '°C / °F', days: ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'], today: 'Hoje',
+      codes: { 0: 'Céu limpo', 1: 'Quase limpo', 2: 'Parcialmente nublado', 3: 'Nublado', 45: 'Neblina', 48: 'Neblina com geada', 51: 'Garoa fraca', 53: 'Garoa', 55: 'Garoa forte', 56: 'Garoa congelante', 57: 'Garoa congelante', 61: 'Chuva fraca', 63: 'Chuva', 65: 'Chuva forte', 66: 'Chuva congelante', 67: 'Chuva congelante forte', 71: 'Neve fraca', 73: 'Neve', 75: 'Neve forte', 77: 'Grãos de neve', 80: 'Pancadas de chuva', 81: 'Pancadas fortes', 82: 'Pancadas muito fortes', 85: 'Pancadas de neve', 86: 'Pancadas de neve fortes', 95: 'Tempestade', 96: 'Tempestade com granizo', 99: 'Tempestade forte com granizo' },
+    },
+  };
+  const T = TXT[SURVIVAL.lang] || TXT.en;
+  const tt = (k, v = {}) => String(T[k] ?? TXT.en[k] ?? k).replace(/\{(\w+)\}/g, (_, n) => v[n] ?? '');
+  document.querySelectorAll('[data-t]').forEach(e => { e.textContent = tt(e.dataset.t); });
+  document.querySelectorAll('[data-t-html]').forEach(e => { e.innerHTML = tt(e.dataset.tHtml); });   // our own texts only
+  document.querySelectorAll('[data-t-ph]').forEach(e => { e.placeholder = tt(e.dataset.tPh); });
+  document.title = tt('title');
+  const $ = id => document.getElementById(id);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const read = k => { try { return JSON.parse(SURVIVAL.store(k) || 'null'); } catch { return null; } };
+  const when = iso => new Date(iso).toLocaleString(SURVIVAL.lang, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  // US units for US English; °C everywhere else
+  const us = (navigator.language || '').toLowerCase() === 'en-us' && SURVIVAL.lang === 'en';
+  const temp = c => us ? `${Math.round(c * 9 / 5 + 32)}°F` : `${Math.round(c)}°C`;
+  const speed = k => us ? `${Math.round(k / 1.609)} mph` : `${Math.round(k)} km/h`;
+  const mm = v => us ? `${(v / 25.4).toFixed(2)} in` : `${Math.round(v * 10) / 10} mm`;
+  const icon = (c, day = 1) => c <= 1 && !day ? '🌙' : c === 2 && !day ? '☁️' : c === 0 ? '☀️' : c <= 2 ? '🌤️' : c === 3 ? '☁️' : c <= 48 ? '🌫️' : c <= 57 ? '🌦️' : c <= 67 ? '🌧️' : c <= 77 ? '🌨️' : c <= 82 ? '🌧️' : c <= 86 ? '🌨️' : '⛈️';
+  const timed = (url, ms = 12000) => { const c = new AbortController(); const id = setTimeout(() => c.abort(), ms); return fetch(url, { signal: c.signal, cache: 'no-store' }).finally(() => clearTimeout(id)); };
+
+  // ---- where: a saved place, the last point on the Map, a name, or GPS
+  let place = read('weather-place');
+  const mapPoint = read('map-point');
+  if (mapPoint) {
+    $('b-map').hidden = false;
+    $('b-map').textContent = tt('usemap', { p: mapPoint.title || `${mapPoint.lat.toFixed(3)}, ${mapPoint.lng.toFixed(3)}` });
+    $('b-map').onclick = () => choose({ name: mapPoint.title || `${mapPoint.lat.toFixed(3)}, ${mapPoint.lng.toFixed(3)}`, lat: mapPoint.lat, lon: mapPoint.lng });
+  }
+  if (window.isSecureContext && navigator.geolocation) {
+    $('b-gps').hidden = false;
+    $('b-gps').onclick = () => navigator.geolocation.getCurrentPosition(p => choose({ name: `${p.coords.latitude.toFixed(3)}, ${p.coords.longitude.toFixed(3)}`, lat: p.coords.latitude, lon: p.coords.longitude }), () => {}, { timeout: 20000 });
+  }
+  $('find').onsubmit = async e => {
+    e.preventDefault();
+    const q = $('place').value.trim(), list = $('places');
+    list.replaceChildren();
+    if (!q) return;
+    try {
+      const r = await (await timed(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=6&language=${SURVIVAL.lang.slice(0, 2)}&format=json`)).json();
+      if (!r.results?.length) throw new Error('none');
+      for (const g of r.results) {
+        const li = el('li'), b = el('button', 'btn ghost small', [g.name, g.admin1, g.country].filter(Boolean).join(', '));
+        b.type = 'button';
+        b.onclick = () => { list.replaceChildren(); choose({ name: [g.name, g.admin1, g.country_code].filter(Boolean).join(', '), lat: g.latitude, lon: g.longitude }); };
+        li.append(b); list.append(li);
+      }
+    } catch { list.append(el('li', 'muted', tt('noplace'))); }
+  };
+  function choose(p) { place = p; SURVIVAL.store('weather-place', JSON.stringify(p)); load(); }
+
+  // ---- the forecast: online when possible, else the last one saved on this device
+  async function load() {
+    if (!place) return;
+    $('where-now').textContent = tt('at', { p: place.name });
+    const status = $('status'); status.hidden = false; status.textContent = tt('loading');
+    const q = `latitude=${place.lat}&longitude=${place.lon}&timezone=auto&forecast_days=7`
+      + '&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,wind_gusts_10m,is_day'
+      + '&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,wind_gusts_10m,is_day'
+      + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_gusts_10m_max,snowfall_sum,uv_index_max';
+    let saved = read('weather-last');
+    try {
+      const data = await (await timed(`https://api.open-meteo.com/v1/forecast?${q}`)).json();
+      if (!data.daily) throw new Error('bad data');
+      // official alerts: the US National Weather Service answers for US points (and refuses others)
+      let alerts = null;
+      try {
+        const a = await timed(`https://api.weather.gov/alerts/active?point=${(+place.lat).toFixed(4)},${(+place.lon).toFixed(4)}`, 8000);
+        if (a.ok) alerts = ((await a.json()).features || []).map(f => f.properties);
+      } catch { }
+      saved = { place, fetched: new Date().toISOString(), data, alerts };
+      SURVIVAL.store('weather-last', JSON.stringify(saved));
+      status.textContent = tt('online', { t: when(saved.fetched) });
+      show(saved);
+    } catch {
+      if (saved && saved.place.lat === place.lat && saved.place.lon === place.lon) { status.textContent = tt('offline', { t: when(saved.fetched) }); show(saved); }
+      else if (saved) { status.textContent = tt('offline', { t: when(saved.fetched) }) + ' (' + saved.place.name + ')'; show(saved); }
+      else { status.textContent = tt('offnone'); }
+    }
+  }
+
+  function show({ data, alerts }) {
+    const d = data.daily, c = data.current, h = data.hourly;
+    // official alerts (USA)
+    const al = $('alerts'); al.replaceChildren(el('h2', null, tt('alerts.h')));
+    if (alerts) {
+      if (!alerts.length) al.append(el('p', 'muted', tt('alerts.none')));
+      for (const a of alerts) {
+        const box = el('div', 'alert');
+        box.append(el('b', null, `⚠ ${a.event}`), el('div', 'muted', `${a.severity || ''} · ${tt('alerts.until', { t: a.expires ? when(a.expires) : '?' })}`));
+        if (a.headline) box.append(el('p', null, a.headline));
+        if (a.instruction) box.append(el('p', null, a.instruction.slice(0, 600)));
+        al.append(box);
+      }
+      al.hidden = false;
+    } else al.hidden = true;
+    // now
+    const now = $('now');
+    now.replaceChildren(el('h2', null, tt('now.h')));
+    if (c) {
+      const big = el('p', 'big', `${icon(c.weather_code, c.is_day)} ${temp(c.temperature_2m)} · ${T.codes[c.weather_code] || ''}`);
+      now.append(big, el('p', 'muted', [tt('feels', { t: temp(c.apparent_temperature) }), tt('wind', { w: speed(c.wind_speed_10m), g: speed(c.wind_gusts_10m) }), tt('humidity', { h: c.relative_humidity_2m })].join(' · ')));
+    }
+    // warnings worked out from the numbers (not official)
+    const flags = [];
+    d.time.forEach((day, i) => {
+      const label = i === 0 ? tt('today') : T.days[new Date(day + 'T12:00').getDay()], code = d.weather_code[i];
+      if (d.precipitation_sum[i] >= 30) flags.push(`${label}: ${tt('flag.rain', { v: mm(d.precipitation_sum[i]) })}`);
+      if (d.wind_gusts_10m_max[i] >= 70) flags.push(`${label}: ${tt('flag.wind', { v: speed(d.wind_gusts_10m_max[i]) })}`);
+      if (code >= 95) flags.push(`${label}: ${tt('flag.storm')}`);
+      if (d.temperature_2m_max[i] >= 35) flags.push(`${label}: ${tt('flag.heat', { v: temp(d.temperature_2m_max[i]) })}`);
+      if (d.temperature_2m_min[i] <= -15) flags.push(`${label}: ${tt('flag.cold', { v: temp(d.temperature_2m_min[i]) })}`);
+      if ([56, 57, 66, 67].includes(code)) flags.push(`${label}: ${tt('flag.ice')}`);
+      if ((d.snowfall_sum?.[i] || 0) >= 15) flags.push(`${label}: ${tt('flag.snow', { v: us ? `${(d.snowfall_sum[i] / 2.54).toFixed(1)} in` : `${Math.round(d.snowfall_sum[i])} cm` })}`);
+    });
+    if (flags.length) {
+      const f = el('div', 'flags'); f.append(el('b', null, tt('flags.h')));
+      const ul = el('ul'); flags.forEach(x => ul.append(el('li', null, '⚠ ' + x))); f.append(ul);
+      now.append(f);
+    }
+    now.hidden = false;
+    // 7 days
+    const days = $('days'); days.replaceChildren(el('h2', null, tt('days.h')));
+    const tb = el('table', 'wx');
+    d.time.forEach((day, i) => {
+      const tr = tb.insertRow();
+      tr.insertCell().textContent = i === 0 ? tt('today') : `${T.days[new Date(day + 'T12:00').getDay()]} ${+day.slice(8)}`;
+      tr.insertCell().textContent = `${icon(d.weather_code[i])} ${T.codes[d.weather_code[i]] || ''}`;
+      tr.insertCell().textContent = `${temp(d.temperature_2m_max[i])} / ${temp(d.temperature_2m_min[i])}`;
+      tr.insertCell().textContent = `${tt('rain')} ${mm(d.precipitation_sum[i])}${d.precipitation_probability_max?.[i] != null ? ` (${d.precipitation_probability_max[i]}%)` : ''}`;
+      tr.insertCell().textContent = `${tt('gusts')} ${speed(d.wind_gusts_10m_max[i])}`;
+      tr.insertCell().textContent = d.uv_index_max?.[i] != null ? `${tt('uv')} ${Math.round(d.uv_index_max[i])}` : '';
+    });
+    days.append(tb); days.hidden = false;
+    // next 24 hours, every 3 hours from now
+    const hours = $('hours'); hours.replaceChildren(el('h2', null, tt('hours.h')));
+    const start = Math.max(0, h.time.findIndex(x => new Date(x) >= new Date(Date.now() - 3600000)));
+    const row = el('div', 'hourly');
+    for (let i = start; i < Math.min(h.time.length, start + 24); i += 3) {
+      const cell = el('div', 'hour');
+      cell.append(el('div', 'muted', new Date(h.time[i]).toLocaleTimeString(SURVIVAL.lang, { hour: '2-digit', minute: '2-digit' })),
+        el('div', 'ic', icon(h.weather_code[i], h.is_day?.[i] ?? 1)), el('b', null, temp(h.temperature_2m[i])),
+        el('div', 'muted', `${h.precipitation_probability[i] ?? 0}% · ${speed(h.wind_gusts_10m[i])}`));
+      row.append(cell);
+    }
+    hours.append(row); hours.hidden = false;
+  }
+
+  // start: the saved place (or the last saved forecast when there is no place)
+  if (place) load();
+  else { const s = read('weather-last'); if (s) { place = s.place; load(); } }
+})();
+</script>
+</body>
+</html>

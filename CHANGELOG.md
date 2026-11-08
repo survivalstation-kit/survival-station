@@ -12,6 +12,17 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates**.
 
+## 1.20.0 (2026-11-08)
+
+- **Weather page** (new tile ⛅ on the home page), for when there is still some connection, even only a phone's mobile data:
+  - 7-day forecast, the next hours and current conditions from Open-Meteo (free, no account), for a place you search, the last point you marked on the map, or your GPS;
+  - official alerts from the US National Weather Service for places in the USA, and links to the official services elsewhere;
+  - simple warning flags (heavy rain, strong gusts, thunderstorms, heat, hard frost, freezing rain, heavy snow), clearly marked as unofficial;
+  - the **last forecast stays saved on the device**, so it still shows (with its date) when the connection goes;
+  - "weather without internet" tips: signs in the sky and wind, and listening for weather radio;
+  - English and Portuguese, metric or US units.
+
+  Privacy: the place you ask about is sent to open-meteo.com (and weather.gov in the USA). Nothing is sent until you ask for a forecast.
 ## 1.19.1 (2026-11-08)
 
 - **"Use at your own risk" everywhere.** One clear statement, in English and Portuguese:

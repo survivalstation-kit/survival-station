@@ -194,6 +194,18 @@ mark { background: #ffe08a; color: #1d1b16; border-radius: 3px; padding: 0 1px; 
 .plan-row > .btn { justify-self: start; }
 .plan .buttons { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
 .printout { display: none; }
+.weather .big { font-size: 26px; font-weight: 700; margin: 6px 0; }
+.weather .small { font-size: 13px; }
+.weather #status[hidden], .weather .card[hidden] { display: none; }
+.weather .alert { border-left: 4px solid var(--bad); padding: 6px 10px; margin: 8px 0; background: var(--surface-2); border-radius: 0 8px 8px 0; }
+.weather .flags { margin-top: 10px; color: var(--warn); }
+.weather .flags ul { margin: 4px 0; }
+.weather table.wx td { padding: 6px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.weather table.wx { display: block; overflow-x: auto; }
+.weather .hourly { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; }
+.weather .hour { flex: none; min-width: 84px; text-align: center; background: var(--surface-2); border-radius: 10px; padding: 8px 6px; font-size: 14px; }
+.weather .hour .ic { font-size: 22px; }
+.weather #places { margin: 0; }
 .disclaimer { color: var(--muted); font-size: 13px; line-height: 1.4; margin: 24px 0 12px; border-top: 1px solid var(--line); padding-top: 10px; }
 .composer .disclaimer { max-width: 760px; margin: 6px auto 0; padding: 0 16px; border: 0; font-size: 12px; }
 p.warn { color: var(--warn); font-weight: 600; }
