@@ -18,7 +18,7 @@ $all = @(Get-CimInstance Win32_Process | Where-Object {
     ($_.Name -in 'llama-server.exe', 'kiwix-serve.exe', 'whisper-server.exe') -or
     ($_.Name -eq 'pmtiles.exe' -and $cmd -match '\sserve\s') -or
     ($_.Name -eq 'caddy.exe' -and $cmd -match 'survival-Caddyfile') -or
-    ($_.Name -eq 'powershell.exe' -and $cmd -match '(kit-control|watch-kit|share-server)\.ps1') -or
+    ($_.Name -eq 'powershell.exe' -and $cmd -match '(kit-control|watch-kit|share-server|portal-server)\.ps1') -or
     ($_.Name -eq 'cmd.exe' -and $cmd -match 'START-WINDOWS\.bat'))
 })
 if (-not $all) { return }

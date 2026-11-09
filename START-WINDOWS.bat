@@ -72,14 +72,15 @@ if defined ONBATTERY (
   )
 )
 set keys=123456789
-set keys=!keys:~0,%n%!
-if %n% GTR 1 (
-  echo.
-  if defined ONBATTERY echo  On battery: the smallest model is picked to save power.  /  Na bateria: o menor modelo foi escolhido para economizar.
-  echo  Old or slow computer? Pick Llama-3.2-1B.  /  Computador antigo ou lento? Escolha Llama-3.2-1B.
-  "%SYS%\choice.exe" /c !keys! /t 10 /d !def! /n /m "  AI model / Modelo de IA [1-%n%] (default/padrao !def!): "
-  set pick=!errorlevel!
-) else set pick=1
+set keys=!keys:~0,%n%!0
+echo.
+echo    0. No AI - library, maps, cards and tools only (fast, low memory)
+echo       Sem IA - so biblioteca, mapas, cartoes e ferramentas (rapido, pouca memoria)
+if defined ONBATTERY echo  On battery: the smallest model is picked to save power.  /  Na bateria: o menor modelo foi escolhido para economizar.
+echo  Old or slow computer? Pick Llama-3.2-1B, or 0 for No AI.  /  Computador antigo ou lento? Escolha Llama-3.2-1B, ou 0 para Sem IA.
+"%SYS%\choice.exe" /c !keys! /t 10 /d !def! /n /m "  Choice / Escolha [1-%n%, 0=No AI] (default/padrao !def!): "
+set pick=!errorlevel!
+if !pick! GTR %n% goto startnoai
 set "MODEL=!model%pick%!"
 echo.
 echo  Starting AI / Iniciando a IA: !MODEL!
@@ -135,9 +136,36 @@ if exist "tools\win\caddy\caddy.exe" (
 echo  Firewall question? Click Allow.  /  Pergunta do firewall? Clique em Permitir.
 goto end
 
+:startnoai
+echo.
+echo  Starting without AI (library, maps, cards, tools).  /  Iniciando sem IA (biblioteca, mapas, cartoes, ferramentas).
+if not exist "setup\portal-server.ps1" goto noai_files
+start "Portal server" /min "%SYS%\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "%~dp0setup\portal-server.ps1" -Root "%~dp0." -Port %PORT%
+echo  Loading...  /  Carregando...
+for /l %%i in (1,1,30) do (
+  "%SYS%\curl.exe" -s -o nul -f http://127.0.0.1:%PORT%/ && goto noai_ready
+  "%SYS%\ping.exe" -n 2 127.0.0.1 >nul
+)
+goto noai_files
+
+:noai_ready
+start "" http://localhost:%PORT%/
+echo.
+echo  READY - no AI / PRONTO - sem IA:  http://localhost:%PORT%/
+if defined ZIMS echo  Library / Biblioteca: on / ligada
+echo  The AI and photo/voice features are off. To use them, or phones, restart and pick a model.
+echo  A IA e os recursos de foto/voz ficam desligados. Para usar, ou para celulares, reinicie e escolha um modelo.
+echo  Firewall question? Click Allow.  /  Pergunta do firewall? Clique em Permitir.
+goto end
+
 :noai
-echo  No AI found - opening the offline pages only.  /  IA nao encontrada - abrindo so as paginas.
-echo  (Run setup\build-drive.ps1 with internet  /  Rode setup\build-drive.ps1 com internet)
+echo  No AI model installed - starting without AI.  /  Sem modelo de IA - iniciando sem IA.
+echo  (Add one later with MAKE-USB.bat and internet.  /  Adicione depois com o MAKE-USB.bat e internet.)
+goto startnoai
+
+:noai_files
+echo  Opening the offline pages as files (the map and search need the server).
+echo  Abrindo as paginas como arquivos (o mapa e a busca precisam do servidor).
 if defined ZIMS echo  Library / Biblioteca: http://localhost:%LIBPORT%/library/
 start "" "%~dp0portal\index.html"
 
@@ -153,4 +181,6 @@ taskkill /f /im kiwix-serve.exe >nul 2>&1
 taskkill /f /im pmtiles.exe >nul 2>&1
 taskkill /f /im whisper-server.exe >nul 2>&1
 taskkill /f /im caddy.exe >nul 2>&1
+rem the "No AI" web server is a PowerShell process; close it by its command line
+"%SYS%\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -Command "Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match 'portal-server\.ps1' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }" >nul 2>&1
 endlocal

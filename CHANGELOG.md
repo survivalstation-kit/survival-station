@@ -12,6 +12,12 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.36.0 (2026-11-08)
+
+- **"No AI" option on the start menu (Windows).** Type **0** when the kit asks which model to start, and it runs **without loading the AI** - faster, far less memory, good for old computers or when you only need the reference. The **library, offline map, search, emergency cards, tools, books and the rest still work** over http://localhost:8080; only the chat and photo features are off.
+  - A small static web server (`setup\portal-server.ps1`) serves the pages in this mode, since normally the AI program serves them. It supports HTTP range requests, so the offline map (PMTiles) still loads, and blocks path traversal. This computer only; phones still need AI mode.
+  - The home page shows **"AI: off (No-AI mode)"** and a clear notice (not "still loading"); the chat page explains how to turn the AI on (restart and pick a model instead of 0). The map tile stays available.
+  - The same static server now also powers the zero-models fallback, so a kit with no AI model still serves the map and search instead of only opening files.
 ## 1.35.1 (2026-11-08)
 
 - **`BOOTABLE-DRIVE.txt`** added to the kit root: a plain-text guide (English and Portuguese) to making the stick bootable, starting a computer from it, and scanning for viruses (ClamAV and Kaspersky), readable in any text editor without opening the portal. It ships on every kit.

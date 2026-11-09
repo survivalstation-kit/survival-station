@@ -24,6 +24,18 @@ const SURVIVAL = (() => {
     } catch { return false; }
   }
 
+  // Is the AI available? Served pages share the AI's origin, so we can read the status code:
+  //  'on' = AI answering; 'loading' = AI server still starting (503); 'off' = the "No AI" static server is
+  //  serving the pages (it sends X-Survival-No-AI); 'none' = nothing answering (page opened as a file).
+  async function aiStatus() {
+    if (!served) return (await up(ai + '/health')) ? 'on' : 'none';
+    try {
+      const r = await fetch(ai + '/health', { cache: 'no-store' });
+      if (r.ok) return 'on';
+      return r.headers.get('x-survival-no-ai') ? 'off' : 'loading';
+    } catch { return 'none'; }
+  }
+
   function store(key, value) {
     try {
       if (value === undefined) return localStorage.getItem(key);
@@ -167,5 +179,5 @@ const SURVIVAL = (() => {
   applyI18n();
   showVersion();
   showDisclaimer();
-  return { served, host, ai, secure, libHost, library, tiles, voice, share, up, store, lang, dict, t, isDark, lowPower, setLowPower, onKitComputer, loadData, saveData };
+  return { served, host, ai, secure, libHost, library, tiles, voice, share, up, aiStatus, store, lang, dict, t, isDark, lowPower, setLowPower, onKitComputer, loadData, saveData };
 })();

@@ -134,12 +134,15 @@
   // the library's home page, filtered to the reader's language
   $('tile-lib').href = `${SURVIVAL.library}/#lang=${SURVIVAL.dict._kiwix}`;
 
-  const [ai, lib] = await Promise.all([SURVIVAL.up(SURVIVAL.ai + '/health'), SURVIVAL.up(SURVIVAL.library + '/', 5000)]);
-  $('st-ai').textContent = t(ai ? 'st.ai.on' : 'st.ai.off');
+  const [aiSt, lib] = await Promise.all([SURVIVAL.aiStatus(), SURVIVAL.up(SURVIVAL.library + '/', 5000)]);
+  const ai = aiSt === 'on';
+  $('st-ai').textContent = t(ai ? 'st.ai.on' : aiSt === 'off' ? 'st.ai.noai' : 'st.ai.off');
   $('st-ai').classList.add(ai ? 'ok' : 'bad');
   $('st-lib').textContent = t(lib ? 'st.lib.on' : 'st.lib.off');
   $('st-lib').classList.add(lib ? 'ok' : 'bad');
-  if (!ai) { $('tile-ai').classList.add('off'); $('tile-map').classList.add('off'); }
+  // no AI: the chat and photo tiles are off. The map still works whenever the pages are served (No-AI mode too),
+  // and only breaks when the page is opened as a plain file.
+  if (!ai) { $('tile-ai').classList.add('off'); if (!SURVIVAL.served) $('tile-map').classList.add('off'); }
   if (!lib) $('tile-lib').classList.add('off');
   // the library server starts with the AI but takes a while to open big books from a USB stick:
   // keep checking, and show it online as soon as it answers
@@ -157,6 +160,8 @@
   // once the AI answers, go to (or reload) the kit's address so everything works
   if (!ai) {
     const box = $('ai-start');
+    if (aiSt === 'off') { box.textContent = t('ai.noai'); box.hidden = false; }   // the kit was started in "No AI" mode on purpose
+    else {
     if (SURVIVAL.served) box.textContent = t('ai.loading');   // the AI server sent this page: it is still loading
     else {
       // opened as a file: the kit folder is the one above portal\
@@ -173,11 +178,13 @@
       box.append(h, ol, path, copy, wait);
     }
     box.hidden = false;
+    // still loading, or opened as a file: when the AI comes up, switch to the full kit
     const timer = setInterval(async () => {
-      if (!await SURVIVAL.up(SURVIVAL.ai + '/health')) return;
+      if ((await SURVIVAL.aiStatus()) !== 'on') return;
       clearInterval(timer);
       if (SURVIVAL.served) location.reload(); else location.href = SURVIVAL.ai + '/';
     }, 5000);
+    }
   }
 
   try {

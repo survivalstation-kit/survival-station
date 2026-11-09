@@ -485,9 +485,10 @@ input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) {
 $('clear').onclick = () => { busy?.abort(); history = []; save(); location.reload(); };
 
 render();
-SURVIVAL.up(SURVIVAL.ai + '/health').then(ok => {
+SURVIVAL.aiStatus().then(st => {
   const s = $('ai-state');
-  if (s) s.textContent = t(ok ? 'chat.on' : 'chat.off');
+  // 'off' = the kit was started in "No AI" mode; 'loading'/'none' = not ready / not found
+  if (s) s.textContent = t(st === 'on' ? 'chat.on' : st === 'off' ? 'chat.noai' : 'chat.off');
 });
 </script>
 </body>
