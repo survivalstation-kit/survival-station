@@ -125,6 +125,8 @@ if (-not $target.Ventoy) {
 # ---------------------------------------------------------------- the ISO folder, and a general "download + verify" helper
 $root = "$($Drive):\"
 $isoDir = Join-Path $root 'ISO'; New-Item -ItemType Directory -Force $isoDir | Out-Null
+# clean up stray extraction folders left by older versions (they put temp folders in ISO\); harmless, just tidy
+Get-ChildItem $isoDir -Directory -Filter '_x_*' -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 # only look for systems in ISO\ (a big kit would make Ventoy's start menu slow to appear)
 New-Item -ItemType Directory -Force (Join-Path $root 'ventoy') | Out-Null
 [IO.File]::WriteAllText((Join-Path $root 'ventoy\ventoy.json'), "{`n  `"control`": [ { `"VTOY_DEFAULT_SEARCH_ROOT`": `"/ISO`" } ]`n}`n", (New-Object Text.UTF8Encoding $false))
@@ -137,11 +139,12 @@ function Find-Hash($text, $file) {
   if ($m.Success) { $m.Value.ToLower() } else { '' }
 }
 function Fetch-Text { foreach ($u in $args) { $r = (& curl.exe -L --fail -s $u) 2>$null; if ($LASTEXITCODE -eq 0 -and $r) { return ($r -join "`n") } }; '' }
-# from several candidate download URLs, return the first that actually serves the file (checked with a 1-byte
-# range request). Used where a project offers an image on many mirrors and some lag behind (e.g. Kali live).
-function First-Url($urls) {
-  foreach ($u in $urls) { $code = & curl.exe -s -L --max-time 20 -r 0-0 -o NUL -w '%{http_code}' $u 2>$null; if ($code -eq '200' -or $code -eq '206') { return $u } }
-  $urls[0]
+# total size of a remote file from its Content-Range header (0 if it can't be read). Used to skip "torrent-only"
+# stub files that some projects leave at the .iso path (e.g. Kali's recent live images).
+function Remote-Size($url) {
+  $h = (& curl.exe -s -L --max-time 20 -r 0-0 -D - -o NUL $url 2>$null) -join "`n"
+  $m = [regex]::Match($h, 'bytes\s+\d+-\d+/(\d+)', 'IgnoreCase')
+  if ($m.Success) { [int64]$m.Groups[1].Value } else { 0 }
 }
 
 # download an image into ISO\<File>, check it against its official SHA-256, and (for .zip images) unzip the .iso out.
@@ -167,7 +170,7 @@ function Save-Image($item) {
   Say ' Checking against the official checksum...' ' Conferindo com o checksum oficial...'
   if (-not $item.NoChecksum -and (Get-FileHash $dl -Algorithm SHA256).Hash.ToLower() -ne $item.Sha256) { Remove-Item $dl -Force; Say " $($item.Name) is damaged (checksum mismatch): run again." " $($item.Name) veio corrompido (checksum não bate): rode de novo." Yellow; return $false }
   if ($item.Zip) {
-    $x = Join-Path $isoDir ('_x_' + [guid]::NewGuid().ToString('N'))
+    $x = Join-Path $env:TEMP ('_x_' + [guid]::NewGuid().ToString('N'))   # extract in TEMP, not on the stick
     Expand-Archive $dl $x -Force
     $inner = Get-ChildItem $x -Recurse -Filter *.iso | Select-Object -First 1
     if (-not $inner) { Remove-Item $x -Recurse -Force; Remove-Item $dl -Force; throw "no .iso inside $($item.File).zip" }
@@ -211,19 +214,18 @@ $Images = [ordered]@{
        Sha256 = (Find-Hash (Fetch-Text "$base/$file.sha256/download" "$base/$file.sha256") $file) }
   } }
   kali = @{ Desc = (T 'security testing of YOUR OWN network/devices, e.g. Wi-Fi (permission required) (~4 GB)' 'teste de segurança da SUA PRÓPRIA rede/aparelhos, ex. Wi-Fi (precisa de permissão) (~4 GB)'); Resolve = {
-    # Kali serves the live ISO's direct http download only on some mirrors (its own /current/ has just the
-    # torrent now), so pick a mirror that actually has it; the checksum comes from Kali's official SHA256SUMS.
-    $sums = Fetch-Text 'https://cdimage.kali.org/current/SHA256SUMS'
-    $file = ([regex]::Match($sums, 'kali-linux-[\d.]+-live-amd64\.iso')).Value
-    $ver = ([regex]::Match($file, 'kali-linux-([\d.]+)-')).Groups[1].Value
-    $url = First-Url @(
-      "https://ftp.halifax.rwth-aachen.de/kali-images/kali-$ver/$file"
-      "https://kali.download/base-images/kali-$ver/$file"
-      "https://cdimage.kali.org/kali-$ver/$file"
-      "https://cdimage.kali.org/current/$file"
-    )
-    @{ Name = 'Kali Linux (live)'; File = $file; Url = $url; Keep = 'kali-linux-*-live-amd64.iso'
-       Sha256 = (Find-Hash $sums $file) }
+    # Kali's recent live images are torrent-only over HTTP (mirrors leave a tiny stub at the .iso path), so use
+    # the newest release whose live ISO is a real HTTP download, from Kali's own archive, verified by its SHA-256.
+    $base = 'https://old.kali.org/kali-images/'
+    $vers = [regex]::Matches((Invoke-WebRequest $base -UseBasicParsing).Content, 'kali-(20\d\d\.\d+)/') | ForEach-Object { $_.Groups[1].Value } | Sort-Object { [version]$_ } -Descending -Unique
+    foreach ($v in $vers) {
+      $file = "kali-linux-$v-live-amd64.iso"; $url = "${base}kali-$v/$file"
+      if ((Remote-Size $url) -gt 1GB) {
+        return @{ Name = "Kali Linux $v (live)"; File = $file; Url = $url; Keep = 'kali-linux-*-live-amd64.iso'
+                  Sha256 = (Find-Hash (Fetch-Text "${base}kali-$v/SHA256SUMS") $file) }
+      }
+    }
+    throw "Kali's live image is only on torrent right now - download it from kali.org and drop it into this ISO folder by hand"
   } }
   kaspersky = @{ Desc = (T 'antivirus rescue disk: scan a computer for viruses outside Windows (~0.7 GB)' 'disco antivírus de resgate: procurar vírus num computador fora do Windows (~0,7 GB)'); Resolve = {
     # Kaspersky publishes no checksum and refreshes this file daily with new virus signatures, so it is

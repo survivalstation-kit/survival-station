@@ -12,6 +12,11 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.37.4 (2026-11-09)
+
+- **Fixed Kali Linux ("checksum mismatch" / a tiny 442 KB download).** Kali now distributes its live image by torrent only; HTTP mirrors leave a small stub at the `.iso` path, which is what was being downloaded. MAKE-BOOTABLE.bat now takes the newest Kali release whose live ISO is a real HTTP download, from Kali's own archive (currently **2025.3**, ~5 GB), and verifies it against that release's official SHA-256. You can update Kali to the latest from inside it once it boots.
+- **No more stray `_x_...` folder in ISO\.** Zipped images (Memtest86+) are now unpacked in the system temp folder instead of on the stick, and any leftover `_x_*` folders are cleaned up on the next run. The empty one you saw is a harmless leftover - safe to delete.
+
 ## 1.37.3 (2026-11-09)
 
 - **MAKE-BOOTABLE.bat shows the systems menu straight away.** Before, after you chose the drive it re-read the whole ~2.9 GB Linux Mint ISO off the stick to re-verify its checksum before the menu appeared (slow). Now the menu comes first, and a system already on the drive is trusted (it was verified when it was downloaded) instead of being re-hashed every run. Fresh downloads are still checked against their official checksum.
