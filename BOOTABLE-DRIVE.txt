@@ -19,13 +19,15 @@ MAKE THE STICK BOOTABLE (Windows, once)   --   THIS ERASES THE STICK
     It installs Ventoy and downloads Linux Mint (checked against the
     official checksum). It also places clamav-scan.sh on the stick.
  3. When asked, pick any extra systems you want (type their numbers):
-      - SystemRescue : repair a broken start-up, recover files, and
-                       reset a forgotten LOCAL Windows account password
       - Rescuezilla  : back up / restore a whole disk
       - Memtest86+   : test the computer's memory (RAM)
       - antiX        : a very light Linux for old computers
       - Kali Linux   : security testing of YOUR OWN network/devices only
       - Kaspersky Rescue Disk : bootable antivirus (see "Scan for viruses")
+      - Hirens BootCD PE : Windows (WinPE) repair, file recovery, and reset
+                       a Windows password with easy click tools. PERSONAL USE
+                       ONLY - built on Microsoft WinPE; do not share a kit
+                       that contains it.
  4. Copy the kit back onto the stick:  run COPY-KIT.bat  (or MAKE-USB.bat).
  Run MAKE-BOOTABLE.bat again any time to add or update systems; after the
  first time it erases nothing.
@@ -79,13 +81,15 @@ TORNAR O PENDRIVE INICIALIZAVEL (Windows, uma vez)  --  ISTO APAGA O PENDRIVE
     Ele instala o Ventoy e baixa o Linux Mint (conferido com o checksum
     oficial). Tambem coloca o clamav-scan.sh no pendrive.
  3. Quando perguntar, escolha os sistemas extras que quiser (digite os numeros):
-      - SystemRescue : reparar o inicio travado, recuperar arquivos e
-                       resetar a senha esquecida de uma conta LOCAL do Windows
       - Rescuezilla  : backup / restauracao de um disco inteiro
       - Memtest86+   : testar a memoria (RAM) do computador
       - antiX        : um Linux bem leve para computadores antigos
       - Kali Linux   : teste de seguranca SOMENTE da sua propria rede/aparelhos
       - Kaspersky Rescue Disk : antivirus inicializavel (veja "Procurar virus")
+      - Hirens BootCD PE : reparo do Windows (WinPE), recuperacao de arquivos e
+                       resetar uma senha do Windows com ferramentas faceis de
+                       clicar. SO PARA USO PESSOAL - feito sobre o Microsoft
+                       WinPE; nao compartilhe um kit que o contenha.
  4. Copie o kit de volta para o pendrive: rode COPY-KIT.bat (ou MAKE-USB.bat).
  Rode o MAKE-BOOTABLE.bat de novo quando quiser para adicionar ou atualizar
  sistemas; depois da primeira vez ele nao apaga nada.

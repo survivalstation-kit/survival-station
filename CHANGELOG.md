@@ -12,6 +12,10 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.37.1 (2026-11-09)
+
+- **SystemRescue removed from the bootable systems menu.** Resetting a Windows password with it meant the command-line `chntpw`, which is fiddly. **Hiren's BootCD PE** does the same job (and Windows repair and file recovery) with easy click tools, so it replaces it. Help, `THIRD-PARTY-NOTICES.md` and `BOOTABLE-DRIVE.txt` updated.
+
 ## 1.37.0 (2026-11-08)
 
 - **Hiren's BootCD PE** added to the optional bootable systems (MAKE-BOOTABLE.bat): a Windows (WinPE) rescue environment with Windows-native repair, partition, backup and recovery tools. Downloaded from the official site and checked against its official SHA-256.

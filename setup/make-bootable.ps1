@@ -9,14 +9,15 @@
   one drive can hold several systems and you pick which to start.
 
   Besides Linux Mint, you can add optional tools (all free, from their official sites):
-   - SystemRescue: repair a broken Windows/Linux start-up, recover deleted files, and reset the password of a
-     local Windows account you are locked out of (includes chntpw).
    - Rescuezilla: back up and restore a whole disk with simple screens.
    - Memtest86+: test the computer's memory for faults.
    - antiX: a very light Linux for old or slow computers.
    - Kali Linux: a security-testing system, for checking the security of YOUR OWN network/devices or ones you
      have written permission to test. Using it against networks or systems you do not own or have permission
      for is illegal; that is on the user, and the kit's "use at your own risk" terms apply.
+   - Kaspersky Rescue Disk: a bootable antivirus (no published checksum; verified by HTTPS to its official domain).
+   - Hiren's BootCD PE: a Windows (WinPE) rescue environment - repair Windows, recover files, and reset a Windows
+     password with click tools. PERSONAL USE ONLY: built on Microsoft WinPE, so do not share kits that contain it.
 
   Installing Ventoy ERASES the drive. A drive that already has Ventoy keeps everything; images are only added
   or updated. Only USB drives are offered; never the computer's own disks.
@@ -184,14 +185,6 @@ $Images = [ordered]@{
     @{ Name = "Linux Mint $ver XFCE"; File = $file; Url = "$mirror$ver/$file"; Keep = 'linuxmint-*-xfce-64bit.iso'
        Sha256 = (Find-Hash (Fetch-Text "$mirror$ver/sha256sum.txt") $file) }
   } }
-  systemrescue = @{ Desc = (T 'repair Windows/Linux, recover files, reset a forgotten Windows password (~0.9 GB)' 'reparar Windows/Linux, recuperar arquivos, resetar uma senha esquecida do Windows (~0,9 GB)'); Resolve = {
-    $page = (Invoke-WebRequest 'https://www.system-rescue.org/Download/' -UseBasicParsing).Content
-    $file = ([regex]::Match($page, 'systemrescue-[\d.]+-amd64\.iso')).Value
-    $ver = ([regex]::Match($file, '[\d.]+')).Value
-    $base = "https://sourceforge.net/projects/systemrescuecd/files/sysresccd-x86/$ver"
-    @{ Name = "SystemRescue $ver"; File = $file; Url = "$base/$file/download"; Keep = 'systemrescue-*-amd64.iso'
-       Sha256 = (Find-Hash (Fetch-Text "$base/$file.sha256" "$base/$file.sha256/download") $file) }
-  } }
   rescuezilla = @{ Desc = (T 'back up and restore a whole disk, point and click (~1.3 GB)' 'fazer backup e restaurar um disco inteiro, com cliques (~1,3 GB)'); Resolve = {
     $rel = Invoke-RestMethod 'https://api.github.com/repos/rescuezilla/rescuezilla/releases/latest'
     $iso = @($rel.assets | Where-Object { $_.name -match '64bit\.noble\.iso$' }) + @($rel.assets | Where-Object { $_.name -match '64bit\.[a-z]+\.iso$' }) | Select-Object -First 1
@@ -225,7 +218,7 @@ $Images = [ordered]@{
     @{ Name = 'Kaspersky Rescue Disk'; File = 'kaspersky-rescue-disk.iso'; NoChecksum = $true; Host = 'kaspersky-labs.com'
        Url = 'https://rescuedisk.s.kaspersky-labs.com/updatable/2018/krd.iso' }
   } }
-  hiren = @{ Warn = $true; Desc = (T 'Windows PE rescue (Hirens BootCD PE): Windows repair tools from the drive (~3 GB). PERSONAL USE ONLY - built on Microsoft WinPE; do not share kits that contain it.' 'resgate em Windows PE (Hirens BootCD PE): ferramentas de reparo do Windows pelo pendrive (~3 GB). SO PARA USO PESSOAL - feito sobre o Microsoft WinPE; nao compartilhe kits que o contenham.'); Resolve = {
+  hiren = @{ Warn = $true; Desc = (T 'Windows PE rescue (Hirens BootCD PE): repair Windows, recover files, and RESET A WINDOWS PASSWORD with easy click tools (~3 GB). PERSONAL USE ONLY - built on Microsoft WinPE; do not share kits that contain it.' 'resgate em Windows PE (Hirens BootCD PE): reparar o Windows, recuperar arquivos e RESETAR UMA SENHA DO WINDOWS com ferramentas faceis de clicar (~3 GB). SO PARA USO PESSOAL - feito sobre o Microsoft WinPE; nao compartilhe kits que o contenham.'); Resolve = {
     # The download page shows one SHA-256 (the ISO's); the file name and official link are stable.
     $page = (Invoke-WebRequest 'https://www.hirensbootcd.org/download/' -UseBasicParsing).Content
     @{ Name = 'Hirens BootCD PE (Windows rescue)'; File = 'HBCD_PE_x64.iso'; Keep = 'HBCD_PE_x64.iso'
