@@ -154,11 +154,9 @@ function Save-Image($item) {
     if ($item.Url -notmatch ('^https://[^/]*' + [regex]::Escape($item.Host) + '/')) { throw "refusing $($item.File): not an https link on $($item.Host)" }
   } elseif ($item.Sha256 -notmatch '^[0-9a-f]{64}$') { throw "no official checksum found for $($item.File)" }
   if (Test-Path $dest) {
-    # a .zip image keeps only the extracted .iso (its hash differs), and a no-checksum image can't be re-verified,
-    # so for those existence is enough (delete the file to force a fresh download)
-    if ($item.Zip -or $item.NoChecksum -or (Get-FileHash $dest -Algorithm SHA256).Hash.ToLower() -eq $item.Sha256) {
-      Say " $($item.Name): already on the drive." " $($item.Name): já está no pendrive." Green; return $true
-    }
+    # it was downloaded and checksum-verified on the run that fetched it; re-hashing a multi-GB file off a USB
+    # stick every time is slow, so trust what is already there (delete the file to force a fresh download and check)
+    Say " $($item.Name): already on the drive." " $($item.Name): já está no pendrive." Green; return $true
   }
   if ($item.NoChecksum) { Say " Note: $($item.Name) has no published checksum; it is downloaded over HTTPS from its official site ($($item.Host)) and updates its own virus signatures when it runs." " Nota: $($item.Name) não tem checksum publicado; é baixado por HTTPS do site oficial ($($item.Host)) e atualiza as próprias assinaturas de vírus ao rodar." Yellow }
   $dl = Join-Path $isoDir ($item.File + $(if ($item.Zip) { '.zip' } else { '' }) + '.part')
@@ -248,10 +246,8 @@ function Add-Image($key) {
   try { [void](Save-Image $item) } catch { Say " $key`: $($_.Exception.Message)" " $key`: $($_.Exception.Message)" Yellow }
 }
 
-# Linux Mint always
-Add-Image 'mint'
-
-# which extras: -Extras all|none|comma-list, else ask
+# Ask which extra systems to add FIRST, before downloading anything, so the menu appears straight away
+# (the downloads below can take a while; choosing up front means no waiting for the menu).
 $opt = @($Images.Keys | Where-Object { -not $Images[$_].Always })
 $want = @()
 if ($Extras) {
@@ -264,6 +260,9 @@ if ($Extras) {
   $pick = Read-Host (T ' Type the numbers you want (e.g. 1 3 5), or Enter to skip' ' Digite os números que quiser (ex.: 1 3 5), ou Enter para pular')
   $want = @($pick -split '[,; ]+' | Where-Object { $_ -match '^\d+$' -and [int]$_ -ge 1 -and [int]$_ -le $opt.Count } | ForEach-Object { $opt[[int]$_ - 1] } | Select-Object -Unique)
 }
+
+# Now download: Linux Mint (always), then the chosen extras
+Add-Image 'mint'
 foreach ($k in $want) { Add-Image $k }
 
 # ---------------------------------------------------------------- ClamAV offline virus scan, to run from Linux Mint

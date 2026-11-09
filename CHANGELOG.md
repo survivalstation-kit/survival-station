@@ -12,6 +12,10 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.37.3 (2026-11-09)
+
+- **MAKE-BOOTABLE.bat shows the systems menu straight away.** Before, after you chose the drive it re-read the whole ~2.9 GB Linux Mint ISO off the stick to re-verify its checksum before the menu appeared (slow). Now the menu comes first, and a system already on the drive is trusted (it was verified when it was downloaded) instead of being re-hashed every run. Fresh downloads are still checked against their official checksum.
+
 ## 1.37.2 (2026-11-09)
 
 - **Fixed the Kali Linux download ("curl 22").** Kali now serves its live ISO's `/current/` folder as a torrent only, so the old direct link 404'd. MAKE-BOOTABLE.bat now picks a mirror that actually hosts the live image (trying several) and still verifies it against Kali's official SHA-256.
