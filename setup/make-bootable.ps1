@@ -137,6 +137,12 @@ function Find-Hash($text, $file) {
   if ($m.Success) { $m.Value.ToLower() } else { '' }
 }
 function Fetch-Text { foreach ($u in $args) { $r = (& curl.exe -L --fail -s $u) 2>$null; if ($LASTEXITCODE -eq 0 -and $r) { return ($r -join "`n") } }; '' }
+# from several candidate download URLs, return the first that actually serves the file (checked with a 1-byte
+# range request). Used where a project offers an image on many mirrors and some lag behind (e.g. Kali live).
+function First-Url($urls) {
+  foreach ($u in $urls) { $code = & curl.exe -s -L --max-time 20 -r 0-0 -o NUL -w '%{http_code}' $u 2>$null; if ($code -eq '200' -or $code -eq '206') { return $u } }
+  $urls[0]
+}
 
 # download an image into ISO\<File>, check it against its official SHA-256, and (for .zip images) unzip the .iso out.
 # $item = @{ Name; File; Url; Sha256; Zip; Keep } ; $Keep is a wildcard of older files of the same system to clear.
@@ -207,9 +213,18 @@ $Images = [ordered]@{
        Sha256 = (Find-Hash (Fetch-Text "$base/$file.sha256/download" "$base/$file.sha256") $file) }
   } }
   kali = @{ Desc = (T 'security testing of YOUR OWN network/devices, e.g. Wi-Fi (permission required) (~4 GB)' 'teste de segurança da SUA PRÓPRIA rede/aparelhos, ex. Wi-Fi (precisa de permissão) (~4 GB)'); Resolve = {
+    # Kali serves the live ISO's direct http download only on some mirrors (its own /current/ has just the
+    # torrent now), so pick a mirror that actually has it; the checksum comes from Kali's official SHA256SUMS.
     $sums = Fetch-Text 'https://cdimage.kali.org/current/SHA256SUMS'
     $file = ([regex]::Match($sums, 'kali-linux-[\d.]+-live-amd64\.iso')).Value
-    @{ Name = 'Kali Linux (live)'; File = $file; Url = "https://cdimage.kali.org/current/$file"; Keep = 'kali-linux-*-live-amd64.iso'
+    $ver = ([regex]::Match($file, 'kali-linux-([\d.]+)-')).Groups[1].Value
+    $url = First-Url @(
+      "https://ftp.halifax.rwth-aachen.de/kali-images/kali-$ver/$file"
+      "https://kali.download/base-images/kali-$ver/$file"
+      "https://cdimage.kali.org/kali-$ver/$file"
+      "https://cdimage.kali.org/current/$file"
+    )
+    @{ Name = 'Kali Linux (live)'; File = $file; Url = $url; Keep = 'kali-linux-*-live-amd64.iso'
        Sha256 = (Find-Hash $sums $file) }
   } }
   kaspersky = @{ Desc = (T 'antivirus rescue disk: scan a computer for viruses outside Windows (~0.7 GB)' 'disco antivírus de resgate: procurar vírus num computador fora do Windows (~0,7 GB)'); Resolve = {

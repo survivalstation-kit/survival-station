@@ -12,6 +12,10 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.37.2 (2026-11-09)
+
+- **Fixed the Kali Linux download ("curl 22").** Kali now serves its live ISO's `/current/` folder as a torrent only, so the old direct link 404'd. MAKE-BOOTABLE.bat now picks a mirror that actually hosts the live image (trying several) and still verifies it against Kali's official SHA-256.
+
 ## 1.37.1 (2026-11-09)
 
 - **SystemRescue removed from the bootable systems menu.** Resetting a Windows password with it meant the command-line `chntpw`, which is fiddly. **Hiren's BootCD PE** does the same job (and Windows repair and file recovery) with easy click tools, so it replaces it. Help, `THIRD-PARTY-NOTICES.md` and `BOOTABLE-DRIVE.txt` updated.
