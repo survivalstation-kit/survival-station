@@ -12,6 +12,11 @@ To release a new version:
 
 Kits pick up the new version with **Verify / repair** or **Check for updates** (from the latest GitHub release when there is internet, from 1.21.0 on).
 
+## 1.37.0 (2026-11-08)
+
+- **Hiren's BootCD PE** added to the optional bootable systems (MAKE-BOOTABLE.bat): a Windows (WinPE) rescue environment with Windows-native repair, partition, backup and recovery tools. Downloaded from the official site and checked against its official SHA-256.
+  - **Personal recovery use only.** It is built on **Microsoft Windows PE** (restricted redistribution) and bundles third-party tools under various terms, so the menu, the on-drive README, the Help page and `THIRD-PARTY-NOTICES.md` all warn: use it for your own computer, but **do not share or copy kits that contain it** (the free Linux systems remain fine to share).
+  - Sergei Strelec's WinPE and MediCat USB were **not** added: they have no clean, verifiable official download, and they bundle commercial/cracked software, which would not fit a freely shareable open-source kit. Any ISO you obtain legally can still be dropped into the drive's `ISO\` folder by hand and Ventoy will list it.
 ## 1.36.0 (2026-11-08)
 
 - **"No AI" option on the start menu (Windows).** Type **0** when the kit asks which model to start, and it runs **without loading the AI** - faster, far less memory, good for old computers or when you only need the reference. The **library, offline map, search, emergency cards, tools, books and the rest still work** over http://localhost:8080; only the chat and photo features are off.

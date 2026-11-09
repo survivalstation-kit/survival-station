@@ -225,9 +225,16 @@ $Images = [ordered]@{
     @{ Name = 'Kaspersky Rescue Disk'; File = 'kaspersky-rescue-disk.iso'; NoChecksum = $true; Host = 'kaspersky-labs.com'
        Url = 'https://rescuedisk.s.kaspersky-labs.com/updatable/2018/krd.iso' }
   } }
+  hiren = @{ Warn = $true; Desc = (T 'Windows PE rescue (Hirens BootCD PE): Windows repair tools from the drive (~3 GB). PERSONAL USE ONLY - built on Microsoft WinPE; do not share kits that contain it.' 'resgate em Windows PE (Hirens BootCD PE): ferramentas de reparo do Windows pelo pendrive (~3 GB). SO PARA USO PESSOAL - feito sobre o Microsoft WinPE; nao compartilhe kits que o contenham.'); Resolve = {
+    # The download page shows one SHA-256 (the ISO's); the file name and official link are stable.
+    $page = (Invoke-WebRequest 'https://www.hirensbootcd.org/download/' -UseBasicParsing).Content
+    @{ Name = 'Hirens BootCD PE (Windows rescue)'; File = 'HBCD_PE_x64.iso'; Keep = 'HBCD_PE_x64.iso'
+       Url = 'https://www.hirensbootcd.org/files/HBCD_PE_x64.iso'; Sha256 = (Find-Hash $page 'HBCD_PE_x64.iso') }
+  } }
 }
 
 function Add-Image($key) {
+  if ($Images[$key].Warn) { Say " Note on $key`: it is built on Microsoft Windows (WinPE). Fine for your own recovery, but do NOT share or copy kits that contain it." " Nota sobre $key`: é feito sobre o Windows da Microsoft (WinPE). Serve para o seu proprio resgate, mas NAO compartilhe nem copie kits que o contenham." Yellow }
   try { $item = & $Images[$key].Resolve }
   catch { Say " Could not reach the download site for $key (no internet?). Skipped." " Não deu para acessar o site de download de $key (sem internet?). Pulado." Yellow; return }
   try { [void](Save-Image $item) } catch { Say " $key`: $($_.Exception.Message)" " $key`: $($_.Exception.Message)" Yellow }
@@ -285,6 +292,9 @@ echo "To move infected files out of the way instead, run again adding:  --move=$
 $present = @(Get-ChildItem $isoDir -Filter *.iso -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name)
 $hasKali = [bool]($present | Where-Object { $_ -like 'kali-*' })
 $hasKav = [bool]($present | Where-Object { $_ -like 'kaspersky-*' })
+$hasHiren = [bool]($present | Where-Object { $_ -like 'HBCD_PE*' })
+$hirenEn = if ($hasHiren) { "`r`nHirens BootCD PE (HBCD_PE_x64.iso) is a Windows (WinPE) rescue environment. It is for YOUR OWN computer`r`nrecovery. It is built on Microsoft Windows and bundles tools under various terms, so do NOT share or copy`r`nkits that contain it (the free Linux systems above are fine to share).`r`n" } else { '' }
+$hirenPt = if ($hasHiren) { "`r`nO Hirens BootCD PE (HBCD_PE_x64.iso) e um ambiente de resgate em Windows (WinPE). E para o resgate do SEU`r`nPROPRIO computador. E feito sobre o Windows da Microsoft e traz ferramentas com termos variados, entao NAO`r`ncompartilhe nem copie kits que o contenham (os sistemas Linux gratuitos acima podem ser compartilhados).`r`n" } else { '' }
 $list = ($present | ForEach-Object { "   - $_" }) -join "`r`n"
 $scanEn = "`r`nScan a computer for viruses (from outside Windows, which catches more):`r`n" +
   "  - ClamAV (free, open source): start Linux Mint, open the SURVIVAL drive, right-click -> Open in Terminal,`r`n" +
@@ -307,7 +317,7 @@ Nothing is installed on the computer unless you choose to install it.
 
 Systems on this drive:
 $list
-$scanEn$kaliEn
+$scanEn$kaliEn$hirenEn
 Iniciar um computador por este pendrive (Survival Station).
 1. Conecte o pendrive e ligue o computador apertando a tecla do menu de boot: geralmente F12, F11, F9, F8 ou Esc
    (Mac Intel: segure Option). Escolha o pendrive.
@@ -315,7 +325,7 @@ Iniciar um computador por este pendrive (Survival Station).
 3. Na primeira vez num computador com Secure Boot: o Ventoy pede para registrar a chave uma vez; siga as telas.
 4. No Linux Mint: abra o gerenciador de arquivos, abra o pendrive SURVIVAL e rode:  bash START-LINUX.sh
 Nada é instalado no computador, a não ser que você escolha instalar.
-$scanPt$kaliPt
+$scanPt$kaliPt$hirenPt
 "@, (New-Object Text.UTF8Encoding $false))
 
 Write-Host ''
